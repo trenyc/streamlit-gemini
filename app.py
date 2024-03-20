@@ -116,8 +116,7 @@ with tab1:
     days = st.text_input("How many days would you like the itinerary to be? \n\n",key="days",value="5")
     suggested_attraction = st.text_input("What should the first suggested attraction be for the trip? \n\n",key="suggested_attraction",value="Visiting Burj Khalifa in Dubai.")
         
-    prompt = f"""Come up with the funniest comment from 
-    """
+    prompt = f"""Come up with the funniest comment from """
     
     config = {
         "temperature": 0.8,
