@@ -87,6 +87,7 @@ with st.sidebar:
                 maxResults=100
               )
             response = request.execute()
+            yttext = ''
             for item in response['items']:
                 yttext = yttext + item['snippet']['topLevelComment']['snippet']['textDisplay']             
                 print(item['snippet']['topLevelComment']['snippet']['textDisplay'])
