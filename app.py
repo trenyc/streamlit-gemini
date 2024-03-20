@@ -63,7 +63,9 @@ with st.sidebar:
           )
         response = request.execute()
         for item in response['items']:
+            st.write(item['snippet']['topLevelComment']['snippet']['textDisplay'])
             print(item['snippet']['topLevelComment']['snippet']['textDisplay'])
+
     else:
         yt_api_key = st.text_input('Enter Youtube API Key:', type='password')
         if not (yt_api_key.startswith('AI')):
@@ -86,7 +88,7 @@ tab1, tab2 = st.tabs(["🌏 Generate Travel Plans - Gemini Pro", "🖼️ Visual
 # Code for Gemini Pro model
 with tab1:
     st.write("💬 Using Gemini Pro - Text only model")
-    st.subheader("🌏 Generate travel itineraries")
+    st.subheader("🌏 Generate funniest comment")
     
     destination_name = st.text_input("Enter destination name: \n\n",key="destination_name",value="United Arab Emirates")
     days = st.text_input("How many days would you like the itinerary to be? \n\n",key="days",value="5")
