@@ -49,6 +49,21 @@ with st.sidebar:
     if 'YOUTUBE_API_KEY' in st.secrets:
         st.success('API key already provided!', icon='✅')
         yt_api_key = st.secrets['YOUTUBE_API_KEY']
+        api_service_name = "youtube"
+          api_version = "v3"
+          DEVELOPER_KEY=yt_api_key
+          
+          youtube = googleapiclient.discovery.build(
+              api_service_name, api_version, developerKey=DEVELOPER_KEY)
+          
+          request = youtube.commentThreads().list(
+              part="snippet",
+              videoId="WNrB1Q9Rry0",
+              maxResults=100
+          )
+          response = request.execute()
+          for item in response['items']:
+              print(item['snippet']['topLevelComment']['snippet']['textDisplay'])
     else:
         yt_api_key = st.text_input('Enter Youtube API Key:', type='password')
         if not (yt_api_key.startswith('AI')):
@@ -57,21 +72,7 @@ with st.sidebar:
             st.success('Success!', icon='✅')
     os.environ['YOUTUBE_API_KEY'] = yt_api_key
 
-api_service_name = "youtube"
-api_version = "v3"
-DEVELOPER_KEY=yt_api_key
 
-youtube = googleapiclient.discovery.build(
-    api_service_name, api_version, developerKey=DEVELOPER_KEY)
-
-request = youtube.commentThreads().list(
-    part="snippet",
-    videoId="WNrB1Q9Rry0",
-    maxResults=100
-)
-response = request.execute()
-for item in response['items']:
-    print(item['snippet']['topLevelComment']['snippet']['textDisplay'])
 
 
 
