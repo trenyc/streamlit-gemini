@@ -43,10 +43,10 @@ with st.sidebar:
 with st.sidebar:
     if 'YOUTUBE_API_KEY' in st.secrets:
         st.success('API key already provided!', icon='✅')
-        api_key = st.secrets['YOUTUBE_API_KEY']
+        yt_api_key = st.secrets['YOUTUBE_API_KEY']
     else:
-        api_key = st.text_input('Enter Youtube API Key:', type='password')
-        if not (api_key.startswith('AI')):
+        yt_api_key = st.text_input('Enter Youtube API Key:', type='password')
+        if not (yt_api_key.startswith('AI')):
             st.warning('Please enter your API Key!', icon='⚠️')
         else:
             st.success('Success!', icon='✅')
