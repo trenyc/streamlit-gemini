@@ -1,7 +1,7 @@
 # Import necessary libraries
 import os
 import streamlit as st
-import googleapiclient.discovery
+import googleapiclient
 import google.generativeai as genai 
 from dotenv import load_dotenv
 from PIL import Image
