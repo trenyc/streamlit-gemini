@@ -92,7 +92,7 @@ with st.sidebar:
                 yttext = yttext + item['snippet']['topLevelComment']['snippet']['textDisplay']             
                 print(item['snippet']['topLevelComment']['snippet']['textDisplay'])
             st.text_area(" ")
-            st.write({yttext})
+            st.write('{yttext'})
 
           
 
