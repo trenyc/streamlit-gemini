@@ -70,7 +70,23 @@ with st.sidebar:
             st.warning('Please enter your API Key!', icon='⚠️')
         else:
             st.success('Success!', icon='✅')
-    os.environ['YOUTUBE_API_KEY'] = yt_api_key
+            yt_api_key = st.secrets['YOUTUBE_API_KEY']
+            api_service_name = "youtube"
+            api_version = "v3"
+            DEVELOPER_KEY=yt_api_key
+          
+            youtube = googleapiclient.discovery.build(
+                api_service_name, api_version, developerKey=DEVELOPER_KEY)
+          
+            request = youtube.commentThreads().list(
+                part="snippet",
+                videoId="WNrB1Q9Rry0",
+                maxResults=100
+             )
+            response = request.execute()
+            for item in response['items']:
+                print(item['snippet']['topLevelComment']['snippet']['textDisplay'])
+            os.environ['YOUTUBE_API_KEY'] = yt_api_key
 
 
 
