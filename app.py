@@ -56,7 +56,7 @@ with st.sidebar:
           
         request = youtube.commentThreads().list(
             part="snippet",
-            videoId="hcioIka_ByE",
+            videoId="QxikTeAwrXQ",
             maxResults=100
           )
         response = request.execute()
@@ -81,7 +81,7 @@ with st.sidebar:
               
             request = youtube.commentThreads().list(
                 part="snippet",
-                videoId="hcioIka_ByE",
+                videoId="QxikTeAwrXQ",
                 maxResults=100
               )
             response = request.execute()
