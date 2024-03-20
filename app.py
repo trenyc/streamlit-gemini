@@ -70,10 +70,10 @@ with st.sidebar:
             st.warning('Please enter your API Key!', icon='⚠️')
         else:
             st.success('Success!', icon='✅')
-            yt_api_key = st.secrets['YOUTUBE_API_KEY']
+            yti_api_key = st.secrets['YOUTUBE_API_KEY']
             api_service_name = "youtube"
             api_version = "v3"
-            DEVELOPER_KEY=yt_api_key
+            DEVELOPER_KEY=yti_api_key
           
             youtube = googleapiclient.discovery.build(
                 api_service_name, api_version, developerKey=DEVELOPER_KEY)
