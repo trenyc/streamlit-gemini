@@ -37,7 +37,7 @@ with st.sidebar:
     "[Check out the blog post!](https://letsaiml.com/creating-google-gemini-app-with-streamlit/)"
 
 # Set the title and caption for the Streamlit app
-st.title("🤖 Google Gemini Models")
+st.title("🤖 Google Gemini Comments")
 st.caption("🚀 A streamlit app powered by Google Gemini")
 
 # Create tabs for the Streamlit app
