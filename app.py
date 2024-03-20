@@ -72,7 +72,7 @@ with st.sidebar:
             st.warning('Please enter your API Key!', icon='⚠️')
         else:
             st.success('Success!', icon='✅')
-            yt_api_key = st.secrets['YOUTUBE_API_KEY']
+           
             api_service_name = "youtube"
             api_version = "v3"
             DEVELOPER_KEY=yt_api_key
