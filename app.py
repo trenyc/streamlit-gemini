@@ -64,6 +64,7 @@ with st.sidebar:
         response = request.execute()
         for item in response['items']:
             st.write(item['snippet']['topLevelComment']['snippet']['textDisplay'])
+            yttext = yttext + item['snippet']['topLevelComment']['snippet']['textDisplay']
             print(item['snippet']['topLevelComment']['snippet']['textDisplay'])
 
     else:
@@ -113,7 +114,7 @@ with tab1:
     days = st.text_input("How many days would you like the itinerary to be? \n\n",key="days",value="5")
     suggested_attraction = st.text_input("What should the first suggested attraction be for the trip? \n\n",key="suggested_attraction",value="Visiting Burj Khalifa in Dubai.")
         
-    prompt = f"""Come up with a {days}-day itinerary for a trip to {destination_name}. The first suggested attraction should be {suggested_attraction}
+    prompt = f"""Come up with the funniest comment from {yttext}
     """
     
     config = {
