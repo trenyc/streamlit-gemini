@@ -4,6 +4,8 @@ import streamlit as st
 import google.generativeai as genai 
 from dotenv import load_dotenv
 from PIL import Image
+import googleapiclient.discovery
+import googleapiclient.errors
 
 # Load environment variables from .env file
 load_dotenv()
