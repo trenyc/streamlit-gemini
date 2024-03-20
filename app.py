@@ -40,9 +40,7 @@ with st.sidebar:
         else:
             st.success('Success!', icon='✅')
     os.environ['GOOGLE_API_KEY'] = api_key
-    "[Get a Google Gemini API key](https://ai.google.dev/)"
-    "[View the source code](https://github.com/wms31/streamlit-gemini/blob/main/app.py)"
-    "[Check out the blog post!](https://letsaiml.com/creating-google-gemini-app-with-streamlit/)"
+   
 
 # Check if the YOUTUBE API key is provided in the sidebar
 with st.sidebar:
@@ -113,7 +111,7 @@ with tab1:
     st.subheader("🌏 Generate funniest comment")
     
 
-    prompt = f"""Come up with a funny comment 
+    prompt = f"""Come up with a funny comment from this: {yttext} 
        """ 
     
     config = {
