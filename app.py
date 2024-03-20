@@ -8,6 +8,9 @@ from PIL import Image
 # Load environment variables from .env file
 load_dotenv()
 
+# Get the Youtube API key from the environment variables
+yt_api_key = os.getenv("YOUTUBE_API_KEY")
+
 # Get the Google API key from the environment variables
 api_key = os.getenv("GOOGLE_API_KEY")
 
@@ -16,7 +19,7 @@ genai.configure(api_key=api_key)
 
 # Set the page configuration for the Streamlit app
 st.set_page_config(
-    page_title="Google Gemini Models",
+    page_title="Google Gemini Comments",
     page_icon="🤖"
 )
 
