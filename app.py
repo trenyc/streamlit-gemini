@@ -1,13 +1,12 @@
 # Import necessary libraries
 import os
 import streamlit as st
+import googleapiclient.discovery
 import google.generativeai as genai 
 from dotenv import load_dotenv
 from PIL import Image
 
 
-from googleapiclient import discovery
-from googleapiclient import errors
 
 # Load environment variables from .env file
 load_dotenv()
