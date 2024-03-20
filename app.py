@@ -105,7 +105,7 @@ st.title("🤖 Google Gemini Comments")
 st.caption("🚀 A streamlit app powered by Google Gemini")
 
 # Create tabs for the Streamlit app
-tab1 = st.tabs(["🌏 Generate Funny Comment - Gemini Pro"])
+tab1, tab2 = st.tabs(["🌏 Generate Funny Comment - Gemini Pro"],[""])
 
 # Code for Gemini Pro model
 with tab1:
