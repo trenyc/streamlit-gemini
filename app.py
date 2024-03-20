@@ -1,4 +1,4 @@
-# Import necessary libraries
+er# Import necessary libraries
 import os
 import streamlit as st
 import googleapiclient 
@@ -111,7 +111,7 @@ with tab1:
     st.subheader("🌏 Generate funniest comment")
     
 
-    prompt = f"""Come up with a funny comment from this: {yttext} 
+    prompt = f"""determine the funniest comment from these comments: {yttext} 
        """ 
     
     config = {
