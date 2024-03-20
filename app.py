@@ -39,6 +39,22 @@ with st.sidebar:
     "[View the source code](https://github.com/wms31/streamlit-gemini/blob/main/app.py)"
     "[Check out the blog post!](https://letsaiml.com/creating-google-gemini-app-with-streamlit/)"
 
+# Check if the YOUTUBE API key is provided in the sidebar
+with st.sidebar:
+    if 'YOUTUBE_API_KEY' in st.secrets:
+        st.success('API key already provided!', icon='✅')
+        api_key = st.secrets['YOUTUBE_API_KEY']
+    else:
+        api_key = st.text_input('Enter Youtube API Key:', type='password')
+        if not (api_key.startswith('AI')):
+            st.warning('Please enter your API Key!', icon='⚠️')
+        else:
+            st.success('Success!', icon='✅')
+    os.environ['YOUTUBE_API_KEY'] = yt_api_key
+
+
+
+
 # Set the title and caption for the Streamlit app
 st.title("🤖 Google Gemini Comments")
 st.caption("🚀 A streamlit app powered by Google Gemini")
