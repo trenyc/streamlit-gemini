@@ -9,7 +9,7 @@ from dotenv import load_dotenv
 from PIL import Image
 
 
-
+yttext = ''
 # Load environment variables from .env file
 load_dotenv()
 
