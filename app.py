@@ -71,6 +71,7 @@ with st.sidebar:
         if not (yt_api_key.startswith('AI')):
             st.warning('Please enter your API Key!', icon='⚠️')
         else:
+            st.success('Success!', icon='✅')
             yt_api_key = st.secrets['YOUTUBE_API_KEY']
             api_service_name = "youtube"
             api_version = "v3"
@@ -88,7 +89,7 @@ with st.sidebar:
             for item in response['items']:
                 st.write(item['snippet']['topLevelComment']['snippet']['textDisplay'])
                 print(item['snippet']['topLevelComment']['snippet']['textDisplay'])
-            st.success('Success!', icon='✅')
+            
 
           
 
