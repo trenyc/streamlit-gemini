@@ -64,7 +64,7 @@ with st.sidebar:
         response = request.execute()
         for item in response['items']:
             st.write(item['snippet']['topLevelComment']['snippet']['textDisplay'])
-            yttext = yttext + item['snippet']['topLevelComment']['snippet']['textDisplay']
+
             print(item['snippet']['topLevelComment']['snippet']['textDisplay'])
 
     else:
@@ -88,9 +88,10 @@ with st.sidebar:
               )
             response = request.execute()
             for item in response['items']:
-                st.write(item['snippet']['topLevelComment']['snippet']['textDisplay'])
+                yttext = yttext + item['snippet']['topLevelComment']['snippet']['textDisplay']             
                 print(item['snippet']['topLevelComment']['snippet']['textDisplay'])
-            
+            st.text_area(label, value='', height=None, max_chars=None, key=None)
+            st.write({yttext})
 
           
 
