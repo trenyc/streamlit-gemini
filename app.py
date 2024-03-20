@@ -1,7 +1,9 @@
 # Import necessary libraries
 import os
 import streamlit as st
-import googleapiclient.discovery
+from oauth2client.client import GoogleCredentials
+from googleapiclient import discovery
+from googleapiclient import errors
 import google.generativeai as genai 
 from dotenv import load_dotenv
 from PIL import Image
