@@ -117,7 +117,7 @@ with tab1:
         "max_output_tokens": 2048,
         }
     
-    generate_t2t = st.button("Generate funny comment", key="generate_t2t")
+    generate_t2t = st.button("Generate fun comments", key="generate_t2t")
     model = genai.GenerativeModel("gemini-pro", generation_config=config)
     if generate_t2t and prompt:
         with st.spinner("Generating your most fun comment using Gemini..."):
