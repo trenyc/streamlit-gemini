@@ -89,6 +89,7 @@ with st.sidebar:
             for item in response['items']:
                 yttext = yttext + item['snippet']['topLevelComment']['snippet']['textDisplay']             
                 print(item['snippet']['topLevelComment']['snippet']['textDisplay'])
+            st.write('{yttext}')
            
           
 
