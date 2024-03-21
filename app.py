@@ -89,8 +89,8 @@ with st.sidebar:
             for item in response['items']:
                 yttext = yttext + item['snippet']['topLevelComment']['snippet']['textDisplay']             
                 print(item['snippet']['topLevelComment']['snippet']['textDisplay'])
-            st.text_area('{yttext}')
-            st.write('{yttext}')
+            #st.text_area('{yttext}')
+            #st.write('{yttext}')
 
           
 
@@ -99,19 +99,19 @@ with st.sidebar:
 
 
 # Set the title and caption for the Streamlit app
-st.title("🤖 Google Gemini Comments")
+st.title("🤖 Youtube Gemini Fun Comments")
 st.caption("🚀 A streamlit app powered by Google Gemini")
 
 # Create tabs for the Streamlit app
-tab1, tab2 = st.tabs(["🌏 Generate Funny Comment - Gemini Pro", "  "])
+tab1, tab2 = st.tabs(["🌏 Generate Fun Commenst - Gemini Pro", "  "])
 
 # Code for Gemini Pro model
 with tab1:
     st.write("💬 Using Gemini Pro - Text only model")
-    st.subheader("🌏 Generate funniest comment")
+    st.subheader("🌏 Generate most fun comments")
     
 
-    prompt = f"""determine the funniest comment from these comments: {yttext} 
+    prompt = f"""list 5 comments categorzing them as funny, interesting, positive, negative, and serious from these comments: {yttext} 
        """ 
     
     config = {
@@ -122,8 +122,8 @@ with tab1:
     generate_t2t = st.button("Generate funny comment", key="generate_t2t")
     model = genai.GenerativeModel("gemini-pro", generation_config=config)
     if generate_t2t and prompt:
-        with st.spinner("Generating your funny comment using Gemini..."):
-            plan_tab, prompt_tab = st.tabs(["Funny Comment", "Prompt"])
+        with st.spinner("Generating your most fun comment using Gemini..."):
+            plan_tab, prompt_tab = st.tabs(["Fun Comments", "Prompt"])
             with plan_tab: 
                 response = model.generate_content(prompt)
                 if response:
