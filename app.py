@@ -101,15 +101,15 @@ with tab1:
         generate_t2t = st.button("Generate Fun Comments", key="generate_t2t")
         model = genai.GenerativeModel("gemini-pro", generation_config=config)
         if generate_t2t and prompt:
-            with st.spinner("Generating fun comments using Gemini..."):
-                plan_tab, prompt_tab = st.tabs(["🎉 Generated Comments", "📜 Prompt"])
-                with plan_tab:
+            try:
+                with st.spinner("Generating fun comments using Gemini..."):
                     response = model.generate_content(prompt)
                     if response:
+                        categorized_comments = response.text
                         st.write("Here are your fun comments:")
-                        st.write(response.text)
-                with prompt_tab:
-                    st.text(prompt)
+                        st.write(categorized_comments)
+            except Exception as e:
+                st.error(f"An error occurred: {e}")
     else:
         st.warning("No comments fetched. Please enter a valid YouTube video URL and try again.")
 
