@@ -74,6 +74,7 @@ if video_id:
     st.video(f"https://www.youtube.com/watch?v={video_id}")
 
 # Fetch and display YouTube comments
+comments = []
 if video_id:
     st.subheader("💬 Fetched YouTube Comments")
     comments = fetch_youtube_comments(video_id)
@@ -88,28 +89,34 @@ with tab1:
     st.write("✨ Using Gemini Pro - Text-only model")
     st.subheader("Generate the most fun comments from your video!")
 
-    yt_comments = "\n".join(comments)
-    prompt = f"""List 5 comments categorizing them as funny, interesting, positive, negative, and serious from these comments: {yt_comments}"""
+    if comments:
+        yt_comments = "\n".join(comments)
+        prompt = f"""List 5 comments categorizing them as funny, interesting, positive, negative, and serious from these comments: {yt_comments}"""
 
-    config = {
-        "temperature": 0.8,
-        "max_output_tokens": 2048,
-    }
+        config = {
+            "temperature": 0.8,
+            "max_output_tokens": 2048,
+        }
 
-    generate_t2t = st.button("Generate Fun Comments", key="generate_t2t")
-    model = genai.GenerativeModel("gemini-pro", generation_config=config)
-    if generate_t2t and prompt:
-        with st.spinner("Generating fun comments using Gemini..."):
-            plan_tab, prompt_tab = st.tabs(["🎉 Generated Comments", "📜 Prompt"])
-            with plan_tab:
-                response = model.generate_content(prompt)
-                if response:
-                    st.write("Here are your fun comments:")
-                    st.write(response.text)
-            with prompt_tab:
-                st.text(prompt)
+        generate_t2t = st.button("Generate Fun Comments", key="generate_t2t")
+        model = genai.GenerativeModel("gemini-pro", generation_config=config)
+        if generate_t2t and prompt:
+            with st.spinner("Generating fun comments using Gemini..."):
+                plan_tab, prompt_tab = st.tabs(["🎉 Generated Comments", "📜 Prompt"])
+                with plan_tab:
+                    response = model.generate_content(prompt)
+                    if response:
+                        st.write("Here are your fun comments:")
+                        st.write(response.text)
+                with prompt_tab:
+                    st.text(prompt)
+    else:
+        st.warning("No comments fetched. Please enter a valid YouTube video URL and try again.")
 
 with tab2:
     st.write("View the prompt used for generating comments:")
-    st.text(prompt)
+    if comments:
+        st.text(prompt)
+    else:
+        st.warning("No prompt to show. Please enter a valid YouTube video URL and fetch comments first.")
 
