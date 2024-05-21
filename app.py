@@ -119,4 +119,3 @@ with tab2:
         st.text(prompt)
     else:
         st.warning("No prompt to show. Please enter a valid YouTube video URL and fetch comments first.")
-
