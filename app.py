@@ -1,10 +1,10 @@
+
 import os
 import streamlit as st
 import googleapiclient.discovery
 from googleapiclient.errors import HttpError
 from googleapiclient.discovery import build
 from dotenv import load_dotenv
-from PIL import Image
 import google.generativeai as genai
 
 # Load environment variables from .env file
@@ -76,46 +76,33 @@ if video_id:
 # Fetch and display YouTube comments
 comments = []
 if video_id:
-    st.subheader("💬 Fetched YouTube Comments")
-    comments = fetch_youtube_comments(video_id)
+    if st.button("Fetch Comments"):
+        comments = fetch_youtube_comments(video_id)
+
+# Toggle display of comments
+show_comments = st.button("Show/Hide Comments")
+if show_comments and comments:
+    st.write("💬 Fetched YouTube Comments")
     for comment in comments:
         st.write(comment)
 
-# Create tabs for the Streamlit app
-tab1, tab2 = st.tabs(["✨ Generate Fun Comments", "🔧 View Prompt"])
+# Categorize and display comments using Gemini
+if comments:
+    prompt = f"""List 5 comments categorizing them as funny, interesting, positive, negative, and serious from these comments: {" ".join(comments)}"""
+    
+    config = {
+        "temperature": 0.8,
+        "max_output_tokens": 2048,
+    }
 
-# Code for generating fun comments
-with tab1:
-    st.write("✨ Using Gemini Pro - Text-only model")
-    st.subheader("Generate the most fun comments from your video!")
-
-    if comments:
-        yt_comments = "\n".join(comments)
-        prompt = f"""List 5 comments categorizing them as funny, interesting, positive, negative, and serious from these comments: {yt_comments}"""
-
-        config = {
-            "temperature": 0.8,
-            "max_output_tokens": 2048,
-        }
-
-        generate_t2t = st.button("Generate Fun Comments", key="generate_t2t")
-        model = genai.GenerativeModel("gemini-pro", generation_config=config)
-        if generate_t2t and prompt:
-            try:
-                with st.spinner("Generating fun comments using Gemini..."):
-                    response = model.generate_content(prompt)
-                    if response:
-                        categorized_comments = response.text
-                        st.write("Here are your fun comments:")
-                        st.write(categorized_comments)
-            except Exception as e:
-                st.error(f"An error occurred: {e}")
-    else:
-        st.warning("No comments fetched. Please enter a valid YouTube video URL and try again.")
-
-with tab2:
-    st.write("View the prompt used for generating comments:")
-    if comments:
-        st.text(prompt)
-    else:
-        st.warning("No prompt to show. Please enter a valid YouTube video URL and fetch comments first.")
+    if st.button("Categorize Comments"):
+        try:
+            model = genai.GenerativeModel("gemini-pro", generation_config=config)
+            with st.spinner("Categorizing comments using Gemini..."):
+                response = model.generate_content(prompt)
+                if response:
+                    categorized_comments = response.text
+                    st.subheader("Categorized Comments")
+                    st.write(categorized_comments)
+        except Exception as e:
+            st.error(f"An error occurred: {e}")
