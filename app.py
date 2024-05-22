@@ -79,17 +79,17 @@ if video_id:
 
 # Fetch and display YouTube comments
 comments = []
-if video_id:
-    if st.button("Fetch Comments"):
-        st.write("Starting to fetch comments...")
-        comments = fetch_youtube_comments(video_id)
-        if comments:
-            st.success("Comments fetched successfully!")
-        else:
-            st.warning("No comments found or failed to fetch comments.")
+if video_id and st.button("Fetch Comments"):
+    st.write("Starting to fetch comments...")
+    comments = fetch_youtube_comments(video_id)
+    if comments:
+        st.success("Comments fetched successfully!")
+    else:
+        st.warning("No comments found or failed to fetch comments.")
 
 # Toggle display of comments
-if st.button("Show/Hide Comments"):
+show_comments = st.checkbox("Show/Hide Comments")
+if show_comments:
     if comments:
         st.write("Displaying fetched comments...")
         st.write("💬 Fetched YouTube Comments")
