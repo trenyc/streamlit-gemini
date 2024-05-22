@@ -4,7 +4,7 @@ import googleapiclient.discovery
 from googleapiclient.errors import HttpError
 from googleapiclient.discovery import build
 from dotenv import load_dotenv
-import google.generativeai as ggi
+import openai
 
 # Set the page configuration for the Streamlit app
 st.set_page_config(
@@ -18,14 +18,14 @@ load_dotenv()
 
 # Get the API keys from the environment variables
 yt_api_key = os.getenv("YOUTUBE_API_KEY")
-api_key = os.getenv("GOOGLE_API_KEY")
+openai_api_key = os.getenv("OPENAI_API_KEY")
 
-# Configure the Google Generative AI with the API key
-if api_key:
-    ggi.configure(api_key=api_key)
-    st.write(f"Using Google API Key: ...{api_key[-4:]}")
+# Configure the OpenAI API with the API key
+if openai_api_key:
+    openai.api_key = openai_api_key
+    st.write(f"Using OpenAI API Key: ...{openai_api_key[-4:]}")
 else:
-    st.error("Google API Key is missing.")
+    st.error("OpenAI API Key is missing.")
 
 # Function to fetch YouTube comments
 def fetch_youtube_comments(video_id):
@@ -52,13 +52,13 @@ def fetch_youtube_comments(video_id):
 with st.sidebar:
     st.image("https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/1f916.png", width=64)
     st.title("🔑 API Keys")
-    if 'GOOGLE_API_KEY' in st.secrets:
-        st.success('Google API key provided!', icon='✅')
-        api_key = st.secrets['GOOGLE_API_KEY']
+    if 'OPENAI_API_KEY' in st.secrets:
+        st.success('OpenAI API key provided!', icon='✅')
+        openai_api_key = st.secrets['OPENAI_API_KEY']
     else:
-        api_key = st.text_input('Enter Google API Key:', type='password')
-        if not api_key:
-            st.warning('Please enter your Google API Key!', icon='⚠️')
+        openai_api_key = st.text_input('Enter OpenAI API Key:', type='password')
+        if not openai_api_key:
+            st.warning('Please enter your OpenAI API Key!', icon='⚠️')
 
     if 'YOUTUBE_API_KEY' in st.secrets:
         st.success('YouTube API key provided!', icon='✅')
@@ -70,7 +70,7 @@ with st.sidebar:
 
 # Main app content
 st.title("🎉 YouTube Comment Fun Generator")
-st.caption("🚀 Unleash the fun in YouTube comments with Google Gemini")
+st.caption("🚀 Unleash the fun in YouTube comments with OpenAI")
 st.image("https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/1f31f.png", width=64)
 
 # Input field for YouTube video URL
@@ -101,33 +101,36 @@ if 'comments' in st.session_state:
         for comment in st.session_state.comments:
             st.write(comment)
 
-# Categorize and display comments using Gemini
+# Categorize and display comments using OpenAI
 if 'comments' in st.session_state and st.session_state.comments:
-    prompt = f"""List 5 comments categorizing them as funny, interesting, positive, negative, and serious from these comments: {" ".join(st.session_state.comments)}"""
+    prompt = f"""Categorize the following comments into categories: funny, interesting, positive, negative, and serious. Comments: {" ".join(st.session_state.comments)}"""
 
     if st.button("Categorize Comments"):
         st.write("Starting to categorize comments...")
         try:
-            st.write("Initializing Google Gemini LLM client...")
-            model = ggi.GenerativeModel("gemini-pro")
-            chat = model.start_chat()
-            st.write("Prompt being sent to Gemini LLM:")
+            st.write("Prompt being sent to OpenAI API:")
             st.code(prompt)
-            st.write(f"Using Google API Key: ...{api_key[-4:]}")
-            st.write("Sending request to Google Gemini LLM...")
-            with st.spinner("Categorizing comments using Gemini..."):
-                response = chat.send_message(prompt, stream=True)
-                st.write("Processing response from Google Gemini LLM...")
+            st.write(f"Using OpenAI API Key: ...{openai_api_key[-4:]}")
+            st.write("Sending request to OpenAI API...")
+            with st.spinner("Categorizing comments using OpenAI..."):
+                response = openai.Completion.create(
+                    engine="text-davinci-003",
+                    prompt=prompt,
+                    max_tokens=2048,
+                    temperature=0.8,
+                    stream=True
+                )
+                st.write("Processing response from OpenAI API...")
                 categorized_comments = ""
                 for word in response:
-                    categorized_comments += word.text
+                    categorized_comments += word['choices'][0]['text']
                 if categorized_comments:
                     st.subheader("Categorized Comments")
                     st.write(categorized_comments)
                     st.success("Comments categorized successfully!")
                 else:
-                    st.error("Received an empty response from Gemini LLM.")
-        except HttpError as e:
-            st.error(f"An HTTP error occurred while categorizing comments: {e}")
+                    st.error("Received an empty response from OpenAI API.")
+        except openai.error.OpenAIError as e:
+            st.error(f"An OpenAI error occurred while categorizing comments: {e}")
         except Exception as e:
             st.error(f"An error occurred while categorizing comments: {e}")
