@@ -53,23 +53,29 @@ search_query = st.text_input("🔍 Search YouTube Videos")
 if search_query and st.button("Search"):
     results = search_youtube_videos(search_query)
     if results:
-        for result in results:
-            video_title = result['snippet']['title']
-            video_id = result['id']['videoId']
-            thumbnail_url = result['snippet']['thumbnails']['default']['url']
-            st.write(f"**{video_title}**")
-            st.image(thumbnail_url, width=120)
-            if st.button(f"Select {video_title}", key=video_id):
-                st.session_state.selected_video_id = video_id
-                st.session_state.auto_fetch = True
-                st.experimental_rerun()
+        st.session_state.search_results = results
+
+if 'search_results' in st.session_state:
+    results = st.session_state.search_results
+    for result in results:
+        video_title = result['snippet']['title']
+        video_id = result['id']['videoId']
+        thumbnail_url = result['snippet']['thumbnails']['default']['url']
+        st.write(f"**{video_title}**")
+        st.image(thumbnail_url, width=120)
+        if st.button(f"Select {video_title}", key=video_id):
+            st.session_state.selected_video_id = video_id
+            st.session_state.video_url = f"https://www.youtube.com/watch?v={video_id}"
+            st.session_state.auto_fetch = True
+            del st.session_state.search_results
+            st.experimental_rerun()
 
 # Set selected video ID from search results
 if 'selected_video_id' in st.session_state:
     video_id = st.session_state.selected_video_id
 
 # Input field for YouTube video URL
-video_url = st.text_input("📺 Paste YouTube Video URL here:", "https://www.youtube.com/watch?v=-T0MGehwWvE")
+video_url = st.text_input("📺 Paste YouTube Video URL here:", st.session_state.get('video_url', "https://www.youtube.com/watch?v=-T0MGehwWvE"))
 if video_url:
     try:
         # Check if 'v=' is present in the URL to extract video_id
