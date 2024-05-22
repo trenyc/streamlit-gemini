@@ -150,11 +150,14 @@ if video_id and yt_api_key and openai_api_key:
     if st.button("Fetch Comments", key="fetch_comments"):  # Add key argument here
         st.write("Starting to fetch comments...")
         comments = fetch_youtube_comments(video_id, comment_order)
-    if comments:
-      st.success("Comments fetched successfully!")
-      st.session_state.comments = comments
-    else:
-      st.warning("No comments found or failed to fetch comments.")
+        if comments:
+              st.success("Comments fetched successfully!")
+              st.session_state.comments = comments
+        else:
+              st.warning("No comments found or failed to fetch comments.")
+
+
+
 
 # Input for additional categories
 categories = st_tags.st_tags(
