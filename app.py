@@ -1,3 +1,4 @@
+
 import os
 import streamlit as st
 import googleapiclient.discovery
@@ -112,6 +113,8 @@ if comments:
         try:
             st.write("Initializing Google Gemini LLM client...")
             model = genai.GenerativeModel("gemini-pro", generation_config=config)
+            st.write("Prompt being sent to Gemini LLM:")
+            st.code(prompt)
             st.write("Sending request to Google Gemini LLM...")
             with st.spinner("Categorizing comments using Gemini..."):
                 response = model.generate_content(prompt)
@@ -121,5 +124,7 @@ if comments:
                     st.subheader("Categorized Comments")
                     st.write(categorized_comments)
                     st.success("Comments categorized successfully!")
+                else:
+                    st.error("Received an empty response from Gemini LLM.")
         except Exception as e:
             st.error(f"An error occurred while categorizing comments: {e}")
