@@ -4,8 +4,14 @@ import googleapiclient.discovery
 from googleapiclient.errors import HttpError
 from googleapiclient.discovery import build
 from dotenv import load_dotenv
-from PIL import Image
 import google.generativeai as genai
+
+# Set the page configuration for the Streamlit app
+st.set_page_config(
+    page_title="YouTube Comment Fun Generator",
+    page_icon="🎉",
+    layout="wide"
+)
 
 # Load environment variables from .env file
 load_dotenv()
@@ -15,33 +21,36 @@ yt_api_key = os.getenv("YOUTUBE_API_KEY")
 api_key = os.getenv("GOOGLE_API_KEY")
 
 # Configure the Google Generative AI with the API key
-genai.configure(api_key=api_key)
-
-# Set the page configuration for the Streamlit app
-st.set_page_config(
-    page_title="YouTube Comment Fun Generator",
-    page_icon="🎉",
-    layout="wide"
-)
+if api_key:
+    genai.configure(api_key=api_key)
+else:
+    st.error("Google API Key is missing.")
 
 # Function to fetch YouTube comments
 def fetch_youtube_comments(video_id):
     try:
+        st.write("Initializing YouTube API client...")
         youtube = build('youtube', 'v3', developerKey=yt_api_key)
+        st.write("Creating request to fetch comments...")
         request = youtube.commentThreads().list(
             part="snippet",
             videoId=video_id,
             maxResults=100
         )
+        st.write("Executing request to YouTube API...")
         response = request.execute()
+        st.write("Processing response from YouTube API...")
         comments = [item['snippet']['topLevelComment']['snippet']['textDisplay'] for item in response['items']]
+        st.write(f"Fetched {len(comments)} comments.")
         return comments
     except HttpError as e:
-        st.error(f"An error occurred: {e}")
+        st.error(f"An error occurred while fetching comments: {e}")
         return []
 
 # Sidebar for API key inputs
 with st.sidebar:
+    st.image("https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/1f916.png", width=64)
+    st.title("🔑 API Keys")
     if 'GOOGLE_API_KEY' in st.secrets:
         st.success('Google API key provided!', icon='✅')
         api_key = st.secrets['GOOGLE_API_KEY']
@@ -61,9 +70,10 @@ with st.sidebar:
 # Main app content
 st.title("🎉 YouTube Comment Fun Generator")
 st.caption("🚀 Unleash the fun in YouTube comments with Google Gemini")
+st.image("https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/1f31f.png", width=64)
 
 # Input field for YouTube video URL
-video_url = st.text_input("Paste YouTube Video URL here:")
+video_url = st.text_input("📺 Paste YouTube Video URL here:")
 video_id = video_url.split('v=')[-1] if 'v=' in video_url else video_url
 
 # Display YouTube video
@@ -71,41 +81,53 @@ if video_id:
     st.video(f"https://www.youtube.com/watch?v={video_id}")
 
 # Fetch and display YouTube comments
-if video_id:
-    st.subheader("Fetched YouTube Comments")
+comments = []
+if video_id and st.button("Fetch Comments"):
+    st.write("Starting to fetch comments...")
     comments = fetch_youtube_comments(video_id)
-    for comment in comments:
-        st.write(comment)
+    if comments:
+        st.success("Comments fetched successfully!")
+        st.session_state.comments = comments
+    else:
+        st.warning("No comments found or failed to fetch comments.")
 
-# Create tabs for the Streamlit app
-tab1, tab2 = st.tabs(["💡 Generate Fun Comments", "🔧 View Prompt"])
+# Toggle display of comments
+if 'comments' in st.session_state:
+    show_comments = st.checkbox("Show/Hide Comments")
+    if show_comments:
+        st.write("Displaying fetched comments...")
+        st.write("💬 Fetched YouTube Comments")
+        for comment in st.session_state.comments:
+            st.write(comment)
 
-# Code for generating fun comments
-with tab1:
-    st.write("✨ Using Gemini Pro - Text-only model")
-    st.subheader("Generate the most fun comments from your video!")
-
-    yt_comments = "\n".join(comments)
-    prompt = f"""List 5 comments categorizing them as funny, interesting, positive, negative, and serious from these comments: {yt_comments}"""
-
+# Categorize and display comments using Gemini
+if 'comments' in st.session_state and st.session_state.comments:
+    prompt = f"""List 5 comments categorizing them as funny, interesting, positive, negative, and serious from these comments: {" ".join(st.session_state.comments)}"""
+    
     config = {
         "temperature": 0.8,
         "max_output_tokens": 2048,
     }
 
-    generate_t2t = st.button("Generate Fun Comments", key="generate_t2t")
-    model = genai.GenerativeModel("gemini-pro", generation_config=config)
-    if generate_t2t and prompt:
-        with st.spinner("Generating fun comments using Gemini..."):
-            plan_tab, prompt_tab = st.tabs(["Generated Comments", "Prompt"])
-            with plan_tab:
+    if st.button("Categorize Comments"):
+        st.write("Starting to categorize comments...")
+        try:
+            st.write("Initializing Google Gemini LLM client...")
+            model = genai.GenerativeModel("gemini-pro", generation_config=config)
+            st.write("Prompt being sent to Gemini LLM:")
+            st.code(prompt)
+            st.write("Sending request to Google Gemini LLM...")
+            with st.spinner("Categorizing comments using Gemini..."):
                 response = model.generate_content(prompt)
+                st.write("Processing response from Google Gemini LLM...")
                 if response:
-                    st.write("Here are your fun comments:")
-                    st.write(response.text)
-            with prompt_tab:
-                st.text(prompt)
-
-with tab2:
-    st.write("View the prompt used for generating comments:")
-    st.text(prompt)
+                    categorized_comments = response.text
+                    st.subheader("Categorized Comments")
+                    st.write(categorized_comments)
+                    st.success("Comments categorized successfully!")
+                else:
+                    st.error("Received an empty response from Gemini LLM.")
+        except HttpError as e:
+            st.error(f"An HTTP error occurred while categorizing comments: {e}")
+        except Exception as e:
+            st.error(f"An error occurred while categorizing comments: {e}")
