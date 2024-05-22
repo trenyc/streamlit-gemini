@@ -1,4 +1,3 @@
-
 import os
 import streamlit as st
 import googleapiclient.discovery
@@ -126,5 +125,7 @@ if comments:
                     st.success("Comments categorized successfully!")
                 else:
                     st.error("Received an empty response from Gemini LLM.")
+        except HttpError as e:
+            st.error(f"An HTTP error occurred while categorizing comments: {e}")
         except Exception as e:
             st.error(f"An error occurred while categorizing comments: {e}")
