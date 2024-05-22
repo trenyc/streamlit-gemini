@@ -1,4 +1,4 @@
-import os
+ import os
 import streamlit as st
 from openai import OpenAI, APIError
 
@@ -54,6 +54,8 @@ if openai_api_key:
                     st.error("No response from the gpt-3.5-turbo model.")
             except APIError as e:
                 st.error(f"An API error occurred: {e}")
+                st.error(f"Error code: {e.code} - {e.message}")
+                st.error(f"Full response: {e.response}")
             except Exception as e:
                 st.error(f"An unexpected error occurred: {e}")
 else:
