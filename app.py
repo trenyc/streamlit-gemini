@@ -77,14 +77,21 @@ if video_id:
 comments = []
 if video_id:
     if st.button("Fetch Comments"):
+        st.write("Fetching comments...")
         comments = fetch_youtube_comments(video_id)
+        if comments:
+            st.success("Comments fetched successfully!")
+        else:
+            st.warning("No comments found or failed to fetch comments.")
 
 # Toggle display of comments
-show_comments = st.button("Show/Hide Comments")
-if show_comments and comments:
-    st.write("💬 Fetched YouTube Comments")
-    for comment in comments:
-        st.write(comment)
+if st.button("Show/Hide Comments"):
+    if comments:
+        st.write("💬 Fetched YouTube Comments")
+        for comment in comments:
+            st.write(comment)
+    else:
+        st.write("No comments to display.")
 
 # Categorize and display comments using Gemini
 if comments:
@@ -96,6 +103,7 @@ if comments:
     }
 
     if st.button("Categorize Comments"):
+        st.write("Categorizing comments...")
         try:
             model = genai.GenerativeModel("gemini-pro", generation_config=config)
             with st.spinner("Categorizing comments using Gemini..."):
@@ -104,5 +112,6 @@ if comments:
                     categorized_comments = response.text
                     st.subheader("Categorized Comments")
                     st.write(categorized_comments)
+                    st.success("Comments categorized successfully!")
         except Exception as e:
             st.error(f"An error occurred: {e}")
