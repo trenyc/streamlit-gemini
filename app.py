@@ -21,9 +21,10 @@ with st.sidebar:
     st.image("https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/1f916.png", width=64)
     st.title("API Keys")
 
+
     # Try to retrieve API keys from environment variables (if available)
-    yt_api_key = os.getenv(YOUTUBE_API_KEY_ENV, None)
-    openai_api_key = os.getenv(OPENAI_API_KEY_ENV, None)
+    yt_api_key = os.environ['YOUTUBE_API_KEY']
+    openai_api_key = os.getenv(OPENAI_API_KEY, None)
 
     # Optional input fields if environment variables are not set
     if not yt_api_key:
