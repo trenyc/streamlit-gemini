@@ -1,5 +1,3 @@
-
-
 import os
 import streamlit as st
 from googleapiclient.discovery import build
@@ -91,3 +89,114 @@ if 'search_results' in st.session_state:
                 st.experimental_rerun()  # Force a rerun to update state
 
 # Set selected video ID from search
+
+# Set selected video ID from search results
+if 'selected_video_id' in st.session_state:
+    video_id = st.session_state.selected_video_id
+
+# Input field for YouTube video URL
+video_url = st.text_input("📺 Paste YouTube Video URL here:", st.session_state.get('video_url', "https://www.youtube.com/watch?v=-T0MGehwWvE"))
+if video_url:
+    try:
+        # Check if 'v=' is present in the URL to extract video_id
+        if 'v=' in video_url:
+            video_id = video_url.split('v=')[-1]
+        st.video(f"https://www.youtube.com/watch?v={video_id}", start_time=0)
+    except Exception as e:
+        st.error(f"Failed to display video: {e}")
+
+# Function to fetch YouTube comments
+def fetch_youtube_comments(video_id):
+    try:
+        if debug_mode:
+            st.write("Initializing YouTube API client...")
+        youtube = build('youtube', 'v3', developerKey=yt_api_key)
+        if debug_mode:
+            st.write("Creating request to fetch comments...")
+        request = youtube.commentThreads().list(
+            part="snippet",
+            videoId=video_id,
+            maxResults=100
+        )
+        if debug_mode:
+            st.write("Executing request to YouTube API...")
+        response = request.execute()
+        if debug_mode:
+            st.write("Processing response from YouTube API...")
+        comments = [item['snippet']['topLevelComment']['snippet']['textDisplay'] for item in response['items']]
+        if debug_mode:
+            st.write(f"Fetched {len(comments)} comments.")
+        return comments
+    except HttpError as e:
+        st.error(f"An error occurred while fetching comments: {e}")
+        return []
+
+# Input for additional categories
+categories = st_tags.st_tags(
+    label='Add custom categories:',
+    text='Press enter to add more',
+    value=['funny', 'interesting', 'positive', 'negative', 'serious'],
+    suggestions=['funny', 'interesting', 'positive', 'negative', 'serious'],
+    maxtags=10,
+)
+
+# Fetch and categorize comments
+def fetch_and_categorize_comments():
+    comments = fetch_youtube_comments(video_id)
+    if comments:
+        st.success("Comments fetched successfully!")
+        st.session_state.comments = comments
+        prompt = f"Categorize the following comments into categories: {', '.join(categories)}. Comments: {' '.join(comments)}"
+        st.write("Starting to categorize comments...")
+        try:
+            if debug_mode:
+                st.write("Prompt being sent to OpenAI API:")
+                st.code(prompt)
+                st.write(f"Using OpenAI API Key: ...{openai_api_key[-4:]}")
+                st.write("Sending request to OpenAI API...")
+            with st.spinner("Categorizing comments using OpenAI..."):
+                response = client.chat.completions.create(
+                    model="gpt-3.5-turbo",
+                    messages=[
+                        {"role": "system", "content": "You are a helpful assistant."},
+                        {"role": "user", "content": prompt},
+                    ]
+                )
+                if debug_mode:
+                    st.write("Processing response from OpenAI API...")
+                if response.choices:
+                    response_text = response.choices[0].message.content.strip()
+                    st.success("Comments categorized successfully!")
+                    st.subheader("Categorized Comments")
+                    st.write(response_text)
+                else:
+                    st.error("No response from the model.")
+        except APIError as e:
+            st.error(f"An API error occurred: {e}")
+            st.error(f"Error code: {e.status_code} - {e.message}")
+            st.error(f"Full response: {e.response}")
+        except Exception as e:
+            st.error(f"An unexpected error occurred: {e}")
+    else:
+        st.warning("No comments found or failed to fetch comments.")
+
+# Fetch and display YouTube comments
+if video_id and yt_api_key and openai_api_key:
+    if 'auto_fetch' in st.session_state and st.session_state.auto_fetch:
+        fetch_and_categorize_comments()
+        st.session_state.auto_fetch = False
+
+# Show "Fetch Comments" and "Show/Hide Comments" in debug mode
+if debug_mode:
+    if st.button("Fetch Comments"):
+        fetch_youtube_comments(video_id)
+    show_comments = st.checkbox("Show/Hide Comments")
+    if show_comments and 'comments' in st.session_state:
+        st.write("Displaying fetched comments...")
+        st.write("💬 Fetched YouTube Comments")
+        for comment in st.session_state.comments:
+            st.write(comment)
+
+# Always show the "Categorize Comments" button
+if st.button("Categorize Comments"):
+    fetch_and_categorize_comments()
