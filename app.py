@@ -6,8 +6,8 @@ from openai import OpenAI, APIError
 import streamlit_tags as st_tags
 
 # Define API key environment variable names
-YOUTUBE_API_KEY_ENV = "YOUTUBE_API_KEY"
-OPENAI_API_KEY_ENV = "OPENAI_API_KEY"
+YOUTUBE_API_KEY = st.secrets["YOUTUBE_API_KEY"]
+OPENAI_API_KEY = st.secrets["OPENAI_API_KEY"]
 
 # Set the page configuration for the Streamlit app
 st.set_page_config(
