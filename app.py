@@ -87,24 +87,22 @@ if video_id and st.button("Fetch Comments"):
     comments = fetch_youtube_comments(video_id)
     if comments:
         st.success("Comments fetched successfully!")
-        st.write(f"Comments: {comments}")
+        st.session_state.comments = comments
     else:
         st.warning("No comments found or failed to fetch comments.")
 
 # Toggle display of comments
-show_comments = st.checkbox("Show/Hide Comments")
-if show_comments:
-    if comments:
+if 'comments' in st.session_state:
+    show_comments = st.checkbox("Show/Hide Comments")
+    if show_comments:
         st.write("Displaying fetched comments...")
         st.write("💬 Fetched YouTube Comments")
-        for comment in comments:
+        for comment in st.session_state.comments:
             st.write(comment)
-    else:
-        st.write("No comments to display.")
 
 # Categorize and display comments using Gemini
-if comments:
-    prompt = f"""List 5 comments categorizing them as funny, interesting, positive, negative, and serious from these comments: {" ".join(comments)}"""
+if 'comments' in st.session_state and st.session_state.comments:
+    prompt = f"""List 5 comments categorizing them as funny, interesting, positive, negative, and serious from these comments: {" ".join(st.session_state.comments)}"""
     
     config = {
         "temperature": 0.8,
