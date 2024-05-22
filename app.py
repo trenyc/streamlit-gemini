@@ -64,10 +64,34 @@ default_comments = {
     ]
 }
 
+# Define OpenAI client
+if openai_api_key:
+    client = OpenAI(api_key=openai_api_key)
+    st.write(f"Using OpenAI API Key: ...{openai_api_key[-4:]}")
+
 # Main app content
 st.title("🎉 Comment Buckets")
 st.caption("🚀 Unleash the fun in YouTube comments with OpenAI")
 st.image("https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/1f31f.png", width=64)
+
+# YouTube search and display functionality
+search_query = st.text_input("🔍 Search YouTube Videos")
+if search_query and st.button("Search"):
+    results = search_youtube_videos(search_query)
+    if results:
+        for result in results:
+            video_title = result['snippet']['title']
+            video_id = result['id']['videoId']
+            thumbnail_url = result['snippet']['thumbnails']['default']['url']
+            st.write(f"**{video_title}**")
+            st.image(thumbnail_url, width=120)
+            if st.button(f"Select {video_title}", key=video_id):
+                st.session_state.selected_video_id = video_id
+                st.experimental_rerun()
+
+# Set selected video ID from search results
+if 'selected_video_id' in st.session_state:
+    video_id = st.session_state.selected_video_id
 
 # Input field for YouTube video URL
 video_url = st.text_input("📺 Paste YouTube Video URL here:", default_video_url)
@@ -75,7 +99,7 @@ video_id = video_url.split('v=')[-1] if 'v=' in video_url else video_url
 
 # Display YouTube video
 if video_id:
-    st.video(f"https://www.youtube.com/watch?v={video_id}")
+    st.video(f"https://www.youtube.com/watch?v={video_id}", start_time=0, height=300)
 
 # Function to fetch YouTube comments
 def fetch_youtube_comments(video_id, order):
@@ -117,37 +141,20 @@ def search_youtube_videos(query):
         st.error(f"An error occurred while searching for videos: {e}")
         return []
 
-# Search and display YouTube videos
-search_query = st.text_input("🔍 Search YouTube Videos")
-if search_query and st.button("Search"):
-    results = search_youtube_videos(search_query)
-    if results:
-        for result in results:
-            video_title = result['snippet']['title']
-            video_id = result['id']['videoId']
-            st.write(f"**{video_title}**")
-            st.video(f"https://www.youtube.com/watch?v={video_id}")
-            if st.button(f"Select {video_title}", key=video_id):
-                st.session_state.selected_video_id = video_id
-                st.experimental_rerun()
-
-# Set selected video ID from search results
-if 'selected_video_id' in st.session_state:
-    video_id = st.session_state.selected_video_id
-
 # Toggle for most recent or top comments
 comment_order = st.radio("Sort comments by:", ("relevance", "time"))
-
-# Display default comments in their respective categories
-if not ('comments' in st.session_state and st.session_state.comments):
-    for category, comment_list in default_comments.items():
-        st.subheader(f"{category.capitalize()} Comments")
-        for comment in comment_list:
-            st.write(comment)
 
 # Input for additional categories
 additional_categories = st.text_input("Add custom categories (comma-separated):", "funny, interesting, positive, negative, serious")
 categories = [category.strip() for category in additional_categories.split(",")]
+
+# Display default categorized comments under the categorize button
+if not ('comments' in st.session_state and st.session_state.comments):
+    st.write("💬 Default Categorized Comments")
+    for category, comment_list in default_comments.items():
+        st.subheader(f"{category.capitalize()} Comments")
+        for comment in comment_list:
+            st.write(comment)
 
 # Fetch and display YouTube comments
 if video_id and yt_api_key and openai_api_key and st.button("Fetch Comments"):
