@@ -23,6 +23,7 @@ api_key = os.getenv("GOOGLE_API_KEY")
 # Configure the Google Generative AI with the API key
 if api_key:
     ggi.configure(api_key=api_key)
+    st.write(f"Using Google API Key: ...{api_key[-4:]}")
 else:
     st.error("Google API Key is missing.")
 
@@ -112,6 +113,7 @@ if 'comments' in st.session_state and st.session_state.comments:
             chat = model.start_chat()
             st.write("Prompt being sent to Gemini LLM:")
             st.code(prompt)
+            st.write(f"Using Google API Key: ...{api_key[-4:]}")
             st.write("Sending request to Google Gemini LLM...")
             with st.spinner("Categorizing comments using Gemini..."):
                 response = chat.send_message(prompt, stream=True)
