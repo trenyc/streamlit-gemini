@@ -3,6 +3,7 @@ import streamlit as st
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 from openai import OpenAI, APIError
+import streamlit_tags as st_tags
 
 # Set the page configuration for the Streamlit app
 st.set_page_config(
@@ -74,6 +75,24 @@ st.title("🎉 Comment Buckets")
 st.caption("🚀 Unleash the fun in YouTube comments with OpenAI")
 st.image("https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/1f31f.png", width=64)
 
+# Function to search YouTube videos
+def search_youtube_videos(query):
+    try:
+        st.write("Searching for YouTube videos...")
+        youtube = build('youtube', 'v3', developerKey=yt_api_key)
+        request = youtube.search().list(
+            part="snippet",
+            q=query,
+            type="video",
+            maxResults=5
+        )
+        response = request.execute()
+        st.write("Processing search results...")
+        return response['items']
+    except HttpError as e:
+        st.error(f"An error occurred while searching for videos: {e}")
+        return []
+
 # YouTube search and display functionality
 search_query = st.text_input("🔍 Search YouTube Videos")
 if search_query and st.button("Search"):
@@ -95,19 +114,14 @@ if 'selected_video_id' in st.session_state:
 
 # Input field for YouTube video URL
 video_url = st.text_input("📺 Paste YouTube Video URL here:", default_video_url)
-video_id = video_url.split('v=')[-1] if 'v=' in video_url else video_url
-
-# Display YouTube video
-if video_id:
-  try:
-      # Check if 'v=' is present in the URL to extract video_id
-      if 'v=' in video_url:
-          video_id = video_url.split('v=')[-1]
-      st.video(f"https://www.youtube.com/watch?v={video_id}", start_time=0)
-  except Exception as e:
-      st.error(f"Failed to display video: {e}")
-
-
+if video_url:
+    try:
+        # Check if 'v=' is present in the URL to extract video_id
+        if 'v=' in video_url:
+            video_id = video_url.split('v=')[-1]
+        st.video(f"https://www.youtube.com/watch?v={video_id}", start_time=0, height=300)
+    except Exception as e:
+        st.error(f"Failed to display video: {e}")
 
 # Function to fetch YouTube comments
 def fetch_youtube_comments(video_id, order):
@@ -131,30 +145,17 @@ def fetch_youtube_comments(video_id, order):
         st.error(f"An error occurred while fetching comments: {e}")
         return []
 
-# Function to search YouTube videos
-def search_youtube_videos(query):
-    try:
-        st.write("Searching for YouTube videos...")
-        youtube = build('youtube', 'v3', developerKey=yt_api_key)
-        request = youtube.search().list(
-            part="snippet",
-            q=query,
-            type="video",
-            maxResults=5
-        )
-        response = request.execute()
-        st.write("Processing search results...")
-        return response['items']
-    except HttpError as e:
-        st.error(f"An error occurred while searching for videos: {e}")
-        return []
-
 # Toggle for most recent or top comments
 comment_order = st.radio("Sort comments by:", ("relevance", "time"))
 
 # Input for additional categories
-additional_categories = st.text_input("Add custom categories (comma-separated):", "funny, interesting, positive, negative, serious")
-categories = [category.strip() for category in additional_categories.split(",")]
+categories = st_tags.st_tags(
+    label='Add custom categories:',
+    text='Press enter to add more',
+    value=['funny', 'interesting', 'positive', 'negative', 'serious'],
+    suggestions=['funny', 'interesting', 'positive', 'negative', 'serious'],
+    maxtags=10,
+)
 
 # Display default categorized comments under the categorize button
 if not ('comments' in st.session_state and st.session_state.comments):
