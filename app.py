@@ -4,7 +4,7 @@ import googleapiclient.discovery
 from googleapiclient.errors import HttpError
 from googleapiclient.discovery import build
 from dotenv import load_dotenv
-import google.generativeai as genai
+import google.generativeai as ggi
 
 # Set the page configuration for the Streamlit app
 st.set_page_config(
@@ -22,7 +22,7 @@ api_key = os.getenv("GOOGLE_API_KEY")
 
 # Configure the Google Generative AI with the API key
 if api_key:
-    genai.configure(api_key=api_key)
+    ggi.configure(api_key=api_key)
 else:
     st.error("Google API Key is missing.")
 
@@ -103,25 +103,23 @@ if 'comments' in st.session_state:
 # Categorize and display comments using Gemini
 if 'comments' in st.session_state and st.session_state.comments:
     prompt = f"""List 5 comments categorizing them as funny, interesting, positive, negative, and serious from these comments: {" ".join(st.session_state.comments)}"""
-    
-    config = {
-        "temperature": 0.8,
-        "max_output_tokens": 2048,
-    }
 
     if st.button("Categorize Comments"):
         st.write("Starting to categorize comments...")
         try:
             st.write("Initializing Google Gemini LLM client...")
-            model = genai.GenerativeModel("gemini-pro", generation_config=config)
+            model = ggi.GenerativeModel("gemini-pro")
+            chat = model.start_chat()
             st.write("Prompt being sent to Gemini LLM:")
             st.code(prompt)
             st.write("Sending request to Google Gemini LLM...")
             with st.spinner("Categorizing comments using Gemini..."):
-                response = model.generate_content(prompt)
+                response = chat.send_message(prompt, stream=True)
                 st.write("Processing response from Google Gemini LLM...")
-                if response:
-                    categorized_comments = response.text
+                categorized_comments = ""
+                for word in response:
+                    categorized_comments += word.text
+                if categorized_comments:
                     st.subheader("Categorized Comments")
                     st.write(categorized_comments)
                     st.success("Comments categorized successfully!")
