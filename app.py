@@ -14,7 +14,10 @@ yt_api_key = os.getenv("YOUTUBE_API_KEY")
 api_key = os.getenv("GOOGLE_API_KEY")
 
 # Configure the Google Generative AI with the API key
-genai.configure(api_key=api_key)
+if api_key:
+    genai.configure(api_key=api_key)
+else:
+    st.error("Google API Key is missing.")
 
 # Set the page configuration for the Streamlit app
 st.set_page_config(
@@ -84,6 +87,7 @@ if video_id and st.button("Fetch Comments"):
     comments = fetch_youtube_comments(video_id)
     if comments:
         st.success("Comments fetched successfully!")
+        st.write(f"Comments: {comments}")
     else:
         st.warning("No comments found or failed to fetch comments.")
 
