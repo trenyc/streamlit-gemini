@@ -20,10 +20,7 @@ with st.sidebar:
     yt_api_key = st.text_input('Enter YouTube API Key:', type='password', key="yt_key")
     openai_api_key = st.text_input('Enter OpenAI API Key:', type='password', key="openai_key")
     
-    if yt_api_key and openai_api_key:
-        st.success('API keys provided!', icon='✅')
-    else:
-        st.warning('Please enter both API keys!', icon='⚠️')
+
 
 # Set up the default YouTube video and comments for the default view
 default_video_url = "https://www.youtube.com/watch?v=-T0MGehwWvE"
@@ -147,6 +144,18 @@ def fetch_youtube_comments(video_id, order):
 
 # Toggle for most recent or top comments
 comment_order = st.radio("Sort comments by:", ("relevance", "time"))
+
+
+
+if video_id and yt_api_key and openai_api_key:
+  if st.button("Fetch Comments"):
+    st.write("Starting to fetch comments...")
+    comments = fetch_youtube_comments(video_id, comment_order)
+    if comments:
+      st.success("Comments fetched successfully!")
+      st.session_state.comments = comments
+    else:
+      st.warning("No comments found or failed to fetch comments.")
 
 # Input for additional categories
 categories = st_tags.st_tags(
