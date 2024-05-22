@@ -1,8 +1,5 @@
 import os
 import streamlit as st
-import googleapiclient.discovery
-from googleapiclient.errors import HttpError
-from googleapiclient.discovery import build
 from dotenv import load_dotenv
 import openai
 
@@ -17,7 +14,6 @@ st.set_page_config(
 load_dotenv()
 
 # Get the API keys from the environment variables
-yt_api_key = os.getenv("YOUTUBE_API_KEY")
 openai_api_key = os.getenv("OPENAI_API_KEY")
 
 # Configure the OpenAI API with the API key
@@ -30,6 +26,11 @@ else:
 # Function to fetch YouTube comments
 def fetch_youtube_comments(video_id):
     try:
+        import googleapiclient.discovery
+        from googleapiclient.errors import HttpError
+        from googleapiclient.discovery import build
+
+        yt_api_key = os.getenv("YOUTUBE_API_KEY")
         st.write("Initializing YouTube API client...")
         youtube = build('youtube', 'v3', developerKey=yt_api_key)
         st.write("Creating request to fetch comments...")
@@ -117,13 +118,10 @@ if 'comments' in st.session_state and st.session_state.comments:
                     engine="text-davinci-003",
                     prompt=prompt,
                     max_tokens=2048,
-                    temperature=0.8,
-                    stream=True
+                    temperature=0.8
                 )
                 st.write("Processing response from OpenAI API...")
-                categorized_comments = ""
-                for word in response:
-                    categorized_comments += word['choices'][0]['text']
+                categorized_comments = response.choices[0].text.strip()
                 if categorized_comments:
                     st.subheader("Categorized Comments")
                     st.write(categorized_comments)
