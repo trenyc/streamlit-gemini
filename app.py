@@ -1,3 +1,4 @@
+
 import os
 import streamlit as st
 from googleapiclient.discovery import build
@@ -54,7 +55,7 @@ def search_youtube_videos(query):
         return []
 
 # YouTube search and display functionality
-search_query = st.text_input("🔍 Search YouTube Videos")
+search_query = st.text_input("🔍 Search YouTube Videos", "Marques Brownlee")
 if search_query and st.button("Search"):
     results = search_youtube_videos(search_query)
     if results:
@@ -173,10 +174,11 @@ if video_id and yt_api_key and openai_api_key:
         fetch_and_categorize_comments()
         st.session_state.auto_fetch = False
 
-if debug_mode and st.button("Fetch Comments"):
-    fetch_youtube_comments(video_id)
+# Always show the "Categorize Comments" button
+if st.button("Categorize Comments"):
+    fetch_and_categorize_comments()
 
-# Toggle display of comments
+# Show/Hide comments in debug mode
 if 'comments' in st.session_state and debug_mode:
     show_comments = st.checkbox("Show/Hide Comments")
     if show_comments:
@@ -184,8 +186,3 @@ if 'comments' in st.session_state and debug_mode:
         st.write("💬 Fetched YouTube Comments")
         for comment in st.session_state.comments:
             st.write(comment)
-
-# Categorize and display comments using OpenAI
-if 'comments' in st.session_state and st.session_state.comments:
-    if st.button("Categorize Comments"):
-        fetch_and_categorize_comments()
