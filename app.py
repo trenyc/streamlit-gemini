@@ -1,8 +1,7 @@
 import os
 import streamlit as st
-import googleapiclient.discovery
-from googleapiclient.errors import HttpError
 from googleapiclient.discovery import build
+from googleapiclient.errors import HttpError
 from dotenv import load_dotenv
 import openai
 
@@ -129,5 +128,7 @@ if 'comments' in st.session_state and st.session_state.comments:
                     st.error("Received an empty response from OpenAI API.")
         except openai.error.OpenAIError as e:
             st.error(f"An OpenAI error occurred while categorizing comments: {e}")
+        except AttributeError as e:
+            st.error(f"An error occurred: {e}")
         except Exception as e:
             st.error(f"An error occurred while categorizing comments: {e}")
