@@ -24,7 +24,7 @@ with st.sidebar:
 
     # Try to retrieve API keys from environment variables (if available)
     yt_api_key = os.environ["YOUTUBE_API_KEY_ENV"]
-    openai_api_key = os.environ["OPENAI_API_KEY"]
+    openai_api_key = os.environ["OPENAI_API_KEY_ENV"]
 
     # Optional input fields if environment variables are not set
     if not yt_api_key:
