@@ -32,32 +32,32 @@ if openai_api_key:
     if st.button("Send Prompt"):
         st.write("Sending prompt to OpenAI API...")
         try:
-            st.write("Attempting to send prompt to text-davinci-003 model...")
+            st.write("Attempting to send prompt to gpt-3.5-turbo model...")
             st.write("Prompt being sent to OpenAI API:")
             st.code(user_prompt)
             st.write(f"Using OpenAI API Key: ...{openai_api_key[-4:]}")
             with st.spinner("Waiting for OpenAI response..."):
                 try:
-                    response = openai.Completion.create(
-                        engine="text-davinci-003",
-                        prompt=user_prompt,
-                        max_tokens=50,
-                        temperature=0.7
+                    response = openai.ChatCompletion.create(
+                        model="gpt-3.5-turbo",
+                        messages=[
+                            {"role": "system", "content": "You are a helpful assistant."},
+                            {"role": "user", "content": user_prompt},
+                        ]
                     )
-                    st.write("Processing response from OpenAI API...")
-                    response_text = response.choices[0].text.strip()
-                    if response_text:
-                        st.subheader("Response from OpenAI (text-davinci-003)")
+                    if response.choices:
+                        response_text = response.choices[0].message['content'].strip()
+                        st.subheader("Response from OpenAI (gpt-3.5-turbo)")
                         st.write(response_text)
                         st.success("OpenAI API call was successful!")
                     else:
-                        st.error("Received an empty response from OpenAI API.")
-                except Exception as e_davinci:
-                    st.error(f"Error with text-davinci-003 model: {e_davinci}")
-                    st.write("Attempting to send prompt to gpt-3.5-turbo model...")
+                        st.error("No response from the gpt-3.5-turbo model.")
+                except Exception as e_turbo:
+                    st.error(f"Error with gpt-3.5-turbo model: {e_turbo}")
+                    st.write("Attempting to send prompt to text-davinci-003 model...")
                     try:
-                        response = openai.ChatCompletion.create(
-                            model="gpt-3.5-turbo",
+                        response = openai.Completion.create(
+                            model="text-davinci-003",
                             messages=[
                                 {"role": "system", "content": "You are a helpful assistant."},
                                 {"role": "user", "content": user_prompt},
@@ -65,13 +65,13 @@ if openai_api_key:
                         )
                         if response.choices:
                             response_text = response.choices[0].message['content'].strip()
-                            st.subheader("Response from OpenAI (gpt-3.5-turbo)")
+                            st.subheader("Response from OpenAI (text-davinci-003)")
                             st.write(response_text)
                             st.success("OpenAI API call was successful!")
                         else:
-                            st.error("No response from the gpt-3.5-turbo model.")
-                    except Exception as e_turbo:
-                        st.error(f"Error with gpt-3.5-turbo model: {e_turbo}")
+                            st.error("No response from the text-davinci-003 model.")
+                    except Exception as e_davinci:
+                        st.error(f"Error with text-davinci-003 model: {e_davinci}")
         except openai.error.OpenAIError as e:
             st.error(f"An OpenAI error occurred: {e}")
         except AttributeError as e:
@@ -80,4 +80,3 @@ if openai_api_key:
             st.error(f"An unexpected error occurred: {e}")
 else:
     st.warning("Please enter the required OpenAI API key to use the application.")
-
