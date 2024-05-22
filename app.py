@@ -1,4 +1,3 @@
-
 import os
 import streamlit as st
 from googleapiclient.discovery import build
@@ -79,7 +78,7 @@ if video_id:
     st.video(f"https://www.youtube.com/watch?v={video_id}")
 
 # Function to fetch YouTube comments
-def fetch_youtube_comments(video_id):
+def fetch_youtube_comments(video_id, order):
     try:
         st.write("Initializing YouTube API client...")
         youtube = build('youtube', 'v3', developerKey=yt_api_key)
@@ -87,7 +86,8 @@ def fetch_youtube_comments(video_id):
         request = youtube.commentThreads().list(
             part="snippet",
             videoId=video_id,
-            maxResults=100
+            maxResults=100,
+            order=order
         )
         st.write("Executing request to YouTube API...")
         response = request.execute()
@@ -99,21 +99,60 @@ def fetch_youtube_comments(video_id):
         st.error(f"An error occurred while fetching comments: {e}")
         return []
 
+# Function to search YouTube videos
+def search_youtube_videos(query):
+    try:
+        st.write("Searching for YouTube videos...")
+        youtube = build('youtube', 'v3', developerKey=yt_api_key)
+        request = youtube.search().list(
+            part="snippet",
+            q=query,
+            type="video",
+            maxResults=5
+        )
+        response = request.execute()
+        st.write("Processing search results...")
+        return response['items']
+    except HttpError as e:
+        st.error(f"An error occurred while searching for videos: {e}")
+        return []
+
+# Search and display YouTube videos
+search_query = st.text_input("🔍 Search YouTube Videos")
+if search_query and st.button("Search"):
+    results = search_youtube_videos(search_query)
+    if results:
+        for result in results:
+            video_title = result['snippet']['title']
+            video_id = result['id']['videoId']
+            st.write(f"**{video_title}**")
+            st.video(f"https://www.youtube.com/watch?v={video_id}")
+            if st.button(f"Select {video_title}", key=video_id):
+                st.session_state.selected_video_id = video_id
+                st.experimental_rerun()
+
+# Set selected video ID from search results
+if 'selected_video_id' in st.session_state:
+    video_id = st.session_state.selected_video_id
+
+# Toggle for most recent or top comments
+comment_order = st.radio("Sort comments by:", ("relevance", "time"))
+
 # Display default comments in their respective categories
-for category, comment_list in default_comments.items():
-    st.subheader(f"{category.capitalize()} Comments")
-    for comment in comment_list:
-        st.write(comment)
+if not ('comments' in st.session_state and st.session_state.comments):
+    for category, comment_list in default_comments.items():
+        st.subheader(f"{category.capitalize()} Comments")
+        for comment in comment_list:
+            st.write(comment)
 
 # Input for additional categories
 additional_categories = st.text_input("Add custom categories (comma-separated):", "funny, interesting, positive, negative, serious")
 categories = [category.strip() for category in additional_categories.split(",")]
 
 # Fetch and display YouTube comments
-comments = []
 if video_id and yt_api_key and openai_api_key and st.button("Fetch Comments"):
     st.write("Starting to fetch comments...")
-    comments = fetch_youtube_comments(video_id)
+    comments = fetch_youtube_comments(video_id, comment_order)
     if comments:
         st.success("Comments fetched successfully!")
         st.session_state.comments = comments
@@ -140,47 +179,6 @@ if 'comments' in st.session_state and st.session_state.comments:
             st.code(prompt)
             st.write(f"Using OpenAI API Key: ...{openai_api_key[-4:]}")
             st.write("Sending request to OpenAI API...")
-            with st.spinner("Categorizing comments using OpenAI..."):
-                response = client.chat.completions.create(
-                    model="gpt-3.5-turbo",
-                    messages=[
-                        {"role": "system", "content": "You are a helpful assistant."},
-                        {"role": "user", "content": prompt},
-                    ]
-                )
-                st.write("Processing response from OpenAI API...")
-                if response.choices:
-                    response_text = response.choices[0].message.content.strip()
-                    st.subheader("Categorized Comments")
-                    st.write(response_text)
-                    st.success("Comments categorized successfully!")
-                else:
-                    st.error("No response from the model.")
-        except APIError as e:
-            st.error(f"An API error occurred: {e}")
-            st.error(f"Error code: {e.status_code} - {e.message}")
-            st.error(f"Full response: {e.response}")
-        except Exception as e:
-            st.error(f"An unexpected error occurred: {e}")
-
-# Display default categorized comments if no comments are fetched
-if not yt_api_key or not openai_api_key:
-    st.write("Please enter your API keys to fetch and categorize YouTube comments.")
-
-    comment_categories = st.multiselect(
-        'Select categories for comments:',
-        ['funny', 'interesting', 'positive', 'negative', 'serious'],
-        default=['funny', 'interesting', 'positive', 'negative', 'serious']
-    )
-
-    if st.button("Categorize Default Comments"):
-        st.write("Starting to categorize comments...")
-        prompt = f"Categorize the following comments into categories: {', '.join(comment_categories)}. Comments: {' '.join([comment for sublist in default_comments.values() for comment in sublist])}"
-        st.write("Prompt being sent to OpenAI API:")
-        st.code(prompt)
-        st.write("Using OpenAI API Key: ...XYra")
-        st.write("Sending request to OpenAI API...")
-        try:
             with st.spinner("Categorizing comments using OpenAI..."):
                 response = client.chat.completions.create(
                     model="gpt-3.5-turbo",
