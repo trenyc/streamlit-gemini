@@ -1,4 +1,3 @@
-
 import os
 import streamlit as st
 import googleapiclient.discovery
@@ -6,6 +5,13 @@ from googleapiclient.errors import HttpError
 from googleapiclient.discovery import build
 from dotenv import load_dotenv
 import google.generativeai as genai
+
+# Set the page configuration for the Streamlit app
+st.set_page_config(
+    page_title="YouTube Comment Fun Generator",
+    page_icon="🎉",
+    layout="wide"
+)
 
 # Load environment variables from .env file
 load_dotenv()
@@ -19,13 +25,6 @@ if api_key:
     genai.configure(api_key=api_key)
 else:
     st.error("Google API Key is missing.")
-
-# Set the page configuration for the Streamlit app
-st.set_page_config(
-    page_title="YouTube Comment Fun Generator",
-    page_icon="🎉",
-    layout="wide"
-)
 
 # Function to fetch YouTube comments
 def fetch_youtube_comments(video_id):
