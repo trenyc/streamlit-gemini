@@ -102,6 +102,7 @@ if search_query and st.button("Search"):
             st.image(thumbnail_url, width=120)
             if st.button(f"Select {video_title}", key=video_id):
                 st.session_state.selected_video_id = video_id
+                st.session_state.auto_fetch = True
                 st.experimental_rerun()
 
 # Set selected video ID from search results
@@ -115,7 +116,7 @@ if video_url:
         # Check if 'v=' is present in the URL to extract video_id
         if 'v=' in video_url:
             video_id = video_url.split('v=')[-1]
-        st.video(f"https://www.youtube.com/watch?v={video_id}", start_time=0, height=300)
+        st.video(f"https://www.youtube.com/watch?v={video_id}", start_time=0)
     except Exception as e:
         st.error(f"Failed to display video: {e}")
 
@@ -153,6 +154,27 @@ categories = st_tags.st_tags(
     maxtags=10,
 )
 
+# Fetch and display YouTube comments
+if video_id and yt_api_key and openai_api_key:
+    if 'auto_fetch' in st.session_state and st.session_state.auto_fetch:
+        st.write("Starting to fetch comments automatically...")
+        comments = fetch_youtube_comments(video_id, comment_order)
+        if comments:
+            st.success("Comments fetched successfully!")
+            st.session_state.comments = comments
+        else:
+            st.warning("No comments found or failed to fetch comments.")
+        st.session_state.auto_fetch = False
+
+    if st.button("Fetch Comments"):
+        st.write("Starting to fetch comments...")
+        comments = fetch_youtube_comments(video_id, comment_order)
+        if comments:
+            st.success("Comments fetched successfully!")
+            st.session_state.comments = comments
+        else:
+            st.warning("No comments found or failed to fetch comments.")
+
 # Display default categorized comments under the categorize button
 if not ('comments' in st.session_state and st.session_state.comments):
     st.write("💬 Default Categorized Comments")
@@ -160,16 +182,6 @@ if not ('comments' in st.session_state and st.session_state.comments):
         st.subheader(f"{category.capitalize()} Comments")
         for comment in comment_list:
             st.write(comment)
-
-# Fetch and display YouTube comments
-if video_id and yt_api_key and openai_api_key and st.button("Fetch Comments"):
-    st.write("Starting to fetch comments...")
-    comments = fetch_youtube_comments(video_id, comment_order)
-    if comments:
-        st.success("Comments fetched successfully!")
-        st.session_state.comments = comments
-    else:
-        st.warning("No comments found or failed to fetch comments.")
 
 # Toggle display of comments
 if 'comments' in st.session_state:
