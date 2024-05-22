@@ -66,7 +66,7 @@ def search_youtube_videos(query):
         return []
 
 # YouTube search and display functionality
-search_query = st.text_input("Search YouTube Videos", "Marques Brownlee")
+search_query = st.text_input("Search YouTube Videos", "Marques Brownlee tech reviews")
 if search_query and st.button("Search"):
     results = search_youtube_videos(search_query)
     if results:
