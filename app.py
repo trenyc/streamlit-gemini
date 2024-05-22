@@ -86,7 +86,7 @@ if video_url:
         st.error(f"Failed to display video: {e}")
 
 # Function to fetch YouTube comments
-def fetch_youtube_comments(video_id, order):
+def fetch_youtube_comments(video_id):
     try:
         st.write("Initializing YouTube API client...")
         youtube = build('youtube', 'v3', developerKey=yt_api_key)
@@ -94,8 +94,7 @@ def fetch_youtube_comments(video_id, order):
         request = youtube.commentThreads().list(
             part="snippet",
             videoId=video_id,
-            maxResults=100,
-            order=order
+            maxResults=100
         )
         st.write("Executing request to YouTube API...")
         response = request.execute()
@@ -107,14 +106,11 @@ def fetch_youtube_comments(video_id, order):
         st.error(f"An error occurred while fetching comments: {e}")
         return []
 
-# Toggle for most recent or top comments
-comment_order = st.radio("Sort comments by:", ("relevance", "time"))
-
 # Fetch and display YouTube comments
 if video_id and yt_api_key and openai_api_key:
     if 'auto_fetch' in st.session_state and st.session_state.auto_fetch:
         st.write("Starting to fetch comments automatically...")
-        comments = fetch_youtube_comments(video_id, comment_order)
+        comments = fetch_youtube_comments(video_id)
         if comments:
             st.success("Comments fetched successfully!")
             st.session_state.comments = comments
@@ -124,7 +120,7 @@ if video_id and yt_api_key and openai_api_key:
 
     if st.button("Fetch Comments"):
         st.write("Starting to fetch comments...")
-        comments = fetch_youtube_comments(video_id, comment_order)
+        comments = fetch_youtube_comments(video_id)
         if comments:
             st.success("Comments fetched successfully!")
             st.session_state.comments = comments
@@ -182,3 +178,4 @@ if 'comments' in st.session_state and st.session_state.comments:
             st.error(f"Full response: {e.response}")
         except Exception as e:
             st.error(f"An unexpected error occurred: {e}")
+
