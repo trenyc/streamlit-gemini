@@ -1,10 +1,11 @@
+
 import os
 import streamlit as st
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 from openai import OpenAI, APIError
 import streamlit_tags as st_tags
- 
+
 # Set the page configuration for the Streamlit app
 st.set_page_config(
     page_title="Comment Buckets",
@@ -19,8 +20,6 @@ with st.sidebar:
     
     yt_api_key = st.text_input('Enter YouTube API Key:', type='password', key="yt_key")
     openai_api_key = st.text_input('Enter OpenAI API Key:', type='password', key="openai_key")
-    
-
 
 # Set up the default YouTube video and comments for the default view
 default_video_url = "https://www.youtube.com/watch?v=-T0MGehwWvE"
@@ -63,7 +62,7 @@ default_comments = {
 }
 
 # Define OpenAI client
-if openai_api_key:ƒ
+if openai_api_key:
     client = OpenAI(api_key=openai_api_key)
     st.write(f"Using OpenAI API Key: ...{openai_api_key[-4:]}")
 
@@ -116,7 +115,7 @@ if video_url:
         # Check if 'v=' is present in the URL to extract video_id
         if 'v=' in video_url:
             video_id = video_url.split('v=')[-1]
-        st.video(f"https://www.youtube.com/watch?v={video_id}", start_time=0)
+        st.video(f"https://www.youtube.com/watch?v={video_id}", start_time=0, height=300)
     except Exception as e:
         st.error(f"Failed to display video: {e}")
 
@@ -144,12 +143,6 @@ def fetch_youtube_comments(video_id, order):
 
 # Toggle for most recent or top comments
 comment_order = st.radio("Sort comments by:", ("relevance", "time"))
-
-
-
-
-
-
 
 # Input for additional categories
 categories = st_tags.st_tags(
