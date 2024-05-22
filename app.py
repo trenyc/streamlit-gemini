@@ -1,4 +1,3 @@
-
 import os
 import streamlit as st
 from googleapiclient.discovery import build
@@ -20,46 +19,6 @@ with st.sidebar:
     
     yt_api_key = st.text_input('Enter YouTube API Key:', type='password', key="yt_key")
     openai_api_key = st.text_input('Enter OpenAI API Key:', type='password', key="openai_key")
-
-# Set up the default YouTube video and comments for the default view
-default_video_url = "https://www.youtube.com/watch?v=-T0MGehwWvE"
-default_comments = {
-    "funny": [
-        "a billion dollars idea for Apple: give iPad the 'MacPad' OS",
-        "Watching on my iPad Pro 13 inch. This screen is heat",
-        "Hey man it’s been too long, I need another MKBHD video",
-        "I bet Apple is going to announce soon the introduction of MacOS apps in iPads just as the iPhone and iPads apps in MacOS",
-        "When you realize they changed all the sizes from 12.9 inches to 13 inches or 10.9 to 11 inches to 'be more clean' when in reality your old magic keyboards are now obsolete and you need to buy some more ❤"
-    ],
-    "interesting": [
-        "Apple is the brand ambassador of innovation for the sake of innovation",
-        "The tech industry has started regressing and profit hunting",
-        "The point of the M4 is energy efficiency, unlike the wild direction in the PC world",
-        "The power of an iPad Pro is impressive for professional applications",
-        "iPads have come a long way since the original Mini"
-    ],
-    "positive": [
-        "Still using my iPad Pro 3rd gen bought 6 or 7 years ago, running well",
-        "Hope to get another 5 years out of iPad Pro",
-        "We are spoiled by Apple's incredible devices at a reasonable price",
-        "iPads show amazing technology and manufacturing wizardry",
-        "Impressed by the power and features of the new iPads"
-    ],
-    "negative": [
-        "Apple seems to have reached its peak",
-        "Concerns about Apple's innovation and direction",
-        "Disappointment with restrictions on using Apple Pencil Pro and other accessories",
-        "Frustration with thinness of iPads and camera bump design",
-        "Criticism of Apple not focusing on OS and software development"
-    ],
-    "serious": [
-        "Discussion about devices becoming thinner and the impact on battery",
-        "Consideration of purchasing decisions based on needs and budget",
-        "Professional use cases for upgraded iPad models",
-        "Debate on the importance of software development over hardware upgrades",
-        "Analystic comparison of various iPad models and their features"
-    ]
-}
 
 # Define OpenAI client
 if openai_api_key:
@@ -110,7 +69,7 @@ if 'selected_video_id' in st.session_state:
     video_id = st.session_state.selected_video_id
 
 # Input field for YouTube video URL
-video_url = st.text_input("📺 Paste YouTube Video URL here:", default_video_url)
+video_url = st.text_input("📺 Paste YouTube Video URL here:", "https://www.youtube.com/watch?v=-T0MGehwWvE")
 if video_url:
     try:
         # Check if 'v=' is present in the URL to extract video_id
@@ -145,15 +104,6 @@ def fetch_youtube_comments(video_id, order):
 # Toggle for most recent or top comments
 comment_order = st.radio("Sort comments by:", ("relevance", "time"))
 
-# Input for additional categories
-categories = st_tags.st_tags(
-    label='Add custom categories:',
-    text='Press enter to add more',
-    value=['funny', 'interesting', 'positive', 'negative', 'serious'],
-    suggestions=['funny', 'interesting', 'positive', 'negative', 'serious'],
-    maxtags=10,
-)
-
 # Fetch and display YouTube comments
 if video_id and yt_api_key and openai_api_key:
     if 'auto_fetch' in st.session_state and st.session_state.auto_fetch:
@@ -175,14 +125,6 @@ if video_id and yt_api_key and openai_api_key:
         else:
             st.warning("No comments found or failed to fetch comments.")
 
-# Display default categorized comments under the categorize button
-if not ('comments' in st.session_state and st.session_state.comments):
-    st.write("💬 Default Categorized Comments")
-    for category, comment_list in default_comments.items():
-        st.subheader(f"{category.capitalize()} Comments")
-        for comment in comment_list:
-            st.write(comment)
-
 # Toggle display of comments
 if 'comments' in st.session_state:
     show_comments = st.checkbox("Show/Hide Comments")
@@ -191,6 +133,15 @@ if 'comments' in st.session_state:
         st.write("💬 Fetched YouTube Comments")
         for comment in st.session_state.comments:
             st.write(comment)
+
+# Input for additional categories
+categories = st_tags.st_tags(
+    label='Add custom categories:',
+    text='Press enter to add more',
+    value=['funny', 'interesting', 'positive', 'negative', 'serious'],
+    suggestions=['funny', 'interesting', 'positive', 'negative', 'serious'],
+    maxtags=10,
+)
 
 # Categorize and display comments using OpenAI
 if 'comments' in st.session_state and st.session_state.comments:
