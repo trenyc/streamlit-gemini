@@ -1,4 +1,3 @@
-
 import os
 import streamlit as st
 from googleapiclient.discovery import build
@@ -71,7 +70,7 @@ if 'search_results' in st.session_state:
         with cols[idx % 3]:
             st.write(f"**{video_title}**")
             st.image(thumbnail_url, width=120)
-            if st.button(f"Select {video_title}", key=video_id):
+            if st.button("Select", key=video_id):
                 st.session_state.selected_video_id = video_id
                 st.session_state.video_url = f"https://www.youtube.com/watch?v={video_id}"
                 st.session_state.auto_fetch = True
@@ -174,15 +173,17 @@ if video_id and yt_api_key and openai_api_key:
         fetch_and_categorize_comments()
         st.session_state.auto_fetch = False
 
-# Always show the "Categorize Comments" button
-if st.button("Categorize Comments"):
-    fetch_and_categorize_comments()
-
-# Show/Hide comments in debug mode
-if 'comments' in st.session_state and debug_mode:
+# Show "Fetch Comments" and "Show/Hide Comments" in debug mode
+if debug_mode:
+    if st.button("Fetch Comments"):
+        fetch_youtube_comments(video_id)
     show_comments = st.checkbox("Show/Hide Comments")
-    if show_comments:
+    if show_comments and 'comments' in st.session_state:
         st.write("Displaying fetched comments...")
         st.write("💬 Fetched YouTube Comments")
         for comment in st.session_state.comments:
             st.write(comment)
+
+# Always show the "Categorize Comments" button
+if st.button("Categorize Comments"):
+    fetch_and_categorize_comments()
