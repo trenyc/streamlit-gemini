@@ -62,18 +62,20 @@ if search_query and st.button("Search"):
 
 if 'search_results' in st.session_state:
     results = st.session_state.search_results
-    for result in results:
+    cols = st.columns(3)
+    for idx, result in enumerate(results):
         video_title = result['snippet']['title']
         video_id = result['id']['videoId']
         thumbnail_url = result['snippet']['thumbnails']['default']['url']
-        st.write(f"**{video_title}**")
-        st.image(thumbnail_url, width=120)
-        if st.button(f"Select {video_title}", key=video_id):
-            st.session_state.selected_video_id = video_id
-            st.session_state.video_url = f"https://www.youtube.com/watch?v={video_id}"
-            st.session_state.auto_fetch = True
-            del st.session_state.search_results
-            st.experimental_rerun()
+        with cols[idx % 3]:
+            st.write(f"**{video_title}**")
+            st.image(thumbnail_url, width=120)
+            if st.button(f"Select {video_title}", key=video_id):
+                st.session_state.selected_video_id = video_id
+                st.session_state.video_url = f"https://www.youtube.com/watch?v={video_id}"
+                st.session_state.auto_fetch = True
+                del st.session_state.search_results
+                st.experimental_rerun()
 
 # Set selected video ID from search results
 if 'selected_video_id' in st.session_state:
@@ -151,9 +153,9 @@ def fetch_and_categorize_comments():
                     st.write("Processing response from OpenAI API...")
                 if response.choices:
                     response_text = response.choices[0].message.content.strip()
+                    st.success("Comments categorized successfully!")
                     st.subheader("Categorized Comments")
                     st.write(response_text)
-                    st.success("Comments categorized successfully!")
                 else:
                     st.error("No response from the model.")
         except APIError as e:
@@ -175,7 +177,7 @@ if debug_mode and st.button("Fetch Comments"):
     fetch_youtube_comments(video_id)
 
 # Toggle display of comments
-if 'comments' in st.session_state:
+if 'comments' in st.session_state and debug_mode:
     show_comments = st.checkbox("Show/Hide Comments")
     if show_comments:
         st.write("Displaying fetched comments...")
