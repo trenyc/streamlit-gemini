@@ -46,7 +46,7 @@ if openai_api_key:
                 )
                 st.write("Processing response from OpenAI API...")
                 if response.choices:
-                    response_text = response.choices[0].message['content'].strip()
+                    response_text = response.choices[0].message.content.strip()
                     st.subheader("Response from OpenAI (gpt-3.5-turbo)")
                     st.write(response_text)
                     st.success("OpenAI API call was successful!")
@@ -54,7 +54,7 @@ if openai_api_key:
                     st.error("No response from the gpt-3.5-turbo model.")
             except APIError as e:
                 st.error(f"An API error occurred: {e}")
-                st.error(f"Error code: {e.code} - {e.message}")
+                st.error(f"Error code: {e.status_code} - {e.message}")
                 st.error(f"Full response: {e.response}")
             except Exception as e:
                 st.error(f"An unexpected error occurred: {e}")
