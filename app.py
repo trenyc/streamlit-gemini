@@ -103,9 +103,11 @@ if video_id:
       # Check if 'v=' is present in the URL to extract video_id
       if 'v=' in video_url:
           video_id = video_url.split('v=')[-1]
-      st.video(f"https://www.youtube.com/watch?v={video_id}", start_time=0, height=300)
+      st.video(f"https://www.youtube.com/watch?v={video_id}", start_time=0)
   except Exception as e:
       st.error(f"Failed to display video: {e}")
+
+
 
 # Function to fetch YouTube comments
 def fetch_youtube_comments(video_id, order):
