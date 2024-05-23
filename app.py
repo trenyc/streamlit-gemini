@@ -267,14 +267,14 @@ def display_categorized_comments(category=None):
         for idx, comment in enumerate(st.session_state.categorized_comments[category]):
             if comment.strip():  # Ensure no blank comments are displayed
                 st.write(comment)
-                votes = fetch_votes(video_id, comment, category)
+                votes = fetch_votes(video_id, comment['id'], category)
                 col1, col2 = st.columns(2)
                 with col1:
-                    if st.button(f"👍 ({votes['up']})", key=f"{category}_up_{idx}"):
+                    if st.button(f"👍 ({votes['up']})", key=f"{category}_up_{comment['id']}"):
                         update_votes(video_id, comment['id'], category, "up")
                         st.experimental_rerun()
                 with col2:
-                    if st.button(f"👎 ({votes['down']})", key=f"{category}_down_{idx}"):
+                    if st.button(f"👎 ({votes['down']})", key=f"{category}_down_{comment['id']}"):
                         update_votes(video_id, comment['id'], category, "down")
                         st.experimental_rerun()
         if st.session_state.next_page_token:
@@ -306,4 +306,5 @@ if st.button("Categorize Comments"):
 if 'categorized_comments' in st.session_state:
     st.subheader("Vote on Comments")
     display_categorized_comments()
+
 
