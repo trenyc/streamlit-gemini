@@ -248,9 +248,6 @@ def categorize_comments():
                         if category in line:
                             st.session_state.categorized_comments[category].append({"id": line.strip(), "text": line.strip()})
                             break
-                if 'categorized_comments' in st.session_state:
-                    st.subheader("Vote on Comments")
-                    display_categorized_comments()  # Call the function here
             else:
                 st.error("No response from the model.")
     except APIError as e:
