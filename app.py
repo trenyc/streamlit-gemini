@@ -241,8 +241,10 @@ def categorize_comments():
                     st.code(response_text)
                 # Strip introductory line and ignore example comment
                 response_lines = response_text.split('\n')
+                st.write("Response from OpenAI APIa:")
                 for line in response_lines:
                     if ':' in line:
+                         st.write("Response from OpenAI API44:")
                         continue
                     for category in categories:
                         if category in line:
