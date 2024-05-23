@@ -300,6 +300,21 @@ def display_categorized_comments(category=None):
                 st.session_state.categorized_comments[category] = []  # Clear existing comments before loading more
                 fetch_and_categorize_comments(category)
 
+# Function to display vote summary for each category
+def display_vote_summary():
+    st.subheader("Vote Summary")
+    for category in st.session_state.categorized_comments.keys():
+        vote_summary = {}
+        for comment_id in st.session_state.votes.get(video_id, {}):
+            if category in st.session_state.votes[video_id][comment_id]:
+                up_votes = st.session_state.votes[video_id][comment_id][category]["up"]
+                if up_votes > 0:
+                    if comment_id not in vote_summary:
+                        vote_summary[comment_id] = 0
+                    vote_summary[comment_id] += up_votes
+
+        st.write(f"**{category.capitalize()}**: {sum(vote_summary.values())} votes")
+
 # Fetch and display YouTube comments
 if video_id and yt_api_key and openai_api_key:
     if 'auto_fetch' in st.session_state and st.session_state.auto_fetch:
@@ -326,3 +341,7 @@ if 'categorized_comments' in st.session_state:
     st.subheader("Vote on Comments")
     for category in st.session_state.categorized_comments.keys():
         display_categorized_comments(category)
+
+# Display vote summary
+if 'votes' in st.session_state:
+    display_vote_summary()
