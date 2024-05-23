@@ -347,8 +347,8 @@ if 'categorized_comments' in st.session_state and any(st.session_state.categoriz
 
 
 # Display vote summary
-if 'votes' in st.session_state:
-    display_vote_summary()
+#if 'votes' in st.session_state:
+#    display_vote_summary()
 
 # Load more comments button
 if st.session_state.next_page_token:
