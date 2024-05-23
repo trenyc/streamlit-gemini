@@ -249,7 +249,9 @@ def categorize_comments_for_category(category):
                 response_lines = response_text.split('\n')
                 if response_lines[0].count(':') > 0:
                     response_lines = response_lines[1:]
+                st.write("test2248ccc")    
                 response_lines = [line for line in response_lines if st.session_state.top_voted_comments[category] not in line]
+                st.write("test224dddd8")
                 categorized_comments = response_lines
                 st.session_state.categorized_comments[category] = []  # Clear existing comments before adding new ones
                 for comment in categorized_comments:
