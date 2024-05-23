@@ -273,6 +273,7 @@ def fetch_and_categorize_comments():
 def display_categorized_comments():
   if isinstance(st.session_state.categorized_comments, dict):
     for current_category in st.session_state.categorized_comments.keys():  # Use current_category
+      st.write("testcat")
       if st.session_state.categorized_comments[current_category]:
         st.write(f"### {current_category.capitalize()}")
         st.write(f"Vote for the comments that are {current_category}.")
