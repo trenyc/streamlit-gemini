@@ -97,7 +97,7 @@ video_url = st.text_input("📺 Paste YouTube Video URL here:", st.session_state
 if video_url:
     try:
         # Check if 'v=' is present in the URL to extract video_id
-        if 'v=' in the video_url:
+        if 'v=' in video_url:
             video_id = video_url.split('v=')[-1]
         st.video(f"https://www.youtube.com/watch?v={video_id}", start_time=0)
     except Exception as e:
