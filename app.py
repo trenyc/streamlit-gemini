@@ -183,23 +183,23 @@ categories = st_tags.st_tags(
 # Function to create a prompt for categorization with token limits
 def create_prompt(category, comments):
     top_voted_comment = st.session_state.top_voted_comments[category]
-    example_comments = []
+    example_comment = ""
     if top_voted_comment:
         voted_comments = sorted(
             [comment for comment in st.session_state.comments if video_id in st.session_state.votes and comment['id'] in st.session_state.votes[video_id] and st.session_state.votes[video_id][comment['id']][category]["up"] > 0],
             key=lambda x: (-st.session_state.votes[video_id][x['id']][category]["up"], x['id'])
         )
-        example_comments = [comment['text'] for comment in voted_comments[:5]]
+        example_comment = voted_comments[0]['text'] if voted_comments else ""
 
-    if not example_comments:
+    if not example_comment:
+        example_comment = category
         if debug_mode:
-            st.write(f"No votes for category {category}")
+            st.write(f"No votes for category {category}. Using keyword '{category}' as example.")
     else:
         if debug_mode:
-            st.write(f"Top voted comments for {category}: {example_comments}")
+            st.write(f"Top voted comment for {category}: {example_comment}")
 
-    example_text = " | ".join(example_comments)
-    base_prompt = f"Categorize the following comments into the category '{category}'. Example comments: '{example_text}'. Comments: "
+    base_prompt = f"Categorize the following comments into the category '{category}'. Example comment: '{example_comment}'. Comments: "
     token_limit = 15000  # Adjust this limit as needed to avoid exceeding the model's context length
     prompt = base_prompt
     for comment in comments:
