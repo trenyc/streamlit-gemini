@@ -271,6 +271,7 @@ def fetch_and_categorize_comments():
 
 # Function to display categorized comments and voting buttons
 def display_categorized_comments():
+    st.write("test1")
     for category in st.session_state.categorized_comments.keys():
         if st.session_state.categorized_comments[category]:
             st.write(f"### {category.capitalize()}")
