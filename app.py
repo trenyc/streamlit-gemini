@@ -1,5 +1,3 @@
-
-
 import os
 import streamlit as st
 from googleapiclient.discovery import build
@@ -138,7 +136,7 @@ def fetch_youtube_comments(video_id, page_token=None):
 if 'comments' not in st.session_state:
     st.session_state.comments = []
 if 'next_page_token' not in st.session_state:
-    st.session_state.next_page_token = None
+    st.session_state.next_page_token = {category: None for category in ['funny', 'interesting', 'positive', 'negative', 'serious']}
 if 'categorized_comments' not in st.session_state:
     st.session_state.categorized_comments = {category: [] for category in ['funny', 'interesting', 'positive', 'negative', 'serious']}
 if 'top_voted_comments' not in st.session_state:
@@ -153,7 +151,7 @@ def update_votes(video_id, comment_id, category, vote):
     if video_id not in st.session_state.votes:
         st.session_state.votes[video_id] = {}
     if comment_id not in st.session_state.votes[video_id]:
-        st.session_state.votes[video_id][comment_id] = {category: {"up": 0, "down": 0} for category in categories}
+        st.session_state.votes[video_id][comment_id] = {category: {"up": 0, "down": 0} for category in st.session_state.categorized_comments.keys()}
     if category not in st.session_state.votes[video_id][comment_id]:
         st.session_state.votes[video_id][comment_id][category] = {"up": 0, "down": 0}
     st.session_state.votes[video_id][comment_id][category][vote] += 1
@@ -243,16 +241,23 @@ def categorize_comments_for_category(category):
         st.error(f"An unexpected error occurred: {e}")
 
 # Fetch and categorize comments
-def fetch_and_categorize_comments():
-    comments, next_page_token = fetch_youtube_comments(video_id, st.session_state.next_page_token)
+def fetch_and_categorize_comments(category=None):
+    if category:
+        page_token = st.session_state.next_page_token.get(category, None)
+    else:
+        page_token = None
+    comments, next_page_token = fetch_youtube_comments(video_id, page_token)
     if comments:
         st.success("Comments fetched successfully!")
         st.session_state.comments.extend(comments)
-        st.session_state.next_page_token = next_page_token
-        
-        # Categorize comments for each category
-        for category in categories:
+        if category:
+            st.session_state.next_page_token[category] = next_page_token
             categorize_comments_for_category(category)
+        else:
+            st.session_state.next_page_token = {cat: next_page_token for cat in st.session_state.next_page_token.keys()}
+            # Categorize comments for each category
+            for category in categories:
+                categorize_comments_for_category(category)
     else:
         st.warning("No comments found or failed to fetch comments.")
 
@@ -272,16 +277,16 @@ def display_categorized_comments(category=None):
                 votes = fetch_votes(video_id, comment['id'], category)
                 col1, col2 = st.columns(2)
                 with col1:
-                    if st.button(f"👍 ({votes['up']})", key=f"{category}_up_{comment['id']}"):
+                    if st.button(f"👍 ({votes['up']})", key=f"{category}_up_{comment['id']}_{idx}"):
                         update_votes(video_id, comment['id'], category, "up")
                         st.experimental_rerun()
                 with col2:
-                    if st.button(f"👎 ({votes['down']})", key=f"{category}_down_{comment['id']}"):
+                    if st.button(f"👎 ({votes['down']})", key=f"{category}_down_{comment['id']}_{idx}"):
                         update_votes(video_id, comment['id'], category, "down")
                         st.experimental_rerun()
-        if st.session_state.next_page_token:
+        if st.session_state.next_page_token.get(category):
             if st.button(f"Load More Comments for {category.capitalize()}", key=f"load_more_{category}"):
-                fetch_and_categorize_comments()
+                fetch_and_categorize_comments(category)
 
 # Fetch and display YouTube comments
 if video_id and yt_api_key and openai_api_key:
