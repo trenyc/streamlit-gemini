@@ -1,3 +1,4 @@
+
 import os
 import streamlit as st
 from googleapiclient.discovery import build
@@ -270,11 +271,11 @@ def display_categorized_comments(category=None):
                 votes = fetch_votes(video_id, comment, category)
                 col1, col2 = st.columns(2)
                 with col1:
-                    if st.button(f"👍 ({votes['up']})", key=f"{comment}_{category}_up_{idx}"):
+                    if st.button(f"👍 ({votes['up']})", key=f"{category}_{comment_id}_up_{idx}"):
                         update_votes(video_id, comment, category, "up")
                         st.experimental_rerun()
                 with col2:
-                    if st.button(f"👎 ({votes['down']})", key=f"{comment}_{category}_down_{idx}"):
+                    if st.button(f"👎 ({votes['down']})", key=f"{category}_{comment_id}_down_{idx}"):
                         update_votes(video_id, comment, category, "down")
                         st.experimental_rerun()
         if st.session_state.next_page_token:
