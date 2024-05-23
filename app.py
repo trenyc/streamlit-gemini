@@ -1,6 +1,7 @@
-# Streamlit App Code - Version 3.3
+# Streamlit App Code - Version 3.4
 
 import os
+import uuid
 import streamlit as st
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
@@ -286,7 +287,8 @@ def display_categorized_comments():
                     if comment['text'].strip():  # Ensure no blank comments are displayed
                         st.write(comment['text'])
                         votes = fetch_votes(video_id, comment['id'], current_category)  # Use current_category
-                        if st.button(f"👍 ({votes['up']})", key=f"{current_category}_up_{comment['id']}_{idx}"):  # Ensure unique key
+                        unique_key = f"{current_category}_up_{comment['id']}_{idx}_{uuid.uuid4()}"  # Ensure unique key
+                        if st.button(f"👍 ({votes['up']})", key=unique_key):  # Ensure unique key
                             update_votes(video_id, comment['id'], current_category, "up")  # Use current_category
                             # Force a rerun to update vote count
                             st.experimental_rerun()
