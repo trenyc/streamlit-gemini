@@ -1,4 +1,4 @@
-# Streamlit App Code - Version 3.0
+# Streamlit App Code - Version 3.1
 
 import os
 import streamlit as st
@@ -276,22 +276,20 @@ def fetch_and_categorize_comments():
         st.warning("No comments found or failed to fetch comments.")
 
 # Function to display categorized comments and voting buttons
-def display_categorized_comments():
-    if isinstance(st.session_state.categorized_comments, dict):
-        for current_category in st.session_state.categorized_comments.keys():  # Use current_category
-            if len(st.session_state.categorized_comments[current_category]) > 0:  # Check if the list is not empty
-                st.write(f"### {current_category.capitalize()}")
-                st.write(f"Vote for the comments that are {current_category}.")
-                for idx, comment in enumerate(st.session_state.categorized_comments[current_category][:5]):
-                    if comment['text'].strip():  # Ensure no blank comments are displayed
-                        st.write(comment['text'])
-                        votes = fetch_votes(video_id, comment['id'], current_category)  # Use current_category
-                        if st.button(f"👍 ({votes['up']})", key=f"{current_category}_up_{comment['id']}_{idx}"):  # Ensure unique key
-                            update_votes(video_id, comment['id'], current_category, "up")  # Use current_category
-                            # Force a rerun to update vote count
-                            st.experimental_rerun()
-            else:
-                st.write(f"No comments found for {current_category}.")
+def display_categorized_comments(current_category):
+    if len(st.session_state.categorized_comments[current_category]) > 0:  # Check if the list is not empty
+        st.write(f"### {current_category.capitalize()}")
+        st.write(f"Vote for the comments that are {current_category}.")
+        for idx, comment in enumerate(st.session_state.categorized_comments[current_category][:5]):
+            if comment['text'].strip():  # Ensure no blank comments are displayed
+                st.write(comment['text'])
+                votes = fetch_votes(video_id, comment['id'], current_category)  # Use current_category
+                if st.button(f"👍 ({votes['up']})", key=f"{current_category}_up_{comment['id']}_{idx}"):  # Ensure unique key
+                    update_votes(video_id, comment['id'], current_category, "up")  # Use current_category
+                    # Force a rerun to update vote count
+                    st.experimental_rerun()
+    else:
+        st.write(f"No comments found for {current_category}.")
 
 # Function to display vote summary for each category
 def display_vote_summary():
@@ -333,7 +331,8 @@ if st.button("Categorize Comments"):
 # Display categorized comments and voting buttons
 if 'categorized_comments' in st.session_state and any(st.session_state.categorized_comments.values()):
     st.subheader("Vote on Comments")
-    display_categorized_comments()
+    for current_category in st.session_state.categorized_comments.keys():
+        display_categorized_comments(current_category)  # Pass current_category
 
 # Display vote summary
 if 'votes' in st.session_state:
