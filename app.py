@@ -190,6 +190,9 @@ def create_prompt(category, comments):
                 example_comment = comment['text']
                 break
 
+    if debug_mode:
+        st.write(f"Top voted comment for {category}: {example_comment}")
+
     base_prompt = f"Categorize the following comments into the category '{category}'. Example comment: '{example_comment}'. Comments: "
     token_limit = 15000  # Adjust this limit as needed to avoid exceeding the model's context length
     prompt = base_prompt
@@ -280,15 +283,9 @@ def display_categorized_comments(category=None):
             if comment['text'].strip():  # Ensure no blank comments are displayed
                 st.write(comment['text'])
                 votes = fetch_votes(video_id, comment['id'], category)
-                col1, col2 = st.columns(2)
-                with col1:
-                    if st.button(f"👍 ({votes['up']})", key=f"{category}_up_{comment['id']}_{idx}_{st.session_state.load_count[category]}"):
-                        update_votes(video_id, comment['id'], category, "up")
-                        st.experimental_rerun()
-                with col2:
-                    if st.button(f"👎 ({votes['down']})", key=f"{category}_down_{comment['id']}_{idx}_{st.session_state.load_count[category]}"):
-                        update_votes(video_id, comment['id'], category, "down")
-                        st.experimental_rerun()
+                if st.button(f"👍 ({votes['up']})", key=f"{category}_up_{comment['id']}_{idx}_{st.session_state.load_count[category]}"):
+                    update_votes(video_id, comment['id'], category, "up")
+                    st.experimental_rerun()
         if st.session_state.next_page_token.get(category):
             if st.button(f"Load More Comments for {category.capitalize()}", key=f"load_more_{category}_{st.session_state.load_count[category]}"):
                 fetch_and_categorize_comments(category)
