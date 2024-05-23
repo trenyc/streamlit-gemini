@@ -162,9 +162,11 @@ def update_votes(video_id, comment_id, category, vote):
 
     # Update top voted comments
     if vote == "up":
+        st.write(f"test13")
         current_top_comment = st.session_state.top_voted_comments[category]
         if current_top_comment is None or st.session_state.votes[video_id][comment_id][category]["up"] > st.session_state.votes[video_id][current_top_comment][category]["up"]:
             st.session_state.top_voted_comments[category] = comment_id
+        st.write(f"test14")
 
 # Function to fetch votes from session state
 def fetch_votes(video_id, comment_id, category):
@@ -184,10 +186,12 @@ categories = st_tags.st_tags(
 
 # Function to create a prompt for categorization with token limits
 def create_prompt(category, comments):
+    st.write(f"test1vv")
     top_voted_comment_id = st.session_state.top_voted_comments[category]
     example_comment = ""
     st.write(f"test1")
     if top_voted_comment_id:
+        st.write(f"test1"ff)
         top_voted_comment = next((comment for comment in st.session_state.comments if comment['id'] == top_voted_comment_id), None)
         st.write(f"test12")
         if top_voted_comment:
