@@ -201,7 +201,7 @@ def create_prompt_for_category(comments, category):
         example_comment = category
         if debug_mode:
             st.write(f"No votes for category {category}. Using keyword '{category}' as example.")
-    
+
     base_prompt = f"Categorize the following comments into the category '{category}'. Example of a '{category}' comment: '{example_comment}'. Comments: "
 
     token_limit = 15000  # Adjust this limit as needed to avoid exceeding the model's context length
