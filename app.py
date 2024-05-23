@@ -299,6 +299,7 @@ def categorize_comments():
                 if response_lines[0].count(':') > 0:
                     response_lines = response_lines[1:]
                 response_lines = [line for line in response_lines if all(st.session_state.top_voted_comments[cat] not in line for cat in categories)]
+
                 for line in response_lines:
                     if ':' in line:
                         continue
