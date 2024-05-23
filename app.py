@@ -153,9 +153,9 @@ def update_votes(video_id, comment_id, category, vote):
     if video_id not in st.session_state.votes:
         st.session_state.votes[video_id] = {}
     if comment_id not in st.session_state.votes[video_id]:
-        st.session_state.votes[video_id][comment_id] = {category: {"up": 0, "down": 0} for category in st.session_state.categorized_comments.keys()}
+        st.session_state.votes[video_id][comment_id] = {category: {"up": 0} for category in st.session_state.categorized_comments.keys()}
     if category not in st.session_state.votes[video_id][comment_id]:
-        st.session_state.votes[video_id][comment_id][category] = {"up": 0, "down": 0}
+        st.session_state.votes[video_id][comment_id][category] = {"up": 0}
     st.session_state.votes[video_id][comment_id][category][vote] += 1
 
     # Update top voted comments
@@ -167,9 +167,9 @@ def update_votes(video_id, comment_id, category, vote):
 # Function to fetch votes from session state
 def fetch_votes(video_id, comment_id, category):
     if video_id in st.session_state.votes and comment_id in st.session_state.votes[video_id]:
-        return st.session_state.votes[video_id][comment_id].get(category, {"up": 0, "down": 0})
+        return st.session_state.votes[video_id][comment_id].get(category, {"up": 0})
     else:
-        return {"up": 0, "down": 0}
+        return {"up": 0}
 
 # Input for additional categories
 categories = st_tags.st_tags(
