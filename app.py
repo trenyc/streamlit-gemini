@@ -323,6 +323,8 @@ if debug_mode:
 # Always show the "Categorize Comments" button
 if st.button("Categorize Comments"):
     fetch_and_categorize_comments()
+    st.subheader("Vote on Comments")
+    display_categorized_comments()
 
 # Display categorized comments and voting buttons
 if 'categorized_comments' in st.session_state and any(st.session_state.categorized_comments.values()):
