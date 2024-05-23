@@ -1,4 +1,3 @@
-
 import os
 import streamlit as st
 from googleapiclient.discovery import build
@@ -229,8 +228,7 @@ def categorize_comments_for_category(category):
                 for comment in categorized_comments:
                     comment_text = comment.strip()
                     if comment_text and category in st.session_state.categorized_comments:
-                        if len(st.session_state.categorized_comments[category]) < 5:
-                            st.session_state.categorized_comments[category].append({"id": comment_text, "text": comment_text})
+                        st.session_state.categorized_comments[category].append({"id": comment_text, "text": comment_text})
                 # Display categorized comments for the category
                 display_categorized_comments(category)
             else:
@@ -275,7 +273,7 @@ def display_categorized_comments(category=None):
     for category in categories_to_display:
         st.write(f"### {category.capitalize()}")
         st.write(f"Vote for the comments that are {category}.")
-        for idx, comment in enumerate(st.session_state.categorized_comments[category][:5]):  # Limit to 5 comments
+        for idx, comment in enumerate(st.session_state.categorized_comments[category]):
             if comment['text'].strip():  # Ensure no blank comments are displayed
                 st.write(comment['text'])
                 votes = fetch_votes(video_id, comment['id'], category)
