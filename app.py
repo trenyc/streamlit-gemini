@@ -245,12 +245,12 @@ def categorize_comments():
                     response_lines = response_lines[1:]
                 response_lines = [line for line in response_lines if line.strip() and all(st.session_state.top_voted_comments[cat] is None or st.session_state.top_voted_comments[cat] not in line for cat in categories)]
                 for line in response_lines:
-                    if ':' in line:
-                        continue
-                    for category in categories:
-                        if category in line and line.strip() not in [c['text'] for c in st.session_state.categorized_comments[category]]:
-                            st.session_state.categorized_comments[category].append({"id": line.strip(), "text": line.strip()})
-                            break
+                    line_text = line.strip()
+                    if line_text:
+                        for category in categories:
+                            if category in line_text and line_text not in [c['text'] for c in st.session_state.categorized_comments[category]]:
+                                st.session_state.categorized_comments[category].append({"id": line_text, "text": line_text})
+                                break
                 if debug_mode:
                     st.write("Categorized comments:")
                     st.write(st.session_state.categorized_comments)
