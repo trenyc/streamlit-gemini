@@ -162,11 +162,9 @@ def update_votes(video_id, comment_id, category, vote):
 
     # Update top voted comments
     if vote == "up":
-        st.write("test13")
         current_top_comment = st.session_state.top_voted_comments[category]
         if current_top_comment is None or st.session_state.votes[video_id][comment_id][category]["up"] > st.session_state.votes[video_id][current_top_comment][category]["up"]:
             st.session_state.top_voted_comments[category] = comment_id
-        st.write("test14")
 
 # Function to fetch votes from session state
 def fetch_votes(video_id, comment_id, category):
@@ -186,14 +184,10 @@ categories = st_tags.st_tags(
 
 # Function to create a prompt for categorization with token limits
 def create_prompt(category, comments):
-    st.write(f"test1vv")
     top_voted_comment_id = st.session_state.top_voted_comments[category]
     example_comment = ""
-    st.write("test1")
     if top_voted_comment_id:
-        st.write("test1ff")
         top_voted_comment = next((comment for comment in st.session_state.comments if comment['id'] == top_voted_comment_id), None)
-        st.write("test12")
         if top_voted_comment:
             example_comment = top_voted_comment['text']
         else:
@@ -245,23 +239,18 @@ def categorize_comments_for_category(category):
                     st.write(f"Response from OpenAI API for {category}:")
                     st.code(response_text)
                 # Strip introductory line and ignore example comment
-                st.write("test2248")
                 response_lines = response_text.split('\n')
                 if response_lines[0].count(':') > 0:
                     response_lines = response_lines[1:]
-                st.write("test2248ccc")    
                 response_lines = [line for line in response_lines if st.session_state.top_voted_comments[category] not in line]
-                st.write("test224dddd8")
                 categorized_comments = response_lines
                 st.session_state.categorized_comments[category] = []  # Clear existing comments before adding new ones
                 for comment in categorized_comments:
                     comment_text = comment.strip()
                     if comment_text and category in st.session_state.categorized_comments:
-                        st.write("test2248xx")
                         if len(st.session_state.categorized_comments[category]) < 5:
                             st.session_state.categorized_comments[category].append({"id": comment_text, "text": comment_text})
                 # Display categorized comments for the category
-                st.write("test2248d")
                 display_categorized_comments(category)
             else:
                 st.error(f"No response from the model for category: {category}")
