@@ -1,3 +1,4 @@
+
 import os
 import streamlit as st
 from googleapiclient.discovery import build
@@ -228,7 +229,8 @@ def categorize_comments_for_category(category):
                 for comment in categorized_comments:
                     comment_text = comment.strip()
                     if comment_text and category in st.session_state.categorized_comments:
-                        st.session_state.categorized_comments[category].append({"id": comment_text, "text": comment_text})
+                        if len(st.session_state.categorized_comments[category]) < 5:
+                            st.session_state.categorized_comments[category].append({"id": comment_text, "text": comment_text})
                 # Display categorized comments for the category
                 display_categorized_comments(category)
             else:
@@ -249,16 +251,14 @@ def fetch_and_categorize_comments(category=None):
     comments, next_page_token = fetch_youtube_comments(video_id, page_token)
     if comments:
         st.success("Comments fetched successfully!")
-        st.session_state.comments.extend(comments)
+        st.session_state.comments = comments  # Replace comments with the new batch
         if category:
             st.session_state.next_page_token[category] = next_page_token
-            st.session_state.categorized_comments[category] = []  # Clear existing comments before fetching more
             categorize_comments_for_category(category)
         else:
             st.session_state.next_page_token = {cat: next_page_token for cat in st.session_state.next_page_token.keys()}
             # Categorize comments for each category
             for category in categories:
-                st.session_state.categorized_comments[category] = []  # Clear existing comments before fetching more
                 categorize_comments_for_category(category)
     else:
         st.warning("No comments found or failed to fetch comments.")
