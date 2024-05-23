@@ -244,7 +244,7 @@ def categorize_comments():
                 st.write("Response from OpenAI APIa:")
                 for line in response_lines:
                     if ':' in line:
-                         st.write("Response from OpenAI API44:")
+                        st.write("Response from OpenAI API44:")
                         continue
                     for category in categories:
                         if category in line:
