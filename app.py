@@ -21,10 +21,9 @@ with st.sidebar:
     st.image("https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/1f916.png", width=64)
     st.title("API Keys")
 
-
     # Try to retrieve API keys from environment variables (if available)
-    yt_api_key = os.environ["YOUTUBE_API_KEY_ENV"]
-    openai_api_key = os.environ["OPENAI_API_KEY_ENV"]
+    yt_api_key = os.environ.get("YOUTUBE_API_KEY_ENV")
+    openai_api_key = os.environ.get("OPENAI_API_KEY_ENV")
 
     # Optional input fields if environment variables are not set
     if not yt_api_key:
@@ -89,8 +88,6 @@ if 'search_results' in st.session_state:
                 del st.session_state.search_results
                 st.experimental_rerun()  # Force a rerun to update state
 
-# Set selected video ID from search
-
 # Set selected video ID from search results
 if 'selected_video_id' in st.session_state:
     video_id = st.session_state.selected_video_id
@@ -107,7 +104,7 @@ if video_url:
         st.error(f"Failed to display video: {e}")
 
 # Function to fetch YouTube comments
-def fetch_youtube_comments(video_id):
+def fetch_youtube_comments(video_id, page_token=None):
     try:
         if debug_mode:
             st.write("Initializing YouTube API client...")
@@ -117,20 +114,50 @@ def fetch_youtube_comments(video_id):
         request = youtube.commentThreads().list(
             part="snippet",
             videoId=video_id,
-            maxResults=100
+            maxResults=100,
+            pageToken=page_token
         )
         if debug_mode:
             st.write("Executing request to YouTube API...")
         response = request.execute()
         if debug_mode:
             st.write("Processing response from YouTube API...")
-        comments = [item['snippet']['topLevelComment']['snippet']['textDisplay'] for item in response['items']]
+        comments = [{"id": item['snippet']['topLevelComment']['id'],
+                     "text": item['snippet']['topLevelComment']['snippet']['textDisplay']} for item in response['items']]
         if debug_mode:
             st.write(f"Fetched {len(comments)} comments.")
-        return comments
+        next_page_token = response.get('nextPageToken', None)
+        return comments, next_page_token
     except HttpError as e:
         st.error(f"An error occurred while fetching comments: {e}")
-        return []
+        return [], None
+
+# Initialize session state for comments and pagination
+if 'comments' not in st.session_state:
+    st.session_state.comments = []
+if 'next_page_token' not in st.session_state:
+    st.session_state.next_page_token = None
+
+# Initialize votes in session state
+if 'votes' not in st.session_state:
+    st.session_state.votes = {}
+
+# Function to update votes in session state
+def update_votes(video_id, comment_id, category, vote):
+    if video_id not in st.session_state.votes:
+        st.session_state.votes[video_id] = {}
+    if comment_id not in st.session_state.votes[video_id]:
+        st.session_state.votes[video_id][comment_id] = {category: {"up": 0, "down": 0} for category in categories}
+    if category not in st.session_state.votes[video_id][comment_id]:
+        st.session_state.votes[video_id][comment_id][category] = {"up": 0, "down": 0}
+    st.session_state.votes[video_id][comment_id][category][vote] += 1
+
+# Function to fetch votes from session state
+def fetch_votes(video_id, comment_id, category):
+    if video_id in st.session_state.votes and comment_id in st.session_state.votes[video_id]:
+        return st.session_state.votes[video_id][comment_id].get(category, {"up": 0, "down": 0})
+    else:
+        return {"up": 0, "down": 0}
 
 # Input for additional categories
 categories = st_tags.st_tags(
@@ -143,11 +170,12 @@ categories = st_tags.st_tags(
 
 # Fetch and categorize comments
 def fetch_and_categorize_comments():
-    comments = fetch_youtube_comments(video_id)
+    comments, next_page_token = fetch_youtube_comments(video_id, st.session_state.next_page_token)
     if comments:
         st.success("Comments fetched successfully!")
-        st.session_state.comments = comments
-        prompt = f"Categorize the following comments into categories: {', '.join(categories)}. Comments: {' '.join(comments)}"
+        st.session_state.comments.extend(comments)
+        st.session_state.next_page_token = next_page_token
+        prompt = f"Categorize the following comments into categories: {', '.join(categories)}. Comments: {' '.join([c['text'] for c in st.session_state.comments])}"
         st.write("Starting to categorize comments...")
         try:
             if debug_mode:
@@ -201,3 +229,26 @@ if debug_mode:
 # Always show the "Categorize Comments" button
 if st.button("Categorize Comments"):
     fetch_and_categorize_comments()
+
+# "Load More" button
+if st.session_state.next_page_token:
+    if st.button("Load More Comments"):
+        fetch_and_categorize_comments()
+
+# Display comments and voting buttons
+if 'comments' in st.session_state:
+    st.subheader("Vote on Comments")
+    for comment in st.session_state.comments:
+        comment_id = comment['id']
+        st.write(comment['text'])
+        for category in categories:
+            votes = fetch_votes(video_id, comment_id, category)
+            col1, col2 = st.columns(2)
+            with col1:
+                if st.button(f"👍 ({votes['up']}) for {category}", key=f"{comment_id}_{category}_up"):
+                    update_votes(video_id, comment_id, category, "up")
+                    st.experimental_rerun()
+            with col2:
+                if st.button(f"👎 ({votes['down']}) for {category}", key=f"{comment_id}_{category}_down"):
+                    update_votes(video_id, comment_id, category, "down")
+                    st.experimental_rerun()
