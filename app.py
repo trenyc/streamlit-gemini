@@ -262,15 +262,15 @@ def categorize_comments():
 
 # Fetch and categorize comments
 def fetch_and_categorize_comments():
-    comments, next_page_token = fetch_youtube_comments(video_id, st.session_state.next_page_token)
-    if comments:
-        st.success("Comments fetched successfully!")
-        st.session_state.comments = comments  # Replace comments with the new batch
-        st.session_state.next_page_token = next_page_token
-        categorize_comments()
-        display_categorized_comments()  # Display categorized comments after fetching and categorizing
-    else:
-        st.warning("No comments found or failed to fetch comments.")
+  comments, next_page_token = fetch_youtube_comments(video_id, st.session_state.next_page_token)
+  if comments:
+    st.success("Comments fetched successfully!")
+    st.session_state.comments = comments  # Replace comments with the new batch
+    st.session_state.next_page_token = next_page_token
+    categorize_comments()
+    display_categorized_comments()  # Moved after categorization
+  else:
+    st.warning("No comments found or failed to fetch comments.")
 
 # Function to display categorized comments and voting buttons
 def display_categorized_comments():
