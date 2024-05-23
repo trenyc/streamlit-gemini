@@ -313,4 +313,5 @@ if st.button("Categorize Comments"):
 # Display categorized comments and voting buttons
 if 'categorized_comments' in st.session_state:
     st.subheader("Vote on Comments")
-    display_categorized_comments()
+    for category in st.session_state.categorized_comments.keys():
+        display_categorized_comments(category)
