@@ -245,6 +245,7 @@ def categorize_comments_for_category(category):
                     st.write(f"Response from OpenAI API for {category}:")
                     st.code(response_text)
                 # Strip introductory line and ignore example comment
+                st.write("test2248")
                 response_lines = response_text.split('\n')
                 if response_lines[0].count(':') > 0:
                     response_lines = response_lines[1:]
@@ -254,9 +255,11 @@ def categorize_comments_for_category(category):
                 for comment in categorized_comments:
                     comment_text = comment.strip()
                     if comment_text and category in st.session_state.categorized_comments:
+                        st.write("test2248xx")
                         if len(st.session_state.categorized_comments[category]) < 5:
                             st.session_state.categorized_comments[category].append({"id": comment_text, "text": comment_text})
                 # Display categorized comments for the category
+                st.write("test2248d")
                 display_categorized_comments(category)
             else:
                 st.error(f"No response from the model for category: {category}")
