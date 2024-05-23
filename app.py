@@ -1,4 +1,4 @@
-# Streamlit App Code - Version 1.2
+# Streamlit App Code - Version 1.3
 
 import os
 import streamlit as st
@@ -238,10 +238,12 @@ def categorize_comments_for_category(category):
                 if debug_mode:
                     st.write(f"Response from OpenAI API for {category}:")
                     st.code(response_text)
-                # Strip introductory line
-                if response_text.startswith("Here are the comments that fall into the category"):
-                    response_text = response_text.split('\n', 1)[1]
-                categorized_comments = response_text.split('\n')
+                # Strip introductory line and ignore example comment
+                response_lines = response_text.split('\n')
+                if response_lines[0].count(':') > 0:
+                    response_lines = response_lines[1:]
+                response_lines = [line for line in response_lines if example_comment not in line]
+                categorized_comments = response_lines
                 st.session_state.categorized_comments[category] = []  # Clear existing comments before adding new ones
                 for comment in categorized_comments:
                     comment_text = comment.strip()
