@@ -1,4 +1,4 @@
-# Streamlit App Code - Version 2.1
+# Streamlit App Code - Version 2.2
 
 import os
 import streamlit as st
@@ -274,7 +274,7 @@ def display_categorized_comments():
         if st.session_state.categorized_comments[category]:
             st.write(f"### {category.capitalize()}")
             st.write(f"Vote for the comments that are {category}.")
-        for idx, comment in enumerate(st.session_state.categorized_comments[category]):
+        for idx, comment in enumerate(st.session_state.categorized_comments[category][:5]):  # Limit to 5 comments per category
             if comment['text'].strip():  # Ensure no blank comments are displayed
                 st.write(comment['text'])
                 votes = fetch_votes(video_id, comment['id'], category)
@@ -284,18 +284,19 @@ def display_categorized_comments():
 
 # Function to display vote summary for each category
 def display_vote_summary():
-    st.subheader("Vote Summary")
-    for category in st.session_state.categorized_comments.keys():
-        vote_summary = {}
-        for comment_id in st.session_state.votes.get(video_id, {}):
-            if category in st.session_state.votes[video_id][comment_id]:
-                up_votes = st.session_state.votes[video_id][comment_id][category]["up"]
-                if up_votes > 0:
-                    if comment_id not in vote_summary:
-                        vote_summary[comment_id] = 0
-                    vote_summary[comment_id] += up_votes
+    if debug_mode:
+        st.subheader("Vote Summary")
+        for category in st.session_state.categorized_comments.keys():
+            vote_summary = {}
+            for comment_id in st.session_state.votes.get(video_id, {}):
+                if category in st.session_state.votes[video_id][comment_id]:
+                    up_votes = st.session_state.votes[video_id][comment_id][category]["up"]
+                    if up_votes > 0:
+                        if comment_id not in vote_summary:
+                            vote_summary[comment_id] = 0
+                        vote_summary[comment_id] += up_votes
 
-        st.write(f"**{category.capitalize()}**: {sum(vote_summary.values())} votes")
+            st.write(f"**{category.capitalize()}**: {sum(vote_summary.values())} votes")
 
 # Fetch and display YouTube comments
 if video_id and yt_api_key and openai_api_key:
