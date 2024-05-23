@@ -1,4 +1,4 @@
-# Streamlit App Code - Version 2.3
+# Streamlit App Code - Version 2.4
 
 import os
 import streamlit as st
@@ -265,6 +265,7 @@ def fetch_and_categorize_comments():
         st.session_state.comments = comments  # Replace comments with the new batch
         st.session_state.next_page_token = next_page_token
         categorize_comments()
+        display_categorized_comments()  # Display categorized comments after fetching and categorizing
     else:
         st.warning("No comments found or failed to fetch comments.")
 
@@ -274,13 +275,14 @@ def display_categorized_comments():
         if st.session_state.categorized_comments[category]:
             st.write(f"### {category.capitalize()}")
             st.write(f"Vote for the comments that are {category}.")
-        for idx, comment in enumerate(st.session_state.categorized_comments[category][:5]):  # Limit to 5 comments per category
-            if comment['text'].strip():  # Ensure no blank comments are displayed
-                st.write(comment['text'])
-                votes = fetch_votes(video_id, comment['id'], category)
-                if st.button(f"👍 ({votes['up']})", key=f"{category}_up_{comment['id']}_{idx}"):
-                    update_votes(video_id, comment['id'], category, "up")
-                    st.experimental_rerun()
+            for idx, comment in enumerate(st.session_state.categorized_comments[category][:5]):
+                if comment['text'].strip():  # Ensure no blank comments are displayed
+                    st.write(comment['text'])
+                    votes = fetch_votes(video_id, comment['id'], category)
+                    if st.button(f" ({votes['up']})", key=f"{category}_up_{comment['id']}_{idx}"):
+                        update_votes(video_id, comment['id'], category, "up")
+                        # Force a rerun to update vote count
+                        st.experimental_rerun()
 
 # Function to display vote summary for each category
 def display_vote_summary():
