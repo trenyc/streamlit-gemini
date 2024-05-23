@@ -241,9 +241,9 @@ def categorize_comments():
                     st.code(response_text)
                 # Strip introductory line and ignore example comment
                 response_lines = response_text.split('\n')
-               # if response_lines and response_lines[0].count(':') > 0:
-               #     response_lines = response_lines[1:]
-               # response_lines = [line for line in response_lines if line.strip() and all(st.session_state.top_voted_comments[cat] is None or st.session_state.top_voted_comments[cat] not in line for cat in categories)]
+                if response_lines and response_lines[0].count(':') > 0:
+                    response_lines = response_lines[1:]
+                response_lines = [line for line in response_lines if line.strip() and all(st.session_state.top_voted_comments[cat] is None or st.session_state.top_voted_comments[cat] not in line for cat in categories)]
                 for line in response_lines:
                     line_text = line.strip()
                     if line_text:
