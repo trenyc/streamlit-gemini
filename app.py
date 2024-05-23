@@ -1,4 +1,4 @@
-# Streamlit App Code - Version 1.4 with Single Load More Button and Improvements
+# Streamlit App Code - Version 3.0
 
 import os
 import streamlit as st
@@ -283,8 +283,8 @@ def display_categorized_comments():
           if comment['text'].strip():  # Ensure no blank comments are displayed
             st.write(comment['text'])
             votes = fetch_votes(video_id, comment['id'], current_category)  # Use current_category
-            if st.button(f"👍 ({votes['up']})", key=f"{category}_up_{comment['id']}_{idx}"):
-              update_votes(video_id, comment['id'], category, "up")
+            if st.button(f"👍 ({votes['up']})", key=f"{current_category}_up_{comment['id']}_{idx}"):  # Ensure unique key
+              update_votes(video_id, comment['id'], current_category, "up")  # Use current_category
               # Force a rerun to update vote count
               st.experimental_rerun()
       else:
