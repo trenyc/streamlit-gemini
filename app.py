@@ -235,6 +235,7 @@ def categorize_comments():
             )
             if debug_mode:
                 st.write("Processing response from OpenAI API...")
+                st.code(response)
             if response.choices:
                 response_text = response.choices[0].message.content.strip()
                 if debug_mode:
@@ -242,8 +243,8 @@ def categorize_comments():
                     st.code(response_text)
                 # Strip introductory line and ignore example comment
                 response_lines = response_text.split('\n')
-                if response_lines and response_lines[0].count(':') > 0:
-                    response_lines = response_lines[1:]
+                #if response_lines and response_lines[0].count(':') > 0:
+                #    response_lines = response_lines[1:]
                 response_lines = [line for line in response_lines if line.strip() and all(st.session_state.top_voted_comments[cat] is None or st.session_state.top_voted_comments[cat] not in line for cat in categories)]
                 for line in response_lines:
                     line_text = line.strip()
