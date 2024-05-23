@@ -1,3 +1,5 @@
+
+
 import os
 import streamlit as st
 from googleapiclient.discovery import build
@@ -228,7 +230,7 @@ def categorize_comments_for_category(category):
                     comment_text = comment.strip()
                     if comment_text and category in st.session_state.categorized_comments:
                         if len(st.session_state.categorized_comments[category]) < 5:
-                            st.session_state.categorized_comments[category].append(comment_text)
+                            st.session_state.categorized_comments[category].append({"id": comment_text, "text": comment_text})
                 # Display categorized comments for the category
                 display_categorized_comments(category)
             else:
@@ -265,8 +267,8 @@ def display_categorized_comments(category=None):
         st.write(f"### {category.capitalize()}")
         st.write(f"Vote for the comments that are {category}.")
         for idx, comment in enumerate(st.session_state.categorized_comments[category]):
-            if comment.strip():  # Ensure no blank comments are displayed
-                st.write(comment)
+            if comment['text'].strip():  # Ensure no blank comments are displayed
+                st.write(comment['text'])
                 votes = fetch_votes(video_id, comment['id'], category)
                 col1, col2 = st.columns(2)
                 with col1:
@@ -296,7 +298,7 @@ if debug_mode:
         st.write("Displaying fetched comments...")
         st.write("💬 Fetched YouTube Comments")
         for comment in st.session_state.comments:
-            st.write(comment)
+            st.write(comment['text'])
 
 # Always show the "Categorize Comments" button
 if st.button("Categorize Comments"):
@@ -306,5 +308,3 @@ if st.button("Categorize Comments"):
 if 'categorized_comments' in st.session_state:
     st.subheader("Vote on Comments")
     display_categorized_comments()
-
-
