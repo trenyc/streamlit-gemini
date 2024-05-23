@@ -191,7 +191,7 @@ def create_prompt(category, comments):
     example_comment = ""
     st.write(f"test1")
     if top_voted_comment_id:
-        st.write(f"test1"ff)
+        st.write(f"test1ff"
         top_voted_comment = next((comment for comment in st.session_state.comments if comment['id'] == top_voted_comment_id), None)
         st.write(f"test12")
         if top_voted_comment:
