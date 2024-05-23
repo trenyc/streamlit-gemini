@@ -1,4 +1,4 @@
-# Streamlit App Code - Version 3.4
+# Streamlit App Code - Version 3.5
 
 import os
 import uuid
@@ -182,51 +182,48 @@ categories = st_tags.st_tags(
 )
 
 # Function to create a prompt for categorization with token limits
-def create_prompt(comments):
-    base_prompt = "Categorize the following comments into the categories: "
-    for category in categories:
-        top_voted_comment_id = st.session_state.top_voted_comments[category]
-        example_comment = ""
-        if top_voted_comment_id:
-            top_voted_comment = next((comment for comment in st.session_state.comments if comment['id'] == top_voted_comment_id), None)
-            if top_voted_comment:
-                example_comment = top_voted_comment['text']
-            else:
-                if debug_mode:
-                    st.write(f"Top voted comment ID for {category} has no corresponding comment.")
-                example_comment = f"Comment with ID: {top_voted_comment_id}"
-        if debug_mode:
-            st.write(f"Top voted comment ID for {category}: {top_voted_comment_id}")
-            st.write(f"Top voted comment text for {category}: {example_comment}")
-
-        if not example_comment:
-            example_comment = category
+def create_prompt_for_category(comments, category):
+    top_voted_comment_id = st.session_state.top_voted_comments[category]
+    example_comment = ""
+    if top_voted_comment_id:
+        top_voted_comment = next((comment for comment in st.session_state.comments if comment['id'] == top_voted_comment_id), None)
+        if top_voted_comment:
+            example_comment = top_voted_comment['text']
+        else:
             if debug_mode:
-                st.write(f"No votes for category {category}. Using keyword '{category}' as example.")
-        
-        base_prompt += f"Example of a '{category}' comment: '{example_comment}'. "
+                st.write(f"Top voted comment ID for {category} has no corresponding comment.")
+            example_comment = f"Comment with ID: {top_voted_comment_id}"
+    if debug_mode:
+        st.write(f"Top voted comment ID for {category}: {top_voted_comment_id}")
+        st.write(f"Top voted comment text for {category}: {example_comment}")
+
+    if not example_comment:
+        example_comment = category
+        if debug_mode:
+            st.write(f"No votes for category {category}. Using keyword '{category}' as example.")
+    
+    base_prompt = f"Categorize the following comments into the category '{category}'. Example of a '{category}' comment: '{example_comment}'. Comments: "
 
     token_limit = 15000  # Adjust this limit as needed to avoid exceeding the model's context length
-    st.code(base_prompt)
     prompt = base_prompt
     for comment in comments:
         comment_text = comment['text']
-        if len(prompt) + len(comment_text) + 2 > token_limit:  # +2 for the "<<>>" separator
+        if len(prompt) + len(comment_text) + 2 > token_limit:  # +2 for the ", " separator
             break
-        prompt += comment_text + "<<>>"
-    return prompt.rstrip('<<>>')
+        prompt += comment_text + ", "
+    return prompt.rstrip(', ')
 
-# Function to categorize comments
-def categorize_comments():
-    prompt = create_prompt(st.session_state.comments)
-    st.write("Starting to categorize comments...")
+# Function to categorize comments for a specific category
+def categorize_comments_for_category(category):
+    prompt = create_prompt_for_category(st.session_state.comments, category)
+    st.write(f"Starting to categorize comments for category: {category}")
     try:
         if debug_mode:
-            st.write("Prompt being sent to OpenAI API:")
+            st.write(f"Prompt for {category} being sent to OpenAI API:")
             st.code(prompt)
             st.write(f"Using OpenAI API Key: ...{openai_api_key[-4:]}")
             st.write("Sending request to OpenAI API...")
-        with st.spinner("Categorizing comments using OpenAI..."):
+        with st.spinner(f"Categorizing comments into {category} using OpenAI..."):
             response = client.chat.completions.create(
                 model="gpt-3.5-turbo",
                 messages=[
@@ -235,30 +232,27 @@ def categorize_comments():
                 ]
             )
             if debug_mode:
-                st.write("Processing response from OpenAI API...")
-                st.code(response)
+                st.write(f"Processing response from OpenAI API for category: {category}")
             if response.choices:
                 response_text = response.choices[0].message.content.strip()
                 if debug_mode:
-                    st.write("Response from OpenAI API:")
+                    st.write(f"Response from OpenAI API for {category}:")
                     st.code(response_text)
                 # Strip introductory line and ignore example comment
                 response_lines = response_text.split('\n')
-                #if response_lines and response_lines[0].count(':') > 0:
-                #    response_lines = response_lines[1:]
+                if response_lines and response_lines[0].count(':') > 0:
+                    response_lines = response_lines[1:]
                 response_lines = [line for line in response_lines if line.strip() and all(st.session_state.top_voted_comments[cat] is None or st.session_state.top_voted_comments[cat] not in line for cat in categories)]
                 for line in response_lines:
                     line_text = line.strip()
                     if line_text:
-                        for category in categories:
-                            if category in line_text and line_text not in [c['text'] for c in st.session_state.categorized_comments[category]]:
-                                st.session_state.categorized_comments[category].append({"id": line_text, "text": line_text})
-                                break
+                        if line_text not in [c['text'] for c in st.session_state.categorized_comments[category]]:
+                            st.session_state.categorized_comments[category].append({"id": line_text, "text": line_text})
                 if debug_mode:
-                    st.write("Categorized comments:")
-                    st.write(st.session_state.categorized_comments)
+                    st.write(f"Categorized comments for {category}:")
+                    st.write(st.session_state.categorized_comments[category])
             else:
-                st.error("No response from the model.")
+                st.error(f"No response from the model for category: {category}")
     except APIError as e:
         st.error(f"An API error occurred: {e}")
         st.error(f"Error code: {e.status_code} - {e.message}")
@@ -266,14 +260,15 @@ def categorize_comments():
     except Exception as e:
         st.error(f"An unexpected error occurred: {e}")
 
-# Fetch and categorize comments
+# Fetch and categorize comments for each category
 def fetch_and_categorize_comments():
     comments, next_page_token = fetch_youtube_comments(video_id, st.session_state.next_page_token)
     if comments:
         st.success("Comments fetched successfully!")
         st.session_state.comments = comments  # Replace comments with the new batch
         st.session_state.next_page_token = next_page_token
-        categorize_comments()
+        for category in categories:
+            categorize_comments_for_category(category)
         display_categorized_comments()  # Display categorized comments after fetching and categorizing
     else:
         st.warning("No comments found or failed to fetch comments.")
