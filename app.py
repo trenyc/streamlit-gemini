@@ -1,4 +1,4 @@
-# Streamlit App Code - Version 1.7
+# Streamlit App Code - Version 1.8
 
 import os
 import streamlit as st
@@ -305,7 +305,7 @@ def display_categorized_comments(category=None):
                     update_votes(video_id, comment['id'], category, "up")
                     st.experimental_rerun()
         if st.session_state.next_page_token.get(category):
-            if st.button(f"Load More Comments for {category.capitalize()}", key=f"load_more_{category}_{st.session_state.load_count[category]}_{len(st.session_state.categorized_comments[category])}"):
+            if st.button(f"Load More Comments for {category.capitalize()}", key=f"load_more_{category}_{st.session_state.load_count[category]}_{len(st.session_state.categorized_comments[category])}_{st.session_state.next_page_token[category]}"):
                 st.session_state.categorized_comments[category] = []  # Clear existing comments before loading more
                 fetch_and_categorize_comments(category)
 
