@@ -1,3 +1,4 @@
+
 import os
 import streamlit as st
 from googleapiclient.discovery import build
@@ -137,25 +138,25 @@ if 'comments' not in st.session_state:
     st.session_state.comments = []
 if 'next_page_token' not in st.session_state:
     st.session_state.next_page_token = None
+if 'categorized_comments' not in st.session_state:
+    st.session_state.categorized_comments = {category: [] for category in ['funny', 'interesting', 'positive', 'negative', 'serious']}
 
 # Initialize votes in session state
 if 'votes' not in st.session_state:
     st.session_state.votes = {}
 
 # Function to update votes in session state
-def update_votes(video_id, comment_id, category, vote):
+def update_votes(video_id, comment_id, vote):
     if video_id not in st.session_state.votes:
         st.session_state.votes[video_id] = {}
     if comment_id not in st.session_state.votes[video_id]:
-        st.session_state.votes[video_id][comment_id] = {category: {"up": 0, "down": 0} for category in categories}
-    if category not in st.session_state.votes[video_id][comment_id]:
-        st.session_state.votes[video_id][comment_id][category] = {"up": 0, "down": 0}
-    st.session_state.votes[video_id][comment_id][category][vote] += 1
+        st.session_state.votes[video_id][comment_id] = {"up": 0, "down": 0}
+    st.session_state.votes[video_id][comment_id][vote] += 1
 
 # Function to fetch votes from session state
-def fetch_votes(video_id, comment_id, category):
+def fetch_votes(video_id, comment_id):
     if video_id in st.session_state.votes and comment_id in st.session_state.votes[video_id]:
-        return st.session_state.votes[video_id][comment_id].get(category, {"up": 0, "down": 0})
+        return st.session_state.votes[video_id][comment_id]
     else:
         return {"up": 0, "down": 0}
 
@@ -197,7 +198,26 @@ def fetch_and_categorize_comments():
                     response_text = response.choices[0].message.content.strip()
                     st.success("Comments categorized successfully!")
                     st.subheader("Categorized Comments")
-                    st.write(response_text)
+                    categorized_comments = response_text.split('\n')
+                    for comment in categorized_comments:
+                        category, comment_text = comment.split(':', 1)
+                        if category.strip() in st.session_state.categorized_comments:
+                            if len(st.session_state.categorized_comments[category.strip()]) < 5:
+                                st.session_state.categorized_comments[category.strip()].append(comment_text.strip())
+                    for category in st.session_state.categorized_comments:
+                        st.write(f"### {category.capitalize()}")
+                        for comment in st.session_state.categorized_comments[category]:
+                            st.write(comment)
+                            votes = fetch_votes(video_id, comment)
+                            col1, col2 = st.columns(2)
+                            with col1:
+                                if st.button(f"👍 ({votes['up']})", key=f"{comment}_up"):
+                                    update_votes(video_id, comment, "up")
+                                    st.experimental_rerun()
+                            with col2:
+                                if st.button(f"👎 ({votes['down']})", key=f"{comment}_down"):
+                                    update_votes(video_id, comment, "down")
+                                    st.experimental_rerun()
                 else:
                     st.error("No response from the model.")
         except APIError as e:
@@ -235,20 +255,20 @@ if st.session_state.next_page_token:
     if st.button("Load More Comments"):
         fetch_and_categorize_comments()
 
-# Display comments and voting buttons
-if 'comments' in st.session_state:
+# Display categorized comments and voting buttons
+if 'categorized_comments' in st.session_state:
     st.subheader("Vote on Comments")
-    for comment in st.session_state.comments:
-        comment_id = comment['id']
-        st.write(comment['text'])
-        for category in categories:
-            votes = fetch_votes(video_id, comment_id, category)
+    for category in st.session_state.categorized_comments:
+        st.write(f"### {category.capitalize()}")
+        for comment in st.session_state.categorized_comments[category]:
+            st.write(comment)
+            votes = fetch_votes(video_id, comment)
             col1, col2 = st.columns(2)
             with col1:
-                if st.button(f"👍 ({votes['up']}) for {category}", key=f"{comment_id}_{category}_up"):
-                    update_votes(video_id, comment_id, category, "up")
+                if st.button(f"👍 ({votes['up']})", key=f"{comment}_up"):
+                    update_votes(video_id, comment, "up")
                     st.experimental_rerun()
             with col2:
-                if st.button(f"👎 ({votes['down']}) for {category}", key=f"{comment_id}_{category}_down"):
-                    update_votes(video_id, comment_id, category, "down")
+                if st.button(f"👎 ({votes['down']})", key=f"{comment}_down"):
+                    update_votes(video_id, comment, "down")
                     st.experimental_rerun()
