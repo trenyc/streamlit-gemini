@@ -1,4 +1,4 @@
-# Streamlit App Code - Version 1.4
+# Streamlit App Code - Version 1.1
 
 import os
 import streamlit as st
@@ -190,13 +190,9 @@ def create_prompt(category, comments):
         top_voted_comment = next((comment for comment in st.session_state.comments if comment['id'] == top_voted_comment_id), None)
         if top_voted_comment:
             example_comment = top_voted_comment['text']
-        else:
-            if debug_mode:
-                st.write(f"Top voted comment ID for {category} has no corresponding comment.")
-            example_comment = f"Comment with ID: {top_voted_comment_id}"
-    if debug_mode:
-        st.write(f"Top voted comment ID for {category}: {top_voted_comment_id}")
-        st.write(f"Top voted comment text for {category}: {example_comment}")
+        if debug_mode:
+            st.write(f"Top voted comment ID for {category}: {top_voted_comment_id}")
+            st.write(f"Top voted comment text for {category}: {example_comment}")
 
     if not example_comment:
         example_comment = category
@@ -238,12 +234,10 @@ def categorize_comments_for_category(category):
                 if debug_mode:
                     st.write(f"Response from OpenAI API for {category}:")
                     st.code(response_text)
-                # Strip introductory line and ignore example comment
-                response_lines = response_text.split('\n')
-                if response_lines[0].count(':') > 0:
-                    response_lines = response_lines[1:]
-                response_lines = [line for line in response_lines if st.session_state.top_voted_comments[category] not in line]
-                categorized_comments = response_lines
+                # Strip introductory line
+                if response_text.startswith("Here are the comments that fall into the category"):
+                    response_text = response_text.split('\n', 1)[1]
+                categorized_comments = response_text.split('\n')
                 st.session_state.categorized_comments[category] = []  # Clear existing comments before adding new ones
                 for comment in categorized_comments:
                     comment_text = comment.strip()
