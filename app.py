@@ -1,4 +1,4 @@
-# Streamlit App Code - Version 2.2
+# Streamlit App Code - Version 2.3
 
 import os
 import streamlit as st
@@ -270,19 +270,17 @@ def fetch_and_categorize_comments():
 
 # Function to display categorized comments and voting buttons
 def display_categorized_comments():
-  for category in st.session_state.categorized_comments.keys():
-    if st.session_state.categorized_comments[category]:
-      st.write(f"### {category.capitalize()}")
-      st.write(f"Vote for the comments that are {category}.")
-      for idx, comment in enumerate(st.session_state.categorized_comments[category][:5]):
-        if comment['text'].strip():  # Ensure no blank comments are displayed
-          st.write(comment['text'])
-          votes = fetch_votes(video_id, comment['id'], category)
-          if st.button(f" ({votes['up']})", key=f"{category}_up_{comment['id']}_{idx}"):
-            update_votes(video_id, comment['id'], category, "up")
-            # Force a rerun to update vote count
-            st.experimental_rerun()
-
+    for category in st.session_state.categorized_comments.keys():
+        if st.session_state.categorized_comments[category]:
+            st.write(f"### {category.capitalize()}")
+            st.write(f"Vote for the comments that are {category}.")
+        for idx, comment in enumerate(st.session_state.categorized_comments[category][:5]):  # Limit to 5 comments per category
+            if comment['text'].strip():  # Ensure no blank comments are displayed
+                st.write(comment['text'])
+                votes = fetch_votes(video_id, comment['id'], category)
+                if st.button(f"👍 ({votes['up']})", key=f"{category}_up_{comment['id']}_{idx}"):
+                    update_votes(video_id, comment['id'], category, "up")
+                    st.experimental_rerun()
 
 # Function to display vote summary for each category
 def display_vote_summary():
@@ -322,7 +320,7 @@ if st.button("Categorize Comments"):
     fetch_and_categorize_comments()
 
 # Display categorized comments and voting buttons
-if 'categorized_comments' in st.session_state:
+if 'categorized_comments' in st.session_state and any(st.session_state.categorized_comments.values()):
     st.subheader("Vote on Comments")
     display_categorized_comments()
 
