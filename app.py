@@ -1,4 +1,3 @@
-
 import os
 import streamlit as st
 from googleapiclient.discovery import build
@@ -98,7 +97,7 @@ video_url = st.text_input("📺 Paste YouTube Video URL here:", st.session_state
 if video_url:
     try:
         # Check if 'v=' is present in the URL to extract video_id
-        if 'v=' in video_url:
+        if 'v=' in the video_url:
             video_id = video_url.split('v=')[-1]
         st.video(f"https://www.youtube.com/watch?v={video_id}", start_time=0)
     except Exception as e:
@@ -159,7 +158,8 @@ def update_votes(video_id, comment_id, category, vote):
 
     # Update top voted comments
     if vote == "up":
-        if st.session_state.top_voted_comments[category] is None or st.session_state.votes[video_id][comment_id][category]["up"] > st.session_state.votes[video_id][st.session_state.top_voted_comments[category]]["up"]:
+        current_top_comment = st.session_state.top_voted_comments[category]
+        if current_top_comment is None or st.session_state.votes[video_id][comment_id][category]["up"] > st.session_state.votes[video_id][current_top_comment][category]["up"]:
             st.session_state.top_voted_comments[category] = comment_id
 
 # Function to fetch votes from session state
@@ -263,6 +263,7 @@ def display_categorized_comments(category=None):
 
     for category in categories_to_display:
         st.write(f"### {category.capitalize()}")
+        st.write(f"Vote for the comments that are {category}.")
         for idx, comment in enumerate(st.session_state.categorized_comments[category]):
             if comment.strip():  # Ensure no blank comments are displayed
                 st.write(comment)
