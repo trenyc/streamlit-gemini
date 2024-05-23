@@ -11,7 +11,7 @@ OPENAI_API_KEY = st.secrets["OPENAI_API_KEY_ENV"]
 
 # Set the page configuration for the Streamlit app
 st.set_page_config(
-    page_title="Comment Buckets",
+    page_title="Comments Categorized",
     page_icon="",
     layout="wide"
 )
@@ -40,7 +40,7 @@ if openai_api_key:
         st.write(f"Using OpenAI API Key: ...{openai_api_key[-4:]}")
 
 # Main app content
-st.title("Comment Buckets")
+st.title("Comments Categorized")
 st.caption("Unleash the fun in YouTube comments with OpenAI")
 st.image("https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/1f31f.png", width=64)
 
@@ -228,6 +228,9 @@ def categorize_comments_for_category(category):
                 if debug_mode:
                     st.write(f"Response from OpenAI API for {category}:")
                     st.code(response_text)
+                # Strip introductory line
+                if response_text.startswith("Here are the comments that fall into the category"):
+                    response_text = response_text.split('\n', 1)[1]
                 categorized_comments = response_text.split('\n')
                 st.session_state.categorized_comments[category] = []  # Clear existing comments before adding new ones
                 for comment in categorized_comments:
