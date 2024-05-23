@@ -1,4 +1,4 @@
-# Streamlit App Code - Version 1.4
+# Streamlit App Code - Version 1.5
 
 import os
 import streamlit as st
@@ -242,7 +242,10 @@ def categorize_comments_for_category(category):
                 response_lines = response_text.split('\n')
                 if response_lines[0].count(':') > 0:
                     response_lines = response_lines[1:]
-                response_lines = [line for line in response_lines if st.session_state.top_voted_comments[category] not in line]
+                st.write("test2248ccc")    
+                example_comment = st.session_state.top_voted_comments.get(category, "")
+                response_lines = [line for line in response_lines if example_comment not in line]
+              
                 categorized_comments = response_lines
                 st.session_state.categorized_comments[category] = []  # Clear existing comments before adding new ones
                 for comment in categorized_comments:
