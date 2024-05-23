@@ -183,7 +183,7 @@ categories = st_tags.st_tags(
 
 # Function to create a prompt for categorization with token limits
 def create_prompt(comments):
-    base_prompt = "Categorize the following comments into the categories: funny, interesting, positive, negative, and serious. "
+    base_prompt = "Categorize the following comments into the categories: "
     for category in categories:
         top_voted_comment_id = st.session_state.top_voted_comments[category]
         example_comment = ""
@@ -207,6 +207,7 @@ def create_prompt(comments):
         base_prompt += f"Example of a '{category}' comment: '{example_comment}'. "
 
     token_limit = 15000  # Adjust this limit as needed to avoid exceeding the model's context length
+    st.code(base_prompt)
     prompt = base_prompt
     for comment in comments:
         comment_text = comment['text']
