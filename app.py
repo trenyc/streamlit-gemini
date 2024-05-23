@@ -274,6 +274,8 @@ def fetch_and_categorize_comments():
 
 # Function to display categorized comments and voting buttons
 def display_categorized_comments():
+
+  st.write("jjjjk")
   if isinstance(st.session_state.categorized_comments, dict):
     for current_category in st.session_state.categorized_comments.keys():  # Use current_category
       if st.session_state.categorized_comments[current_category]:
