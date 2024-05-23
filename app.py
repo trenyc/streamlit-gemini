@@ -274,8 +274,6 @@ def fetch_and_categorize_comments():
 
 # Function to display categorized comments and voting buttons
 def display_categorized_comments():
-
-  st.write("jjjjk")
   if isinstance(st.session_state.categorized_comments, dict):
     for current_category in st.session_state.categorized_comments.keys():  # Use current_category
       if st.session_state.categorized_comments[current_category]:
@@ -289,6 +287,8 @@ def display_categorized_comments():
               update_votes(video_id, comment['id'], category, "up")
               # Force a rerun to update vote count
               st.experimental_rerun()
+      else:
+        st.write(f"No comments found for {current_category}.")
 
 # Function to display vote summary for each category
 def display_vote_summary():
