@@ -283,11 +283,10 @@ def display_categorized_comments():
           if comment['text'].strip():  # Ensure no blank comments are displayed
             st.write(comment['text'])
             votes = fetch_votes(video_id, comment['id'], current_category)  # Use current_category
-            # ... rest of the code for voting buttons ...
-                        if st.button(f"👍 ({votes['up']})", key=f"{category}_up_{comment['id']}_{idx}"):
-                            update_votes(video_id, comment['id'], category, "up")
-                            # Force a rerun to update vote count
-                            st.experimental_rerun()
+            if st.button(f"👍 ({votes['up']})", key=f"{category}_up_{comment['id']}_{idx}"):
+              update_votes(video_id, comment['id'], category, "up")
+              # Force a rerun to update vote count
+              st.experimental_rerun()
 
 # Function to display vote summary for each category
 def display_vote_summary():
