@@ -1,4 +1,4 @@
-# Streamlit App Code - Version 3.2
+# Streamlit App Code - Version 3.3
 
 import os
 import streamlit as st
@@ -241,9 +241,9 @@ def categorize_comments():
                     st.code(response_text)
                 # Strip introductory line and ignore example comment
                 response_lines = response_text.split('\n')
-                if response_lines[0].count(':') > 0:
+                if response_lines and response_lines[0].count(':') > 0:
                     response_lines = response_lines[1:]
-                response_lines = [line for line in response_lines if all(st.session_state.top_voted_comments[cat] is None or st.session_state.top_voted_comments[cat] not in line for cat in categories)]
+                response_lines = [line for line in response_lines if line.strip() and all(st.session_state.top_voted_comments[cat] is None or st.session_state.top_voted_comments[cat] not in line for cat in categories)]
                 for line in response_lines:
                     if ':' in line:
                         continue
