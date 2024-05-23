@@ -244,9 +244,12 @@ def categorize_comments():
                 response_lines = response_text.split('\n')
                 if response_lines[0].count(':') > 0:
                     response_lines = response_lines[1:]
+
                 for line in response_lines:
+                    if ':' in line:
+                        continue
                     for category in categories:
-                        if category in line and line.strip() not in st.session_state.categorized_comments[category]:
+                        if category in line and line.strip() not in [c['text'] for c in st.session_state.categorized_comments[category]]:
                             st.session_state.categorized_comments[category].append({"id": line.strip(), "text": line.strip()})
                             break
             else:
