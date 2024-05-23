@@ -277,15 +277,15 @@ def display_categorized_comments(category=None):
                 votes = fetch_votes(video_id, comment['id'], category)
                 col1, col2 = st.columns(2)
                 with col1:
-                    if st.button(f"👍 ({votes['up']})", key=f"{category}_up_{comment['id']}_{idx}"):
+                    if st.button(f"👍 ({votes['up']})", key=f"{category}_up_{comment['id']}_{idx}_{len(st.session_state.categorized_comments[category])}"):
                         update_votes(video_id, comment['id'], category, "up")
                         st.experimental_rerun()
                 with col2:
-                    if st.button(f"👎 ({votes['down']})", key=f"{category}_down_{comment['id']}_{idx}"):
+                    if st.button(f"👎 ({votes['down']})", key=f"{category}_down_{comment['id']}_{idx}_{len(st.session_state.categorized_comments[category])}"):
                         update_votes(video_id, comment['id'], category, "down")
                         st.experimental_rerun()
         if st.session_state.next_page_token.get(category):
-            if st.button(f"Load More Comments for {category.capitalize()}", key=f"load_more_{category}"):
+            if st.button(f"Load More Comments for {category.capitalize()}", key=f"load_more_{category}_{len(st.session_state.categorized_comments[category])}"):
                 fetch_and_categorize_comments(category)
 
 # Fetch and display YouTube comments
