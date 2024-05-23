@@ -211,10 +211,10 @@ def create_prompt(comments):
     prompt = base_prompt
     for comment in comments:
         comment_text = comment['text']
-        if len(prompt) + len(comment_text) + 2 > token_limit:  # +2 for the ", " separator
+        if len(prompt) + len(comment_text) + 2 > token_limit:  # +2 for the "<<>>" separator
             break
-        prompt += comment_text + ", "
-    return prompt.rstrip(', ')
+        prompt += comment_text + "<<>>"
+    return prompt.rstrip('<<>>')
 
 # Function to categorize comments
 def categorize_comments():
