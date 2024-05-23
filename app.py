@@ -1,4 +1,3 @@
-
 import os
 import streamlit as st
 from googleapiclient.discovery import build
@@ -142,6 +141,8 @@ if 'categorized_comments' not in st.session_state:
     st.session_state.categorized_comments = {category: [] for category in ['funny', 'interesting', 'positive', 'negative', 'serious']}
 if 'top_voted_comments' not in st.session_state:
     st.session_state.top_voted_comments = {category: None for category in ['funny', 'interesting', 'positive', 'negative', 'serious']}
+if 'load_count' not in st.session_state:
+    st.session_state.load_count = {category: 0 for category in ['funny', 'interesting', 'positive', 'negative', 'serious']}
 
 # Initialize votes in session state
 if 'votes' not in st.session_state:
@@ -254,11 +255,13 @@ def fetch_and_categorize_comments(category=None):
         st.session_state.comments = comments  # Replace comments with the new batch
         if category:
             st.session_state.next_page_token[category] = next_page_token
+            st.session_state.load_count[category] += 1  # Increment load count
             categorize_comments_for_category(category)
         else:
             st.session_state.next_page_token = {cat: next_page_token for cat in st.session_state.next_page_token.keys()}
             # Categorize comments for each category
             for category in categories:
+                st.session_state.load_count[category] += 1  # Increment load count
                 categorize_comments_for_category(category)
     else:
         st.warning("No comments found or failed to fetch comments.")
@@ -279,15 +282,15 @@ def display_categorized_comments(category=None):
                 votes = fetch_votes(video_id, comment['id'], category)
                 col1, col2 = st.columns(2)
                 with col1:
-                    if st.button(f"👍 ({votes['up']})", key=f"{category}_up_{comment['id']}_{idx}_{len(st.session_state.categorized_comments[category])}"):
+                    if st.button(f"👍 ({votes['up']})", key=f"{category}_up_{comment['id']}_{idx}_{st.session_state.load_count[category]}"):
                         update_votes(video_id, comment['id'], category, "up")
                         st.experimental_rerun()
                 with col2:
-                    if st.button(f"👎 ({votes['down']})", key=f"{category}_down_{comment['id']}_{idx}_{len(st.session_state.categorized_comments[category])}"):
+                    if st.button(f"👎 ({votes['down']})", key=f"{category}_down_{comment['id']}_{idx}_{st.session_state.load_count[category]}"):
                         update_votes(video_id, comment['id'], category, "down")
                         st.experimental_rerun()
         if st.session_state.next_page_token.get(category):
-            if st.button(f"Load More Comments for {category.capitalize()}", key=f"load_more_{category}_{len(st.session_state.categorized_comments[category])}"):
+            if st.button(f"Load More Comments for {category.capitalize()}", key=f"load_more_{category}_{st.session_state.load_count[category]}"):
                 fetch_and_categorize_comments(category)
 
 # Fetch and display YouTube comments
