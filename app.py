@@ -171,8 +171,8 @@ categories = st_tags.st_tags(
 )
 
 # Function to create a prompt for categorization with token limits
-def create_prompt(comments):
-    base_prompt = "Categorize the following comments into categories: {}. Comments: ".format(', '.join(categories))
+def create_prompt(category, comments):
+    base_prompt = f"Categorize the following comments into the category '{category}'. Comments: "
     token_limit = 15000  # Adjust this limit as needed to avoid exceeding the model's context length
     prompt = base_prompt
     for comment in comments:
@@ -182,6 +182,51 @@ def create_prompt(comments):
         prompt += comment_text + ", "
     return prompt.rstrip(', ')
 
+# Function to categorize comments for a specific category
+def categorize_comments_for_category(category):
+    prompt = create_prompt(category, st.session_state.comments)
+    st.write(f"Starting to categorize comments for category: {category}")
+    try:
+        if debug_mode:
+            st.write(f"Prompt for {category} being sent to OpenAI API:")
+            st.code(prompt)
+            st.write(f"Using OpenAI API Key: ...{openai_api_key[-4:]}")
+            st.write("Sending request to OpenAI API...")
+        with st.spinner(f"Categorizing comments into {category} using OpenAI..."):
+            response = client.chat.completions.create(
+                model="gpt-3.5-turbo",
+                messages=[
+                    {"role": "system", "content": "You are a helpful assistant."},
+                    {"role": "user", "content": prompt},
+                ]
+            )
+            if debug_mode:
+                st.write(f"Processing response from OpenAI API for category: {category}")
+            if response.choices:
+                response_text = response.choices[0].message.content.strip()
+                if debug_mode:
+                    st.write(f"Response from OpenAI API for {category}:")
+                    st.code(response_text)
+                categorized_comments = response_text.split('\n')
+                for comment in categorized_comments:
+                    try:
+                        comment_text = comment.strip()
+                        if category in st.session_state.categorized_comments:
+                            if len(st.session_state.categorized_comments[category]) < 5:
+                                st.session_state.categorized_comments[category].append(comment_text)
+                    except ValueError:
+                        st.warning(f"Could not parse categorized comment: {comment}")
+                # Display categorized comments for the category
+                display_categorized_comments(category)
+            else:
+                st.error(f"No response from the model for category: {category}")
+    except APIError as e:
+        st.error(f"An API error occurred: {e}")
+        st.error(f"Error code: {e.status_code} - {e.message}")
+        st.error(f"Full response: {e.response}")
+    except Exception as e:
+        st.error(f"An unexpected error occurred: {e}")
+
 # Fetch and categorize comments
 def fetch_and_categorize_comments():
     comments, next_page_token = fetch_youtube_comments(video_id, st.session_state.next_page_token)
@@ -190,75 +235,35 @@ def fetch_and_categorize_comments():
         st.session_state.comments.extend(comments)
         st.session_state.next_page_token = next_page_token
         
-        # Create prompt with token limits
-        prompt = create_prompt(st.session_state.comments)
-        st.write("Starting to categorize comments...")
-        try:
-            if debug_mode:
-                st.write("Prompt being sent to OpenAI API:")
-                st.code(prompt)
-                st.write(f"Using OpenAI API Key: ...{openai_api_key[-4:]}")
-                st.write("Sending request to OpenAI API...")
-            with st.spinner("Categorizing comments using OpenAI..."):
-                response = client.chat.completions.create(
-                    model="gpt-3.5-turbo",
-                    messages=[
-                        {"role": "system", "content": "You are a helpful assistant."},
-                        {"role": "user", "content": prompt},
-                    ]
-                )
-                if debug_mode:
-                    st.write("Processing response from OpenAI API...")
-                if response.choices:
-                    response_text = response.choices[0].message.content.strip()
-                    st.success("Comments categorized successfully!")
-                    st.subheader("Categorized Comments")
-                    if debug_mode:
-                        st.write("Response from OpenAI API:")
-                        st.code(response_text)
-                    categorized_comments = response_text.split('\n')
-                    for comment in categorized_comments:
-                        try:
-                            category, comment_text = comment.split(':', 1)
-                            category = category.strip()
-                            comment_text = comment_text.strip()
-                            if category in st.session_state.categorized_comments:
-                                if len(st.session_state.categorized_comments[category]) < 5:
-                                    st.session_state.categorized_comments[category].append(comment_text)
-                        except ValueError:
-                            st.warning(f"Could not parse categorized comment: {comment}")
-                    
-                    # Display initial categorized comments
-                    display_categorized_comments()
-                else:
-                    st.error("No response from the model.")
-        except APIError as e:
-            st.error(f"An API error occurred: {e}")
-            st.error(f"Error code: {e.status_code} - {e.message}")
-            st.error(f"Full response: {e.response}")
-        except Exception as e:
-            st.error(f"An unexpected error occurred: {e}")
+        # Categorize comments for each category
+        for category in categories:
+            categorize_comments_for_category(category)
     else:
         st.warning("No comments found or failed to fetch comments.")
 
 # Function to display categorized comments and voting buttons
-def display_categorized_comments():
-    for category in st.session_state.categorized_comments:
+def display_categorized_comments(category=None):
+    if category:
+        categories_to_display = [category]
+    else:
+        categories_to_display = st.session_state.categorized_comments.keys()
+
+    for category in categories_to_display:
         st.write(f"### {category.capitalize()}")
-        for comment in st.session_state.categorized_comments[category]:
+        for idx, comment in enumerate(st.session_state.categorized_comments[category]):
             st.write(comment)
             votes = fetch_votes(video_id, comment, category)
             col1, col2 = st.columns(2)
             with col1:
-                if st.button(f"👍 ({votes['up']})", key=f"{comment}_{category}_up"):
+                if st.button(f"👍 ({votes['up']})", key=f"{comment}_{category}_up_{idx}"):
                     update_votes(video_id, comment, category, "up")
                     st.experimental_rerun()
             with col2:
-                if st.button(f"👎 ({votes['down']})", key=f"{comment}_{category}_down"):
+                if st.button(f"👎 ({votes['down']})", key=f"{comment}_{category}_down_{idx}"):
                     update_votes(video_id, comment, category, "down")
                     st.experimental_rerun()
         if st.session_state.next_page_token:
-            if st.button(f"Load More Comments for {category.capitalize()}"):
+            if st.button(f"Load More Comments for {category.capitalize()}", key=f"load_more_{category}"):
                 fetch_and_categorize_comments()
 
 # Fetch and display YouTube comments
@@ -286,3 +291,4 @@ if st.button("Categorize Comments"):
 if 'categorized_comments' in st.session_state:
     st.subheader("Vote on Comments")
     display_categorized_comments()
+
