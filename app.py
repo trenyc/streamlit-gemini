@@ -1,3 +1,5 @@
+# Streamlit App Code - Version 1.2
+
 import os
 import streamlit as st
 from googleapiclient.discovery import build
@@ -188,9 +190,13 @@ def create_prompt(category, comments):
         top_voted_comment = next((comment for comment in st.session_state.comments if comment['id'] == top_voted_comment_id), None)
         if top_voted_comment:
             example_comment = top_voted_comment['text']
-        if debug_mode:
-            st.write(f"Top voted comment ID for {category}: {top_voted_comment_id}")
-            st.write(f"Top voted comment text for {category}: {example_comment}")
+        else:
+            if debug_mode:
+                st.write(f"Top voted comment ID for {category} has no corresponding comment.")
+            example_comment = f"Comment with ID: {top_voted_comment_id}"
+    if debug_mode:
+        st.write(f"Top voted comment ID for {category}: {top_voted_comment_id}")
+        st.write(f"Top voted comment text for {category}: {example_comment}")
 
     if not example_comment:
         example_comment = category
