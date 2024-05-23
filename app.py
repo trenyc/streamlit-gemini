@@ -186,7 +186,7 @@ def create_prompt(category, comments):
     example_comments = []
     if top_voted_comment:
         voted_comments = sorted(
-            [comment for comment in st.session_state.comments if st.session_state.votes[video_id][comment['id']][category]["up"] > 0],
+            [comment for comment in st.session_state.comments if video_id in st.session_state.votes and comment['id'] in st.session_state.votes[video_id] and st.session_state.votes[video_id][comment['id']][category]["up"] > 0],
             key=lambda x: (-st.session_state.votes[video_id][x['id']][category]["up"], x['id'])
         )
         example_comments = [comment['text'] for comment in voted_comments[:5]]
@@ -297,6 +297,7 @@ def display_categorized_comments(category=None):
                     st.experimental_rerun()
         if st.session_state.next_page_token.get(category):
             if st.button(f"Load More Comments for {category.capitalize()}", key=f"load_more_{category}_{st.session_state.load_count[category]}"):
+                st.session_state.categorized_comments[category] = []  # Clear existing comments before loading more
                 fetch_and_categorize_comments(category)
 
 # Fetch and display YouTube comments
