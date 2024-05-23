@@ -1,3 +1,4 @@
+
 import os
 import streamlit as st
 from googleapiclient.discovery import build
@@ -139,6 +140,8 @@ if 'next_page_token' not in st.session_state:
     st.session_state.next_page_token = None
 if 'categorized_comments' not in st.session_state:
     st.session_state.categorized_comments = {category: [] for category in ['funny', 'interesting', 'positive', 'negative', 'serious']}
+if 'top_voted_comments' not in st.session_state:
+    st.session_state.top_voted_comments = {category: None for category in ['funny', 'interesting', 'positive', 'negative', 'serious']}
 
 # Initialize votes in session state
 if 'votes' not in st.session_state:
@@ -153,6 +156,11 @@ def update_votes(video_id, comment_id, category, vote):
     if category not in st.session_state.votes[video_id][comment_id]:
         st.session_state.votes[video_id][comment_id][category] = {"up": 0, "down": 0}
     st.session_state.votes[video_id][comment_id][category][vote] += 1
+
+    # Update top voted comments
+    if vote == "up":
+        if st.session_state.top_voted_comments[category] is None or st.session_state.votes[video_id][comment_id][category]["up"] > st.session_state.votes[video_id][st.session_state.top_voted_comments[category]]["up"]:
+            st.session_state.top_voted_comments[category] = comment_id
 
 # Function to fetch votes from session state
 def fetch_votes(video_id, comment_id, category):
@@ -172,7 +180,15 @@ categories = st_tags.st_tags(
 
 # Function to create a prompt for categorization with token limits
 def create_prompt(category, comments):
-    base_prompt = f"Categorize the following comments into the category '{category}'. Comments: "
+    top_voted_comment = st.session_state.top_voted_comments[category]
+    example_comment = ""
+    if top_voted_comment:
+        for comment in st.session_state.comments:
+            if comment['id'] == top_voted_comment:
+                example_comment = comment['text']
+                break
+
+    base_prompt = f"Categorize the following comments into the category '{category}'. Example comment: '{example_comment}'. Comments: "
     token_limit = 15000  # Adjust this limit as needed to avoid exceeding the model's context length
     prompt = base_prompt
     for comment in comments:
@@ -209,13 +225,10 @@ def categorize_comments_for_category(category):
                     st.code(response_text)
                 categorized_comments = response_text.split('\n')
                 for comment in categorized_comments:
-                    try:
-                        comment_text = comment.strip()
-                        if category in st.session_state.categorized_comments:
-                            if len(st.session_state.categorized_comments[category]) < 5:
-                                st.session_state.categorized_comments[category].append(comment_text)
-                    except ValueError:
-                        st.warning(f"Could not parse categorized comment: {comment}")
+                    comment_text = comment.strip()
+                    if comment_text and category in st.session_state.categorized_comments:
+                        if len(st.session_state.categorized_comments[category]) < 5:
+                            st.session_state.categorized_comments[category].append(comment_text)
                 # Display categorized comments for the category
                 display_categorized_comments(category)
             else:
@@ -251,17 +264,18 @@ def display_categorized_comments(category=None):
     for category in categories_to_display:
         st.write(f"### {category.capitalize()}")
         for idx, comment in enumerate(st.session_state.categorized_comments[category]):
-            st.write(comment)
-            votes = fetch_votes(video_id, comment, category)
-            col1, col2 = st.columns(2)
-            with col1:
-                if st.button(f"👍 ({votes['up']})", key=f"{comment}_{category}_up_{idx}"):
-                    update_votes(video_id, comment, category, "up")
-                    st.experimental_rerun()
-            with col2:
-                if st.button(f"👎 ({votes['down']})", key=f"{comment}_{category}_down_{idx}"):
-                    update_votes(video_id, comment, category, "down")
-                    st.experimental_rerun()
+            if comment.strip():  # Ensure no blank comments are displayed
+                st.write(comment)
+                votes = fetch_votes(video_id, comment, category)
+                col1, col2 = st.columns(2)
+                with col1:
+                    if st.button(f"👍 ({votes['up']})", key=f"{comment}_{category}_up_{idx}"):
+                        update_votes(video_id, comment, category, "up")
+                        st.experimental_rerun()
+                with col2:
+                    if st.button(f"👎 ({votes['down']})", key=f"{comment}_{category}_down_{idx}"):
+                        update_votes(video_id, comment, category, "down")
+                        st.experimental_rerun()
         if st.session_state.next_page_token:
             if st.button(f"Load More Comments for {category.capitalize()}", key=f"load_more_{category}"):
                 fetch_and_categorize_comments()
@@ -291,4 +305,3 @@ if st.button("Categorize Comments"):
 if 'categorized_comments' in st.session_state:
     st.subheader("Vote on Comments")
     display_categorized_comments()
-
