@@ -274,15 +274,16 @@ def fetch_and_categorize_comments():
 
 # Function to display categorized comments and voting buttons
 def display_categorized_comments():
-    if isinstance(st.session_state.categorized_comments, dict):
-        for category in st.session_state.categorized_comments.keys():
-            if st.session_state.categorized_comments[category]:
-                st.write(f"### {category.capitalize()}")
-                st.write(f"Vote for the comments that are {category}.")
-                for idx, comment in enumerate(st.session_state.categorized_comments[category][:5]):
-                    if comment['text'].strip():  # Ensure no blank comments are displayed
-                        st.write(comment['text'])
-                        votes = fetch_votes(video_id, comment['id'], category)
+  if isinstance(st.session_state.categorized_comments, dict):
+    for current_category in st.session_state.categorized_comments.keys():  # Use current_category
+      if st.session_state.categorized_comments[current_category]:
+        st.write(f"### {current_category.capitalize()}")
+        st.write(f"Vote for the comments that are {current_category}.")
+        for idx, comment in enumerate(st.session_state.categorized_comments[current_category][:5]):
+          if comment['text'].strip():  # Ensure no blank comments are displayed
+            st.write(comment['text'])
+            votes = fetch_votes(video_id, comment['id'], current_category)  # Use current_category
+            # ... rest of the code for voting buttons ...
                         if st.button(f"👍 ({votes['up']})", key=f"{category}_up_{comment['id']}_{idx}"):
                             update_votes(video_id, comment['id'], category, "up")
                             # Force a rerun to update vote count
