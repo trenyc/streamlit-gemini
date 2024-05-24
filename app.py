@@ -1,4 +1,4 @@
-# Streamlit App Code - Version 3.9
+# Streamlit App Code - Version 4.0
 
 import os
 import uuid
@@ -99,7 +99,7 @@ video_url = st.text_input("📺 Paste YouTube Video URL here:", st.session_state
 if video_url:
     try:
         # Check if 'v=' is present in the URL to extract video_id
-        if 'v=' in video_url:
+        if 'v=' in the video_url:
             video_id = video_url.split('v=')[-1]
         st.video(f"https://www.youtube.com/watch?v={video_id}", start_time=0)
     except Exception as e:
@@ -143,8 +143,6 @@ if 'categorized_comments' not in st.session_state:
     st.session_state.categorized_comments = {category: [] for category in ['funny', 'interesting', 'positive', 'negative', 'serious']}
 if 'top_voted_comments' not in st.session_state:
     st.session_state.top_voted_comments = {category: None for category in ['funny', 'interesting', 'positive', 'negative', 'serious']}
-if 'displayed_comment_ids' not in st.session_state:
-    st.session_state.displayed_comment_ids = set()
 
 # Initialize votes in session state
 if 'votes' not in st.session_state:
@@ -247,7 +245,7 @@ def categorize_comments_for_category(category):
                 for line in response_lines:
                     line_text = line.strip()
                     if line_text and line_text not in st.session_state.displayed_comment_ids:
-                        st.session_state.categorized_comments[category].append({"id": line_text, "text": line_text})
+                        st.session_state.categorized_comments[category].append({"id": line_text, "text": line_text, "displayed": False})
                         st.session_state.displayed_comment_ids.add(line_text)
                 if debug_mode:
                     st.write(f"Categorized comments for {category}:")
@@ -282,16 +280,19 @@ def display_categorized_comments():
             if len(st.session_state.categorized_comments[current_category]) > 0:  # Check if the list is not empty
                 st.write(f"### {current_category.capitalize()}")
                 st.write(f"Vote for the comments that are {current_category}.")
-                for idx, comment in enumerate(st.session_state.categorized_comments[current_category][:5]):
+                filtered_comments = [
+                    comment for comment in st.session_state.categorized_comments[current_category]
+                    if not comment.get('displayed', False)
+                ]
+                for idx, comment in enumerate(filtered_comments[:5]):
                     if comment['text'].strip():  # Ensure no blank comments are displayed
-                        if comment['id'] not in st.session_state.displayed_comment_ids:
-                            st.session_state.displayed_comment_ids.add(comment['id'])
-                            st.write(comment['text'])
-                            votes = fetch_votes(video_id, comment['id'], current_category)  # Use current_category
-                            unique_vote_key = f"{current_category}_up_{comment['id']}_{idx}"  # Ensure unique key
-                            if st.button(f"👍 ({votes['up']})", key=unique_vote_key):  # Ensure unique key
-                                update_votes(video_id, comment['id'], current_category, "up")  # Use current_category
-                                st.experimental_rerun()  # Force a rerun to update vote count
+                        st.write(comment['text'])
+                        votes = fetch_votes(video_id, comment['id'], current_category)  # Use current_category
+                        unique_vote_key = f"{current_category}_up_{comment['id']}_{uuid.uuid4()}"  # Ensure unique key
+                        if st.button(f"👍 ({votes['up']})", key=unique_vote_key):  # Ensure unique key
+                            update_votes(video_id, comment['id'], current_category, "up")  # Use current_category
+                            comment['displayed'] = True  # Update displayed flag
+                            st.experimental_rerun()  # Force a rerun to update vote count
             else:
                 st.write(f"No comments found for {current_category}.")
 
