@@ -289,8 +289,7 @@ def display_categorized_comments():
                         votes = fetch_votes(video_id, comment['id'], current_category)  # Use current_category
                        
                         unique_vote_key = f"{current_category}_up_{comment['id']}"
-               
-                        st.write(unique_vote_key)
+              
                         vote_text = f" ({votes['up']})"
              
 
