@@ -198,8 +198,8 @@ def create_prompt_for_category(comments, category):
     return prompt.rstrip(', ')
 
 # Function to categorize comments for a specific category
-def categorize_comments_for_category(category):
-    prompt = create_prompt_for_category(st.session_state.comments, category)
+def categorize_comments_for_category(category, comments):
+    prompt = create_prompt_for_category(comments, category)
     st.write(f"Starting to categorize comments for category: {category}")
     try:
         with st.spinner(f"Categorizing comments into {category} using OpenAI..."):
@@ -241,13 +241,13 @@ def fetch_and_categorize_comments():
         st.session_state.next_page_token = next_page_token
         st.session_state.batch_number += 1  # Increment batch number
         for category in categories:
-            categorize_comments_for_category(category)
-        display_categorized_comments(prevent_votes=False)  # Display categorized comments after fetching and categorizing
+            categorize_comments_for_category(category, st.session_state.comments)
+        display_categorized_comments()  # Display categorized comments after fetching and categorizing
     else:
         st.warning("No comments found or failed to fetch comments.")
 
 # Function to display categorized comments
-def display_categorized_comments(prevent_votes=True):
+def display_categorized_comments(prevent_votes=False):
     if isinstance(st.session_state.categorized_comments, dict):
         for current_category in st.session_state.categorized_comments.keys():  # Use current_category
             if len(st.session_state.categorized_comments[current_category]) > 0:  # Check if the list is not empty
@@ -332,12 +332,15 @@ if st.session_state.load_more_clicked:
             st.warning("No more comments available.")
             st.session_state.load_more_clicked = False
 
-# Function to display comments without voting buttons
+# Function to display loaded comments categorized without voting buttons
 def display_loaded_comments():
-    st.subheader("Additional Comments")
-    for comment in st.session_state.comments[5:]:
-        if comment['text'].strip():
-            st.write(comment['text'])
+    if isinstance(st.session_state.categorized_comments, dict):
+        for current_category in st.session_state.categorized_comments.keys():
+            if len(st.session_state.categorized_comments[current_category]) > 5:
+                st.write(f"### More {current_category.capitalize()} Comments")
+                additional_comments = st.session_state.categorized_comments[current_category][5:]
+                for idx, comment in enumerate(additional_comments):
+                    if comment['text'].strip():
+                        st.write(comment['text'])
 
-if 'load_more_clicked' in st.session_state and st.session_state.load_more_clicked == False:
-    display_loaded_comments()
+display_loaded_comments()
