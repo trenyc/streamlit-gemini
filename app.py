@@ -150,7 +150,7 @@ if 'votes' not in st.session_state:
     st.session_state.votes = {}
 
 # Function to update votes in session state
-def update_votes(video_id, comment_id, category, vote)
+def update_votes(video_id, comment_id, category, vote):
     if video_id not in st.session_state.votes:
         st.session_state.votes[video_id] = {}
     if comment_id not in st.session_state.votes[video_id]:
