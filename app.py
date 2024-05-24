@@ -1,4 +1,4 @@
-# Streamlit App Code - Version 3.21
+# Streamlit App Code - Version 3.22
 
 import os
 import streamlit as st
@@ -242,27 +242,28 @@ def fetch_and_categorize_comments():
         st.session_state.batch_number += 1  # Increment batch number
         for category in categories:
             categorize_comments_for_category(category)
-        display_categorized_comments()  # Display categorized comments after fetching and categorizing
+        display_categorized_comments(prevent_votes=False)  # Display categorized comments after fetching and categorizing
     else:
         st.warning("No comments found or failed to fetch comments.")
 
-# Function to display categorized comments and voting buttons
-def display_categorized_comments():
+# Function to display categorized comments
+def display_categorized_comments(prevent_votes=True):
     if isinstance(st.session_state.categorized_comments, dict):
         for current_category in st.session_state.categorized_comments.keys():  # Use current_category
             if len(st.session_state.categorized_comments[current_category]) > 0:  # Check if the list is not empty
                 st.write(f"### {current_category.capitalize()}")
-                st.write(f"Vote for the comments that are {current_category}.")
+                st.write(f"Comments that are {current_category}:")
 
                 comments = st.session_state.categorized_comments[current_category][:5]
                 for idx, comment in enumerate(comments):
                     if comment['text'].strip():  # Ensure no blank comments are displayed
                         st.write(comment['text'])
-                        votes = fetch_votes(video_id, comment['id'], current_category)  # Use current_category
-                        if st.button(f" ({votes['up']})", key=f"{current_category}_up_{comment['id']}"):
-                            update_votes(video_id, comment['id'], current_category, "up")
-                            st.experimental_rerun()  # Force a rerun to update vote count
+                        if not prevent_votes:
+                            votes = fetch_votes(video_id, comment['id'], current_category)  # Use current_category
 
+                            if st.button(f"👍 ({votes['up']})", key=f"{current_category}_up_{comment['id']}"):
+                                update_votes(video_id, comment['id'], current_category, "up")
+                                st.experimental_rerun()  # Force a rerun to update vote count
 
             else:
                 st.write(f"No comments found for {current_category}.")
@@ -273,61 +274,4 @@ def display_vote_summary():
         st.subheader("Vote Summary")
         for category in st.session_state.categorized_comments.keys():
             vote_summary = {}
-            for comment_id in st.session_state.votes.get(video_id, {}):
-                if category in st.session_state.votes[video_id][comment_id]:
-                    up_votes = st.session_state.votes[video_id][comment_id][category]["up"]
-                    if up_votes > 0:
-                        if comment_id not in vote_summary:
-                            vote_summary[comment_id] = 0
-                        vote_summary[comment_id] += up_votes
-
-            st.write(f"**{category.capitalize()}**: {sum(vote_summary.values())} votes")
-
-# Fetch and display YouTube comments
-if 'selected_video_id' in st.session_state and yt_api_key and openai_api_key:
-    if 'auto_fetch' in st.session_state and st.session_state.auto_fetch:
-        fetch_and_categorize_comments()
-        st.session_state.auto_fetch = False
-
-# Show "Fetch Comments" and "Show/Hide Comments" in debug mode
-if debug_mode:
-    if st.button("Fetch Comments"):
-        fetch_youtube_comments(video_id)
-    show_comments = st.checkbox("Show/Hide Comments")
-    if show_comments and 'comments' in st.session_state:
-        st.write("Displaying fetched comments...")
-        st.write("💬 Fetched YouTube Comments")
-        for comment in st.session_state.comments:
-            st.write(comment['text'])
-
-# Always show the "Categorize Comments" button
-if st.button("Categorize Comments"):
-    fetch_and_categorize_comments()
-
-# Display categorized comments and voting buttons
-if 'categorized_comments' in st.session_state and any(st.session_state.categorized_comments.values()):
-    st.subheader("Vote on Comments")
-    display_categorized_comments()
-
-# Display vote summary
-if 'votes' in st.session_state:
-    display_vote_summary()
-
-# Load more comments button
-if st.session_state.next_page_token:
-    if st.button("Load More Comments"):
-        st.session_state.load_more_clicked = True
-
-if st.button("Load More Comments"):
-  st.session_state.load_more_clicked = True
-  if st.session_state.next_page_token:
-    with st.spinner("Loading more comments..."):
-      comments, next_page_token = fetch_youtube_comments(video_id, st.session_state.next_page_token)
-      if comments:
-        st.session_state.comments = comments + st.session_state.comments
-        st.session_state.next_page_token = next_page_token
-      else:
-        st.warning("No more comments available.")
-  # Set load_more_clicked to False only after successful fetch
-  st.session_state.load_more_clicked = False
-
+            for comment_id in st.session_state
