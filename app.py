@@ -1,4 +1,4 @@
-# Streamlit App Code - Version 3.8 with Display Flag
+# Streamlit App Code - Version 3.9
 
 import os
 import uuid
@@ -45,7 +45,6 @@ if openai_api_key:
 # Main app content
 st.title("Youtube Comments Categorizer")
 st.caption("Unleash fun in YouTube comments with OpenAI")
-
 
 # Function to search YouTube videos
 def search_youtube_videos(query):
@@ -144,6 +143,8 @@ if 'categorized_comments' not in st.session_state:
     st.session_state.categorized_comments = {category: [] for category in ['funny', 'interesting', 'positive', 'negative', 'serious']}
 if 'top_voted_comments' not in st.session_state:
     st.session_state.top_voted_comments = {category: None for category in ['funny', 'interesting', 'positive', 'negative', 'serious']}
+if 'previously_rendered_comments' not in st.session_state:
+    st.session_state.previously_rendered_comments = {category: [] for category in ['funny', 'interesting', 'positive', 'negative', 'serious']}
 
 # Initialize votes in session state
 if 'votes' not in st.session_state:
@@ -167,12 +168,11 @@ def update_votes(video_id, comment_id, category, vote):
 
 # Function to fetch votes from session state
 def fetch_votes(video_id, comment_id, category):
-  if video_id not in st.session_state.votes:
-    st.session_state.votes[video_id] = {}
-  if comment_id not in st.session_state.votes[video_id]:
-    st.session_state.votes[video_id][comment_id] = {category: {"up": 0}}
-  return st.session_state.votes[video_id][comment_id].get(category, {"up": 0})
-
+    if video_id not in st.session_state.votes:
+        st.session_state.votes[video_id] = {}
+    if comment_id not in st.session_state.votes[video_id]:
+        st.session_state.votes[video_id][comment_id] = {category: {"up": 0}}
+    return st.session_state.votes[video_id][comment_id].get(category, {"up": 0})
 
 # Input for additional categories
 categories = st_tags.st_tags(
@@ -283,7 +283,7 @@ def display_categorized_comments():
             if len(st.session_state.categorized_comments[current_category]) > 0:  # Check if the list is not empty
                 st.write(f"### {current_category.capitalize()}")
                 st.write(f"Vote for the comments that are {current_category}.")
-            
+
                 filtered_comments = [
                     comment for comment in st.session_state.categorized_comments[current_category]
                     if not comment.get('displayed', False)
@@ -294,18 +294,12 @@ def display_categorized_comments():
                         st.write(comment['text'])
                         comment['displayed'] = True  # Update displayed flag
                         votes = fetch_votes(video_id, comment['id'], current_category)  # Use current_category
-                       
-                        unique_vote_key = f"{current_category}_up_{comment['id']}_{uuid.uuid4()}"  # Ensure unique key
-              
-                        vote_text = f" ({votes['up']})"
-             
 
-                        if st.button(f"👍 {vote_text}", key=unique_vote_key):  # Ensure unique key
-                            st.write("update votes before");
+                        unique_vote_key = f"{current_category}_up_{comment['id']}_{uuid.uuid4()}"  # Ensure unique key
+
+                        if st.button(f"👍 ({votes['up']})", key=unique_vote_key):  # Ensure unique key
                             update_votes(video_id, comment['id'], current_category, "up")  # Use current_category
-                            # Force a rerun to update vote count
-                            #votes['up'] += 1  # Update local vote count (optional, for immediate UI update) 
-                            st.rerun()
+                            st.session_state.previous_votes_update = True  # Set flag to indicate votes update
      
             else:
                 st.write(f"No comments found for {current_category}.")
