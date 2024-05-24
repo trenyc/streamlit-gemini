@@ -289,6 +289,8 @@ def display_categorized_comments():
                     if comment['text'].strip():  # Ensure no blank comments are displayed
                         st.write(comment['text'])
                         votes = fetch_votes(video_id, comment['id'], current_category)  # Use current_category
+                        st.write(votes)
+                        st.write(votes['up'])
                         unique_key = f"{current_category}_up_{comment['id']}_{idx}_{uuid.uuid4()}"  # Ensure unique key
                         if st.button(f"👍 ({votes['up']})", key=unique_key):  # Ensure unique key
                             st.write("update votes before");
