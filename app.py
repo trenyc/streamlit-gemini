@@ -89,7 +89,7 @@ if 'search_results' in st.session_state:
                 st.session_state.video_url = f"https://www.youtube.com/watch?v={video_id}"
                 st.session_state.auto_fetch = True
                 del st.session_state.search_results
-                st.experimental_rerun()  # Force a rerun to update state
+                st.rerun()  # Force a rerun to update state
 
 # Set selected video ID from search results
 if 'selected_video_id' in st.session_state:
@@ -289,7 +289,7 @@ def display_categorized_comments():
                         if st.button(f"👍 ({votes['up']})", key=unique_key):  # Ensure unique key
                             update_votes(video_id, comment['id'], current_category, "up")  # Use current_category
                             # Force a rerun to update vote count
-                            st.experimental_rerun()
+                            st.rerun()
             else:
                 st.write(f"No comments found for {current_category}.")
 
