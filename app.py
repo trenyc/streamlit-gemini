@@ -1,4 +1,4 @@
-# Streamlit App Code - Version 3.9
+# Streamlit App Code - Version 3.10
 
 import os
 import uuid
@@ -88,7 +88,7 @@ if 'search_results' in st.session_state:
                 st.session_state.video_url = f"https://www.youtube.com/watch?v={video_id}"
                 st.session_state.auto_fetch = True
                 del st.session_state.search_results
-                st.rerun()  # Force a rerun to update state
+                st.experimental_rerun()  # Force a rerun to update state
 
 # Set selected video ID from search results
 if 'selected_video_id' in st.session_state:
