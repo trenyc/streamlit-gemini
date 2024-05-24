@@ -1,7 +1,6 @@
-# Streamlit App Code - Version 3.13
+# Streamlit App Code - Version 3.15
 
 import os
-import uuid
 import streamlit as st
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
@@ -106,7 +105,7 @@ if video_url:
         st.error(f"Failed to display video: {e}")
 
 # Function to fetch YouTube comments
-def fetch_youtube_comments(video_id, page_token=None):
+def fetch_youtube_comments(video_id):
     try:
         if debug_mode:
             st.write("Initializing YouTube API client...")
@@ -116,8 +115,7 @@ def fetch_youtube_comments(video_id, page_token=None):
         request = youtube.commentThreads().list(
             part="snippet",
             videoId=video_id,
-            maxResults=100,
-            pageToken=page_token
+            maxResults=100
         )
         if debug_mode:
             st.write("Executing request to YouTube API...")
@@ -128,17 +126,14 @@ def fetch_youtube_comments(video_id, page_token=None):
                      "text": item['snippet']['topLevelComment']['snippet']['textDisplay']} for item in response['items']]
         if debug_mode:
             st.write(f"Fetched {len(comments)} comments.")
-        next_page_token = response.get('nextPageToken', None)
-        return comments, next_page_token
+        return comments
     except HttpError as e:
         st.error(f"An error occurred while fetching comments: {e}")
-        return [], None
+        return []
 
 # Initialize session state for comments and pagination
 if 'comments' not in st.session_state:
     st.session_state.comments = []
-if 'next_page_token' not in st.session_state:
-    st.session_state.next_page_token = None
 if 'categorized_comments' not in st.session_state:
     st.session_state.categorized_comments = {category: [] for category in ['funny', 'positive', 'negative']}
 if 'top_voted_comments' not in st.session_state:
@@ -264,12 +259,11 @@ def categorize_comments_for_category(category):
 
 # Fetch and categorize comments for each category
 def fetch_and_categorize_comments():
-    comments, next_page_token = fetch_youtube_comments(video_id, st.session_state.next_page_token)
+    comments = fetch_youtube_comments(video_id)
     if comments:
         st.success("Comments fetched successfully!")
         # Update comments with the new batch, considering existing comments
-        st.session_state.comments.extend(comments)  # Append new comments
-        st.session_state.next_page_token = next_page_token
+        st.session_state.comments = comments  # Overwrite with new comments
         for category in categories:
             categorize_comments_for_category(category)
         display_categorized_comments()  # Display categorized comments after fetching and categorizing
@@ -295,10 +289,8 @@ def display_categorized_comments():
                         st.session_state.previously_rendered_comments[current_category].append(comment['id'])  # Mark comment as rendered
                         votes = fetch_votes(video_id, comment['id'], current_category)  # Use current_category
 
-                        unique_vote_key = f"{current_category}_up_{comment['id']}_{uuid.uuid4()}"  # Ensure unique key
-
-                        if st.button(f"👍 ({votes['up']})", key=unique_vote_key):  # Ensure unique key
-                            update_votes(video_id, comment['id'], current_category, "up")  # Use current_category
+                        if st.button(f"👍 ({votes['up']})", key=f"{current_category}_up_{comment['id']}"):
+                            update_votes(video_id, comment['id'], current_category, "up")
                             st.experimental_rerun()  # Force a rerun to update vote count
 
             else:
@@ -349,8 +341,3 @@ if 'categorized_comments' in st.session_state and any(st.session_state.categoriz
 # Display vote summary
 if 'votes' in st.session_state:
     display_vote_summary()
-
-# Load more comments button
-if st.session_state.next_page_token:
-    if st.button("Load More Comments"):
-        fetch_and_categorize_comments()
