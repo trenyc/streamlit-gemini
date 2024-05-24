@@ -294,6 +294,8 @@ def display_categorized_comments():
                             st.write("update votes before");
                             update_votes(video_id, comment['id'], current_category, "up")  # Use current_category
                             # Force a rerun to update vote count
+                            votes['up'] += 1  # Update local vote count (optional, for immediate UI update)
+ 
                             st.rerun()
             else:
                 st.write(f"No comments found for {current_category}.")
