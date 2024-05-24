@@ -251,6 +251,7 @@ def categorize_comments_for_category(category):
                 if debug_mode:
                     st.write(f"Categorized comments for {category}:")
                     st.write(st.session_state.categorized_comments[category])
+                display_categorized_comments()  # Display categorized comments after fetching and categorizing
             else:
                 st.error(f"No response from the model for category: {category}")
     except APIError as e:
@@ -269,7 +270,7 @@ def fetch_and_categorize_comments():
         st.session_state.next_page_token = next_page_token
         for category in categories:
             categorize_comments_for_category(category)
-        display_categorized_comments()  # Display categorized comments after fetching and categorizing
+        #display_categorized_comments()  # Display categorized comments after fetching and categorizing
     else:
         st.warning("No comments found or failed to fetch comments.")
 
