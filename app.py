@@ -329,7 +329,7 @@ if st.session_state.next_page_token:
           else:
             st.warning("No more comments available.")
       # Set load_more_clicked to False only after successful fetch
-    st.session_state.load_more_clicked = False
+      st.session_state.load_more_clicked = False
 
 
 
