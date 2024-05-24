@@ -283,11 +283,7 @@ def display_categorized_comments():
             if len(st.session_state.categorized_comments[current_category]) > 0:  # Check if the list is not empty
                 st.write(f"### {current_category.capitalize()}")
                 st.write(f"Vote for the comments that are {current_category}.")
-                # Clear existing comments before adding new ones
-                for idx in range(len(st.session_state.categorized_comments[current_category])):
-                    st.empty(f"{current_category}_comment_{idx}")
                 for idx, comment in enumerate(st.session_state.categorized_comments[current_category][:5]):
-                    unique_comment_key = f"{current_category}_comment_{idx}_{uuid.uuid4()}"
                     if comment['text'].strip():  # Ensure no blank comments are displayed
                         st.write(comment['text'])
                         votes = fetch_votes(video_id, comment['id'], current_category)  # Use current_category
