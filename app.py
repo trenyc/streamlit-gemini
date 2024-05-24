@@ -326,7 +326,7 @@ if st.session_state.load_more_clicked:
             st.session_state.comments = comments + st.session_state.comments
             st.session_state.next_page_token = next_page_token
             st.session_state.load_more_clicked = False
-            st.experimental_rerun()
+            #st.experimental_rerun()
         else:
             st.warning("No more comments available.")
             st.session_state.load_more_clicked = False
