@@ -245,18 +245,18 @@ def categorize_comments_for_category(category):
 
 # Fetch and categorize comments for each category
 def fetch_and_categorize_comments():
-    comments, next_page_token = fetch_youtube_comments(video_id, st.session_state.next_page_token)
-    if comments:
-        st.success("Comments fetched successfully!")
-        # Update comments with the new batch, considering existing comments
-        st.session_state.comments.extend(comments)  # Append new comments
-        st.session_state.next_page_token = next_page_token
-        st.session_state.batch_number += 1  # Increment batch number
-        for category in categories:
-            categorize_comments_for_category(category)
-        display_categorized_comments()  # Display categorized comments after fetching and categorizing
-    else:
-        st.warning("No comments found or failed to fetch comments.")
+  comments, next_page_token = fetch_youtube_comments(video_id, st.session_state.next_page_token)
+  if comments:
+    st.success("Comments fetched successfully!")
+    # Update comments with the new batch, considering existing comments
+    st.session_state.comments = comments + st.session_state.comments  # Combine lists
+    st.session_state.next_page_token = next_page_token
+    for category in categories:
+      categorize_comments_for_category(category)
+    display_categorized_comments()  # Display categorized comments after fetching and categorizing
+  else:
+    st.warning("No comments found or failed to fetch comments.")
+
 
 # Function to display categorized comments and voting buttons
 def display_categorized_comments():
