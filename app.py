@@ -1,7 +1,6 @@
-# Streamlit App Code - Version 3.15
+# Streamlit App Code - Version 3.16
 
 import os
-import uuid
 import streamlit as st
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
@@ -273,30 +272,24 @@ def fetch_and_categorize_comments():
 
 # Function to display categorized comments and voting buttons
 def display_categorized_comments():
-  if isinstance(st.session_state.categorized_comments, dict):
-    for current_category in st.session_state.categorized_comments.keys():
-      if len(st.session_state.categorized_comments[current_category]) > 0:
-        st.write(f"### {current_category.capitalize()}")
-        st.write(f"Vote for the comments that are {current_category}.")
+    if isinstance(st.session_state.categorized_comments, dict):
+        for current_category in st.session_state.categorized_comments.keys():  # Use current_category
+            if len(st.session_state.categorized_comments[current_category]) > 0:  # Check if the list is not empty
+                st.write(f"### {current_category.capitalize()}")
+                st.write(f"Vote for the comments that are {current_category}.")
 
-        comments = st.session_state.categorized_comments[current_category][:5]
-        for idx, comment in enumerate(comments):
-          if comment['text'].strip():
-            st.write(comment['text'])
-            votes = fetch_votes(video_id, comment['id'], current_category)
+                comments = st.session_state.categorized_comments[current_category][:5]
+                for idx, comment in enumerate(comments):
+                    if comment['text'].strip():  # Ensure no blank comments are displayed
+                        st.write(comment['text'])
+                        votes = fetch_votes(video_id, comment['id'], current_category)  # Use current_category
 
-            # Use a dictionary to store button click state
-            comment_votes = st.session_state.get(f"comment_votes_{comment['id']}", {"up": 0})
-            unique_vote_key = f"{current_category}_up_{comment['id']}_{uuid.uuid4()}"
+                        if st.button(f"👍 ({votes['up']})", key=f"{current_category}_up_{comment['id']}"):
+                            update_votes(video_id, comment['id'], current_category, "up")
+                            st.experimental_rerun()  # Force a rerun to update vote count
 
-            if st.button(f"\U0001f44d ({votes['up'] + comment_votes['up']})", key=unique_vote_key):
-              update_votes(video_id, comment['id'], current_category, "up")
-              comment_votes['up'] += 1
-              st.session_state[f"comment_votes_{comment['id']}"] = comment_votes
-
-
-      else:
-        st.write(f"No comments found for {current_category}.")
+            else:
+                st.write(f"No comments found for {current_category}.")
 
 # Function to display vote summary for each category
 def display_vote_summary():
