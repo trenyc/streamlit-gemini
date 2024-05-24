@@ -271,6 +271,7 @@ def create_vote_button(video_id, comment_id, category, vote_type="up"):
 
 # Function to display categorized comments
 def display_categorized_comments(prevent_votes=False):
+    st.write("Displaying categorized comments")
     if isinstance(st.session_state.categorized_comments, dict):
         for current_category in st.session_state.categorized_comments.keys():  # Use current_category
             if len(st.session_state.categorized_comments[current_category]) > 0:  # Check if the list is not empty
@@ -336,10 +337,12 @@ if 'votes' in st.session_state:
 # Load more comments button
 if st.session_state.next_page_token:
     if st.button("Load More Comments"):
-        load_more_comments()
+        with st.spinner("Loading more comments..."):
+            load_more_comments()
 
 # Function to display loaded comments categorized without voting buttons
 def display_loaded_comments():
+    st.write("Displaying loaded comments")
     if isinstance(st.session_state.categorized_comments, dict):
         for current_category in st.session_state.categorized_comments.keys():
             if len(st.session_state.categorized_comments[current_category]) > 5:
