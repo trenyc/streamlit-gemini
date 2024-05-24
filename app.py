@@ -43,9 +43,9 @@ if openai_api_key:
         st.write(f"Using OpenAI API Key: ...{openai_api_key[-4:]}")
 
 # Main app content
-st.title("Comments Categorized")
-st.caption("Unleash the fun in YouTube comments with OpenAI")
-st.image("https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/1f31f.png", width=64)
+st.title("Youtube Comments Categorizer")
+st.caption("Unleash fun in YouTube comments with OpenAI")
+
 
 # Function to search YouTube videos
 def search_youtube_videos(query):
