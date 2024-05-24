@@ -150,9 +150,7 @@ if 'votes' not in st.session_state:
     st.session_state.votes = {}
 
 # Function to update votes in session state
-def update_votes(video_id, comment_id, category, vote):
-    st.write("update votes");
-    st.write(video_id, comment_id, category, vote);
+def update_votes(video_id, comment_id, category, vote)
     if video_id not in st.session_state.votes:
         st.session_state.votes[video_id] = {}
     if comment_id not in st.session_state.votes[video_id]:
@@ -300,7 +298,7 @@ def display_categorized_comments():
                             st.write("update votes before");
                             update_votes(video_id, comment['id'], current_category, "up")  # Use current_category
                             # Force a rerun to update vote count
-                            votes['up'] += 1  # Update local vote count (optional, for immediate UI update) 
+                            #votes['up'] += 1  # Update local vote count (optional, for immediate UI update) 
                             st.rerun()
             else:
                 st.write(f"No comments found for {current_category}.")
