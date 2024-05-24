@@ -292,12 +292,20 @@ def display_categorized_comments():
                         st.write(votes)
                         st.write(votes['up'])
                         unique_key = f"{current_category}_up_{comment['id']}_{idx}_{uuid.uuid4()}"  # Ensure unique key
+
+                        unique_vote_key = f"{current_category}_up_{comment['id']}"
+                        vote_text = f" ({votes['up']})"
+                        if st.button(vote_text, key=unique_vote_key):
+                            update_votes(video_id, comment['id'], current_category, "up")
+                            votes['up'] += 1
+                            # Update vote text to reflect the new count
+                            st.write(f" ({votes['up']})", key=unique_vote_key)
+
                         if st.button(f"👍 ({votes['up']})", key=unique_key):  # Ensure unique key
                             st.write("update votes before");
                             update_votes(video_id, comment['id'], current_category, "up")  # Use current_category
                             # Force a rerun to update vote count
-                            votes['up'] += 1  # Update local vote count (optional, for immediate UI update)
- 
+                            votes['up'] += 1  # Update local vote count (optional, for immediate UI update) 
                             st.rerun()
             else:
                 st.write(f"No comments found for {current_category}.")
