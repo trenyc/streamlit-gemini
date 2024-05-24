@@ -296,7 +296,7 @@ def display_categorized_comments():
                         votes = fetch_votes(video_id, comment['id'], current_category)  # Use current_category
 
                         unique_vote_key = f"{current_category}_up_{comment['id']}_{uuid.uuid4()}"  # Ensure unique key
-                        vote_key = f"{current_category}_up_{comment['id']})}"  # Ensure unique key
+                        vote_key = f"{current_category}_up_{comment['id']}"  # Ensure unique key
                         if st.button(f"👍 ({votes['up']})", key=vote_key):  # Ensure unique key
                             update_votes(video_id, comment['id'], current_category, "up")  # Use current_category
                             #st.experimental_rerun()  # Force a rerun to update vote count
