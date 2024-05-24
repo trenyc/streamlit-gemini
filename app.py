@@ -195,7 +195,7 @@ def create_prompt_for_category(comments, category):
         if len(prompt) + len(comment_text) + 2 > token_limit:  # +2 for the ", " separator
             break
         prompt += comment_text + ", "
-    return prompt.rstrip(', ')
+    return prompt.rstrip(', '
 
 # Function to categorize comments for a specific category
 def categorize_comments_for_category(category, comments):
@@ -231,6 +231,18 @@ def categorize_comments_for_category(category, comments):
     except Exception as e:
         st.error(f"An unexpected error occurred: {e}")
 
+# Function to load more comments
+def load_more_comments():
+    comments, next_page_token = fetch_youtube_comments(video_id, st.session_state.next_page_token)
+    if comments:
+        st.session_state.comments = comments + st.session_state.comments
+        st.session_state.next_page_token = next_page_token
+        for category in categories:
+            categorize_comments_for_category(category, comments)
+    else:
+        st.warning("No more comments available.")
+        st.session_state.load_more_clicked = False
+
 # Fetch and categorize comments for each category
 def fetch_and_categorize_comments():
     comments, next_page_token = fetch_youtube_comments(video_id, st.session_state.next_page_token)
@@ -241,8 +253,8 @@ def fetch_and_categorize_comments():
         st.session_state.next_page_token = next_page_token
         st.session_state.batch_number += 1  # Increment batch number
         for category in categories:
-            categorize_comments_for_category(category, st.session_state.comments)
-        display_categorized_comments()  # Display categorized comments after fetching and categorizing
+            categorize_comments_for_category(category, comments)
+        display_categorized_comments(prevent_votes=False)  # Display categorized comments after fetching and categorizing
     else:
         st.warning("No comments found or failed to fetch comments.")
 
@@ -317,20 +329,7 @@ if 'votes' in st.session_state:
 # Load more comments button
 if st.session_state.next_page_token:
     if st.button("Load More Comments"):
-        st.session_state.load_more_clicked = True
-
-if st.session_state.load_more_clicked:
-    st.write("Load More button clicked.")
-    with st.spinner("Loading more comments..."):
-        comments, next_page_token = fetch_youtube_comments(video_id, st.session_state.next_page_token)
-        if comments:
-            st.session_state.comments = comments + st.session_state.comments
-            st.session_state.next_page_token = next_page_token
-            st.session_state.load_more_clicked = False
-            st.experimental_rerun()
-        else:
-            st.warning("No more comments available.")
-            st.session_state.load_more_clicked = False
+        load_more_comments()
 
 # Function to display loaded comments categorized without voting buttons
 def display_loaded_comments():
