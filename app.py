@@ -268,7 +268,8 @@ def fetch_and_categorize_comments():
     comments, next_page_token = fetch_youtube_comments(video_id, st.session_state.next_page_token)
     if comments:
         st.success("Comments fetched successfully!")
-        st.session_state.comments = comments  # Replace comments with the new batch
+        # Update comments with the new batch, considering existing comments
+        st.session_state.comments.extend(comments)  # Append new comments
         st.session_state.next_page_token = next_page_token
         for category in categories:
             categorize_comments_for_category(category)
