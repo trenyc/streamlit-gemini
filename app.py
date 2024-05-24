@@ -151,6 +151,7 @@ if 'votes' not in st.session_state:
 
 # Function to update votes in session state
 def update_votes(video_id, comment_id, category, vote):
+    st.write("update votes");
     st.write(video_id, comment_id, category, vote);
     if video_id not in st.session_state.votes:
         st.session_state.votes[video_id] = {}
@@ -168,6 +169,7 @@ def update_votes(video_id, comment_id, category, vote):
 
 # Function to fetch votes from session state
 def fetch_votes(video_id, comment_id, category):
+    st.write("fetchvotes");
     if video_id in st.session_state.votes and comment_id in st.session_state.votes[video_id]:
         st.write(st.session_state.votes[video_id][comment_id][category])
         return st.session_state.votes[video_id][comment_id].get(category, {"up": 0})
@@ -289,6 +291,7 @@ def display_categorized_comments():
                         votes = fetch_votes(video_id, comment['id'], current_category)  # Use current_category
                         unique_key = f"{current_category}_up_{comment['id']}_{idx}_{uuid.uuid4()}"  # Ensure unique key
                         if st.button(f"👍 ({votes['up']})", key=unique_key):  # Ensure unique key
+                            st.write("update votes before");
                             update_votes(video_id, comment['id'], current_category, "up")  # Use current_category
                             # Force a rerun to update vote count
                             st.rerun()
