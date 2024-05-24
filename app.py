@@ -1,4 +1,4 @@
-# Streamlit App Code - Version 3.20
+# Streamlit App Code - Version 3.21
 
 import os
 import streamlit as st
@@ -182,17 +182,9 @@ def create_prompt_for_category(comments, category):
         if top_voted_comment:
             example_comment = top_voted_comment['text']
         else:
-            if debug_mode:
-                st.write(f"Top voted comment ID for {category} has no corresponding comment.")
             example_comment = f"Comment with ID: {top_voted_comment_id}"
-    if debug_mode:
-        st.write(f"Top voted comment ID for {category}: {top_voted_comment_id}")
-        st.write(f"Top voted comment text for {category}: {example_comment}")
-
     if not example_comment:
         example_comment = category
-        if debug_mode:
-            st.write(f"No votes for category {category}. Using keyword '{category}' as example.")
 
     base_prompt = f"Categorize the following comments into the category '{category}'. Example of a '{category}' comment: '{example_comment}'. Comments: "
 
@@ -210,10 +202,6 @@ def categorize_comments_for_category(category):
     prompt = create_prompt_for_category(st.session_state.comments, category)
     st.write(f"Starting to categorize comments for category: {category}")
     try:
-        if debug_mode:
-            st.write(f"Prompt for {category} being sent to OpenAI API:")
-            st.code(prompt)
-            st.write(f"Using OpenAI API Key: ...{openai_api_key[-4:]}")
         with st.spinner(f"Categorizing comments into {category} using OpenAI..."):
             response = client.chat.completions.create(
                 model="gpt-3.5-turbo",
@@ -245,18 +233,18 @@ def categorize_comments_for_category(category):
 
 # Fetch and categorize comments for each category
 def fetch_and_categorize_comments():
-  comments, next_page_token = fetch_youtube_comments(video_id, st.session_state.next_page_token)
-  if comments:
-    st.success("Comments fetched successfully!")
-    # Update comments with the new batch, considering existing comments
-    st.session_state.comments = comments + st.session_state.comments  # Combine lists
-    st.session_state.next_page_token = next_page_token
-    for category in categories:
-      categorize_comments_for_category(category)
-    display_categorized_comments()  # Display categorized comments after fetching and categorizing
-  else:
-    st.warning("No comments found or failed to fetch comments.")
-
+    comments, next_page_token = fetch_youtube_comments(video_id, st.session_state.next_page_token)
+    if comments:
+        st.success("Comments fetched successfully!")
+        # Prepend new comments to existing comments
+        st.session_state.comments = comments + st.session_state.comments
+        st.session_state.next_page_token = next_page_token
+        st.session_state.batch_number += 1  # Increment batch number
+        for category in categories:
+            categorize_comments_for_category(category)
+        display_categorized_comments()  # Display categorized comments after fetching and categorizing
+    else:
+        st.warning("No comments found or failed to fetch comments.")
 
 # Function to display categorized comments and voting buttons
 def display_categorized_comments():
@@ -335,7 +323,7 @@ if st.session_state.load_more_clicked:
     with st.spinner("Loading more comments..."):
         comments, next_page_token = fetch_youtube_comments(video_id, st.session_state.next_page_token)
         if comments:
-            st.session_state.comments.extend(comments)
+            st.session_state.comments = comments + st.session_state.comments
             st.session_state.next_page_token = next_page_token
             st.session_state.load_more_clicked = False
             st.experimental_rerun()
