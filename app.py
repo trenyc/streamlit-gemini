@@ -348,7 +348,9 @@ if 'votes' in st.session_state:
 
 # Load more comments button
 if st.session_state.next_page_token:
+    st.write("loadmorenexttoken")
     if st.button("Load More Comments"):
+        st.write("clicked")
         with st.spinner("Loading more comments..."):
             comments, next_page_token = fetch_youtube_comments(video_id, st.session_state.next_page_token)
             if comments:
