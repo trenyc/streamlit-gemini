@@ -274,4 +274,70 @@ def display_vote_summary():
         st.subheader("Vote Summary")
         for category in st.session_state.categorized_comments.keys():
             vote_summary = {}
-            for comment_id in st.session_state
+            for comment_id in st.session_state.votes.get(video_id, {}):
+                if category in st.session_state.votes[video_id][comment_id]:
+                    up_votes = st.session_state.votes[video_id][comment_id][category]["up"]
+                    if up_votes > 0:
+                        if comment_id not in vote_summary:
+                            vote_summary[comment_id] = 0
+                        vote_summary[comment_id] += up_votes
+
+            st.write(f"**{category.capitalize()}**: {sum(vote_summary.values())} votes")
+
+# Fetch and display YouTube comments
+if 'selected_video_id' in st.session_state and yt_api_key and openai_api_key:
+    if 'auto_fetch' in st.session_state and st.session_state.auto_fetch:
+        fetch_and_categorize_comments()
+        st.session_state.auto_fetch = False
+
+# Show "Fetch Comments" and "Show/Hide Comments" in debug mode
+if debug_mode:
+    if st.button("Fetch Comments"):
+        fetch_youtube_comments(video_id)
+    show_comments = st.checkbox("Show/Hide Comments")
+    if show_comments and 'comments' in st.session_state:
+        st.write("Displaying fetched comments...")
+        st.write("💬 Fetched YouTube Comments")
+        for comment in st.session_state.comments:
+            st.write(comment['text'])
+
+# Always show the "Categorize Comments" button
+if st.button("Categorize Comments"):
+    fetch_and_categorize_comments()
+
+# Display categorized comments and voting buttons
+if 'categorized_comments' in st.session_state and any(st.session_state.categorized_comments.values()):
+    st.subheader("Vote on Comments")
+    display_categorized_comments(prevent_votes=False)
+
+# Display vote summary
+if 'votes' in st.session_state:
+    display_vote_summary()
+
+# Load more comments button
+if st.session_state.next_page_token:
+    if st.button("Load More Comments"):
+        st.session_state.load_more_clicked = True
+
+if st.session_state.load_more_clicked:
+    st.write("Load More button clicked.")
+    with st.spinner("Loading more comments..."):
+        comments, next_page_token = fetch_youtube_comments(video_id, st.session_state.next_page_token)
+        if comments:
+            st.session_state.comments = comments + st.session_state.comments
+            st.session_state.next_page_token = next_page_token
+            st.session_state.load_more_clicked = False
+            st.experimental_rerun()
+        else:
+            st.warning("No more comments available.")
+            st.session_state.load_more_clicked = False
+
+# Function to display comments without voting buttons
+def display_loaded_comments():
+    st.subheader("Additional Comments")
+    for comment in st.session_state.comments[5:]:
+        if comment['text'].strip():
+            st.write(comment['text'])
+
+if 'load_more_clicked' in st.session_state and st.session_state.load_more_clicked == False:
+    display_loaded_comments()
