@@ -299,7 +299,7 @@ def display_categorized_comments():
 
                         if st.button(f"👍 ({votes['up']})", key=unique_vote_key):  # Ensure unique key
                             update_votes(video_id, comment['id'], current_category, "up")  # Use current_category
-                            st.experimental_rerun()  # Force a rerun to update vote count
+                            #st.experimental_rerun()  # Force a rerun to update vote count
 
             else:
                 st.write(f"No comments found for {current_category}.")
