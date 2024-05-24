@@ -284,10 +284,10 @@ def display_categorized_comments():
                 st.write(f"### {current_category.capitalize()}")
                 st.write(f"Vote for the comments that are {current_category}.")
 
-                #filtered_comments = [
-                 #   comment for comment in st.session_state.categorized_comments[current_category]
-                  #  if comment['id'] not in st.session_state.previously_rendered_comments[current_category]
-                #]
+                filtered_comments = [
+                    comment for comment in st.session_state.categorized_comments[current_category]
+                    if comment['id'] not in st.session_state.previously_rendered_comments[current_category]
+                ]
 
                 for idx, comment in enumerate(filtered_comments[:5]):
                     if comment['text'].strip():  # Ensure no blank comments are displayed
