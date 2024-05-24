@@ -1,7 +1,6 @@
-# Streamlit App Code - Version 3.6
+# Streamlit App Code - Version 3.7
 
 import os
-import uuid
 import streamlit as st
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
@@ -88,7 +87,7 @@ if 'search_results' in st.session_state:
                 st.session_state.video_url = f"https://www.youtube.com/watch?v={video_id}"
                 st.session_state.auto_fetch = True
                 del st.session_state.search_results
-                st.rerun()  # Force a rerun to update state
+                st.experimental_rerun()  # Force a rerun to update state
 
 # Set selected video ID from search results
 if 'selected_video_id' in st.session_state:
@@ -140,9 +139,9 @@ if 'comments' not in st.session_state:
 if 'next_page_token' not in st.session_state:
     st.session_state.next_page_token = None
 if 'categorized_comments' not in st.session_state:
-    st.session_state.categorized_comments = {category: [] for category in ['funny', 'positive', 'negative']}
+    st.session_state.categorized_comments = {category: [] for category in ['funny', 'interesting', 'positive', 'negative', 'serious']}
 if 'top_voted_comments' not in st.session_state:
-    st.session_state.top_voted_comments = {category: None for category in ['funny', 'positive', 'negative']}
+    st.session_state.top_voted_comments = {category: None for category in ['funny', 'interesting', 'positive', 'negative', 'serious']}
 
 # Initialize votes in session state
 if 'votes' not in st.session_state:
@@ -175,8 +174,8 @@ def fetch_votes(video_id, comment_id, category):
 categories = st_tags.st_tags(
     label='Add custom categories:',
     text='Press enter to add more',
-    value=['funny',  'positive', 'negative'],
-    suggestions=['funny',  'positive', 'negative'],
+    value=['funny', 'interesting', 'positive', 'negative', 'serious'],
+    suggestions=['funny', 'interesting', 'positive', 'negative', 'serious'],
     maxtags=10,
 )
 
@@ -250,7 +249,6 @@ def categorize_comments_for_category(category):
                 if debug_mode:
                     st.write(f"Categorized comments for {category}:")
                     st.write(st.session_state.categorized_comments[category])
-                #display_categorized_comments()  # Display categorized comments after fetching and categorizing
             else:
                 st.error(f"No response from the model for category: {category}")
     except APIError as e:
@@ -285,7 +283,7 @@ def display_categorized_comments():
                     if comment['text'].strip():  # Ensure no blank comments are displayed
                         st.write(comment['text'])
                         votes = fetch_votes(video_id, comment['id'], current_category)  # Use current_category
-                        unique_vote_key = f"{current_category}_up_{comment['id']}_{uuid.uuid4()}"  # Ensure unique key
+                        unique_vote_key = f"{current_category}_up_{comment['id']}_{idx}"  # Ensure unique key
                         if st.button(f"👍 ({votes['up']})", key=unique_vote_key):  # Ensure unique key
                             update_votes(video_id, comment['id'], current_category, "up")  # Use current_category
                             st.experimental_rerun()  # Force a rerun to update vote count
