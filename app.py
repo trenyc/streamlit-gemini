@@ -318,15 +318,16 @@ if st.session_state.next_page_token:
     if st.button("Load More Comments"):
         st.session_state.load_more_clicked = True
 
-if st.session_state.load_more_clicked:
-    st.write("Load More button clicked.")
+if st.button("Load More Comments"):
+  st.session_state.load_more_clicked = True
+  if st.session_state.next_page_token:
     with st.spinner("Loading more comments..."):
-        comments, next_page_token = fetch_youtube_comments(video_id, st.session_state.next_page_token)
-        if comments:
-            st.session_state.comments = comments + st.session_state.comments
-            st.session_state.next_page_token = next_page_token
-            st.session_state.load_more_clicked = False
-            #st.experimental_rerun()
-        else:
-            st.warning("No more comments available.")
-            st.session_state.load_more_clicked = False
+      comments, next_page_token = fetch_youtube_comments(video_id, st.session_state.next_page_token)
+      if comments:
+        st.session_state.comments = comments + st.session_state.comments
+        st.session_state.next_page_token = next_page_token
+      else:
+        st.warning("No more comments available.")
+  # Set load_more_clicked to False only after successful fetch
+  st.session_state.load_more_clicked = False
+
