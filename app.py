@@ -289,7 +289,7 @@ def display_categorized_comments():
                 for idx, comment in enumerate(st.session_state.categorized_comments[current_category][:5]):
                     unique_comment_key = f"{current_category}_comment_{idx}_{uuid.uuid4()}"
                     if comment['text'].strip():  # Ensure no blank comments are displayed
-                        st.write(comment['text'], key=unique_comment_key)
+                        st.write(comment['text'])
                         votes = fetch_votes(video_id, comment['id'], current_category)  # Use current_category
                        
                         unique_vote_key = f"{current_category}_up_{comment['id']}"
