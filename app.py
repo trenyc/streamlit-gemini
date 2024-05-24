@@ -151,6 +151,7 @@ if 'votes' not in st.session_state:
 
 # Function to update votes in session state
 def update_votes(video_id, comment_id, category, vote):
+    st.write(video_id, comment_id, category, vote);
     if video_id not in st.session_state.votes:
         st.session_state.votes[video_id] = {}
     if comment_id not in st.session_state.votes[video_id]:
@@ -168,6 +169,7 @@ def update_votes(video_id, comment_id, category, vote):
 # Function to fetch votes from session state
 def fetch_votes(video_id, comment_id, category):
     if video_id in st.session_state.votes and comment_id in st.session_state.votes[video_id]:
+        st.write(st.session_state.votes[video_id][comment_id][category])
         return st.session_state.votes[video_id][comment_id].get(category, {"up": 0})
     else:
         return {"up": 0}
