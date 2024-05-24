@@ -1,4 +1,4 @@
-# Streamlit App Code - Version 3.18
+# Streamlit App Code - Version 3.19
 
 import os
 import streamlit as st
@@ -48,8 +48,6 @@ st.caption("Unleash fun in YouTube comments with OpenAI")
 # Function to search YouTube videos
 def search_youtube_videos(query):
     try:
-        if debug_mode:
-            st.write("Searching for YouTube videos...")
         youtube = build('youtube', 'v3', developerKey=yt_api_key)
         request = youtube.search().list(
             part="snippet",
@@ -58,8 +56,6 @@ def search_youtube_videos(query):
             maxResults=5
         )
         response = request.execute()
-        if debug_mode:
-            st.write("Processing search results...")
         return response['items']
     except HttpError as e:
         st.error(f"An error occurred while searching for videos: {e}")
@@ -108,26 +104,16 @@ if video_url:
 # Function to fetch YouTube comments
 def fetch_youtube_comments(video_id, page_token=None):
     try:
-        if debug_mode:
-            st.write("Initializing YouTube API client...")
         youtube = build('youtube', 'v3', developerKey=yt_api_key)
-        if debug_mode:
-            st.write("Creating request to fetch comments...")
         request = youtube.commentThreads().list(
             part="snippet",
             videoId=video_id,
             maxResults=100,
             pageToken=page_token
         )
-        if debug_mode:
-            st.write("Executing request to YouTube API...")
         response = request.execute()
-        if debug_mode:
-            st.write("Processing response from YouTube API...")
         comments = [{"id": item['snippet']['topLevelComment']['id'],
                      "text": item['snippet']['topLevelComment']['snippet']['textDisplay']} for item in response['items']]
-        if debug_mode:
-            st.write(f"Fetched {len(comments)} comments.")
         next_page_token = response.get('nextPageToken', None)
         return comments, next_page_token
     except HttpError as e:
@@ -226,7 +212,6 @@ def categorize_comments_for_category(category):
             st.write(f"Prompt for {category} being sent to OpenAI API:")
             st.code(prompt)
             st.write(f"Using OpenAI API Key: ...{openai_api_key[-4:]}")
-            st.write("Sending request to OpenAI API...")
         with st.spinner(f"Categorizing comments into {category} using OpenAI..."):
             response = client.chat.completions.create(
                 model="gpt-3.5-turbo",
@@ -235,13 +220,8 @@ def categorize_comments_for_category(category):
                     {"role": "user", "content": prompt},
                 ]
             )
-            if debug_mode:
-                st.write(f"Processing response from OpenAI API for category: {category}")
             if response.choices:
                 response_text = response.choices[0].message.content.strip()
-                if debug_mode:
-                    st.write(f"Response from OpenAI API for {category}:")
-                    st.code(response_text)
                 # Strip introductory line and ignore example comment
                 response_lines = response_text.split('\n')
                 if response_lines and response_lines[0].count(':') > 0:
@@ -252,9 +232,6 @@ def categorize_comments_for_category(category):
                     if line_text:
                         if line_text not in [c['text'] for c in st.session_state.categorized_comments[category]]:
                             st.session_state.categorized_comments[category].append({"id": line_text, "text": line_text})
-                if debug_mode:
-                    st.write(f"Categorized comments for {category}:")
-                    st.write(st.session_state.categorized_comments[category])
             else:
                 st.error(f"No response from the model for category: {category}")
     except APIError as e:
@@ -348,14 +325,18 @@ if 'votes' in st.session_state:
 
 # Load more comments button
 if st.session_state.next_page_token:
-    st.write("loadmorenexttoken")
     if st.button("Load More Comments"):
-        st.write("clicked")
-        with st.spinner("Loading more comments..."):
-            comments, next_page_token = fetch_youtube_comments(video_id, st.session_state.next_page_token)
-            if comments:
-                st.session_state.comments.extend(comments)
-                st.session_state.next_page_token = next_page_token
-                st.experimental_rerun()
-            else:
-                st.warning("No more comments available.")
+        st.session_state.load_more_clicked = True
+
+if st.session_state.get('load_more_clicked', False):
+    with st.spinner("Loading more comments..."):
+        comments, next_page_token = fetch_youtube_comments(video_id, st.session_state.next_page_token)
+        st.write("Load More button clicked.")
+        if comments:
+            st.session_state.comments.extend(comments)
+            st.session_state.next_page_token = next_page_token
+            st.session_state.load_more_clicked = False
+            st.experimental_rerun()
+        else:
+            st.warning("No more comments available.")
+            st.session_state.load_more_clicked = False
