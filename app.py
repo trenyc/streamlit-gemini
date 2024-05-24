@@ -302,9 +302,7 @@ def display_categorized_comments():
                             # Force a rerun to update vote count
                             #votes['up'] += 1  # Update local vote count (optional, for immediate UI update) 
                             st.rerun()
-                  # Clear existing comments before adding new ones
-                  for idx in range(len(st.session_state.categorized_comments[current_category])):
-                      st.empty(f"{current_category}")
+     
             else:
                 st.write(f"No comments found for {current_category}.")
 
