@@ -1,4 +1,4 @@
-# Streamlit App Code - Version 3.5
+# Streamlit App Code - Version 3.6
 
 import os
 import uuid
@@ -43,9 +43,8 @@ if openai_api_key:
         st.write(f"Using OpenAI API Key: ...{openai_api_key[-4:]}")
 
 # Main app content
-st.title("Youtube Comments Categorizer")
+st.title("YouTube Comments Categorizer")
 st.caption("Unleash fun in YouTube comments with OpenAI")
-
 
 # Function to search YouTube videos
 def search_youtube_videos(query):
@@ -167,12 +166,10 @@ def update_votes(video_id, comment_id, category, vote):
 
 # Function to fetch votes from session state
 def fetch_votes(video_id, comment_id, category):
-  if video_id not in st.session_state.votes:
-    st.session_state.votes[video_id] = {}
-  if comment_id not in st.session_state.votes[video_id]:
-    st.session_state.votes[video_id][comment_id] = {category: {"up": 0}}
-  return st.session_state.votes[video_id][comment_id].get(category, {"up": 0})
-
+    if video_id in st.session_state.votes and comment_id in st.session_state.votes[video_id]:
+        return st.session_state.votes[video_id][comment_id].get(category, {"up": 0})
+    else:
+        return {"up": 0}
 
 # Input for additional categories
 categories = st_tags.st_tags(
@@ -284,25 +281,14 @@ def display_categorized_comments():
             if len(st.session_state.categorized_comments[current_category]) > 0:  # Check if the list is not empty
                 st.write(f"### {current_category.capitalize()}")
                 st.write(f"Vote for the comments that are {current_category}.")
-            
-
                 for idx, comment in enumerate(st.session_state.categorized_comments[current_category][:5]):
                     if comment['text'].strip():  # Ensure no blank comments are displayed
                         st.write(comment['text'])
                         votes = fetch_votes(video_id, comment['id'], current_category)  # Use current_category
-                       
-                        unique_vote_key = f"{current_category}_up_{comment['id']}"
-              
-                        vote_text = f" ({votes['up']})"
-             
-
+                        unique_vote_key = f"{current_category}_up_{comment['id']}_{uuid.uuid4()}"  # Ensure unique key
                         if st.button(f"👍 ({votes['up']})", key=unique_vote_key):  # Ensure unique key
-                            st.write("update votes before");
                             update_votes(video_id, comment['id'], current_category, "up")  # Use current_category
-                            # Force a rerun to update vote count
-                            #votes['up'] += 1  # Update local vote count (optional, for immediate UI update) 
-                            st.rerun()
-     
+                            st.experimental_rerun()  # Force a rerun to update vote count
             else:
                 st.write(f"No comments found for {current_category}.")
 
