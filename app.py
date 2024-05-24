@@ -1,7 +1,7 @@
 # Streamlit App Code - Version 3.6
 
 import os
-import uuid
+import uuidf
 import streamlit as st
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
@@ -140,9 +140,9 @@ if 'comments' not in st.session_state:
 if 'next_page_token' not in st.session_state:
     st.session_state.next_page_token = None
 if 'categorized_comments' not in st.session_state:
-    st.session_state.categorized_comments = {category: [] for category in ['funny', 'interesting', 'positive', 'negative', 'serious']}
+    st.session_state.categorized_comments = {category: [] for category in ['funny', 'positive', 'negative']}
 if 'top_voted_comments' not in st.session_state:
-    st.session_state.top_voted_comments = {category: None for category in ['funny', 'interesting', 'positive', 'negative', 'serious']}
+    st.session_state.top_voted_comments = {category: None for category in ['funny', 'positive', 'negative']}
 
 # Initialize votes in session state
 if 'votes' not in st.session_state:
@@ -175,8 +175,8 @@ def fetch_votes(video_id, comment_id, category):
 categories = st_tags.st_tags(
     label='Add custom categories:',
     text='Press enter to add more',
-    value=['funny', 'interesting', 'positive', 'negative', 'serious'],
-    suggestions=['funny', 'interesting', 'positive', 'negative', 'serious'],
+    value=['funny',  'positive', 'negative'],
+    suggestions=['funny',  'positive', 'negative'],
     maxtags=10,
 )
 
