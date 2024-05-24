@@ -259,10 +259,10 @@ def display_categorized_comments():
                     if comment['text'].strip():  # Ensure no blank comments are displayed
                         st.write(comment['text'])
                         votes = fetch_votes(video_id, comment['id'], current_category)  # Use current_category
-
-                        if st.button(f"👍 ({votes['up']})", key=f"{current_category}_up_{comment['id']}"):
+                        if st.button(f" ({votes['up']})", key=f"{current_category}_up_{comment['id']}"):
                             update_votes(video_id, comment['id'], current_category, "up")
                             st.experimental_rerun()  # Force a rerun to update vote count
+
 
             else:
                 st.write(f"No comments found for {current_category}.")
