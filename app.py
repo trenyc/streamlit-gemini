@@ -279,23 +279,21 @@ def display_categorized_comments():
         st.write(f"### {current_category.capitalize()}")
         st.write(f"Vote for the comments that are {current_category}.")
 
-        filtered_comments = [
-          comment for comment in st.session_state.categorized_comments[current_category]
-          if comment['id'] not in st.session_state.previously_rendered_comments[current_category]
-        ]
-
-        for idx, comment in enumerate(filtered_comments[:5]):
-          if comment['text'].strip():  # Ensure no blank comments are displayed
+        comments = st.session_state.categorized_comments[current_category]
+        for idx, comment in enumerate(comments):
+          if comment['text'].strip():
             st.write(comment['text'])
             votes = fetch_votes(video_id, comment['id'], current_category)
 
+            # Use a dictionary to store button click state
+            comment_votes = st.session_state.get(f"comment_votes_{comment['id']}", {"up": 0})
             unique_vote_key = f"{current_category}_up_{comment['id']}_{uuid.uuid4()}"
 
-            if st.button(f" ({votes['up']})", key=unique_vote_key):
+            if st.button(f" ({votes['up'] + comment_votes['up']})", key=unique_vote_key):
               update_votes(video_id, comment['id'], current_category, "up")
+              comment_votes['up'] += 1
+              st.session_state[f"comment_votes_{comment['id']}"] = comment_votes  # Update session state
 
-            # Mark comment as rendered after displaying it
-            st.session_state.previously_rendered_comments[current_category].append(comment['id'])
       else:
         st.write(f"No comments found for {current_category}.")
 
