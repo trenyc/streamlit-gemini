@@ -169,13 +169,12 @@ def update_votes(video_id, comment_id, category, vote):
 
 # Function to fetch votes from session state
 def fetch_votes(video_id, comment_id, category):
-    st.write("fetchvotes");
-    if video_id in st.session_state.votes and comment_id in st.session_state.votes[video_id]:
-        st.write("sessionvote")
-        st.write(st.session_state.votes[video_id][comment_id][category])
-        return st.session_state.votes[video_id][comment_id].get(category, {"up": 0})
-    else:
-        return {"up": 0}
+  if video_id not in st.session_state.votes:
+    st.session_state.votes[video_id] = {}
+  if comment_id not in st.session_state.votes[video_id]:
+    st.session_state.votes[video_id][comment_id] = {category: {"up": 0}}
+  return st.session_state.votes[video_id][comment_id].get(category, {"up": 0})
+
 
 # Input for additional categories
 categories = st_tags.st_tags(
