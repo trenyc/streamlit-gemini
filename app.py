@@ -279,7 +279,7 @@ def display_categorized_comments():
         st.write(f"### {current_category.capitalize()}")
         st.write(f"Vote for the comments that are {current_category}.")
 
-        comments = st.session_state.categorized_comments[current_category]
+        comments = st.session_state.categorized_comments[current_category][:5]
         for idx, comment in enumerate(comments):
           if comment['text'].strip():
             st.write(comment['text'])
@@ -289,10 +289,11 @@ def display_categorized_comments():
             comment_votes = st.session_state.get(f"comment_votes_{comment['id']}", {"up": 0})
             unique_vote_key = f"{current_category}_up_{comment['id']}_{uuid.uuid4()}"
 
-            if st.button(f" ({votes['up'] + comment_votes['up']})", key=unique_vote_key):
+            if st.button(f"\U0001f44d ({votes['up'] + comment_votes['up']})", key=unique_vote_key):
               update_votes(video_id, comment['id'], current_category, "up")
               comment_votes['up'] += 1
-              st.session_state[f"comment_votes_{comment['id']}"] = comment_votes  # Update session state
+              st.session_state[f"comment_votes_{comment['id']}"] = comment_votes
+
 
       else:
         st.write(f"No comments found for {current_category}.")
