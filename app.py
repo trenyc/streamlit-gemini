@@ -1,6 +1,7 @@
-# Streamlit App Code - Version 3.8
+# Streamlit App Code - Version 3.9
 
 import os
+import uuid
 import streamlit as st
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
@@ -142,8 +143,8 @@ if 'categorized_comments' not in st.session_state:
     st.session_state.categorized_comments = {category: [] for category in ['funny', 'interesting', 'positive', 'negative', 'serious']}
 if 'top_voted_comments' not in st.session_state:
     st.session_state.top_voted_comments = {category: None for category in ['funny', 'interesting', 'positive', 'negative', 'serious']}
-if 'displayed_comments' not in st.session_state:
-    st.session_state.displayed_comments = set()
+if 'displayed_comment_ids' not in st.session_state:
+    st.session_state.displayed_comment_ids = set()
 
 # Initialize votes in session state
 if 'votes' not in st.session_state:
@@ -245,9 +246,9 @@ def categorize_comments_for_category(category):
                 response_lines = [line for line in response_lines if line.strip() and all(st.session_state.top_voted_comments[cat] is None or st.session_state.top_voted_comments[cat] not in line for cat in categories)]
                 for line in response_lines:
                     line_text = line.strip()
-                    if line_text and line_text not in st.session_state.displayed_comments:
+                    if line_text and line_text not in st.session_state.displayed_comment_ids:
                         st.session_state.categorized_comments[category].append({"id": line_text, "text": line_text})
-                        st.session_state.displayed_comments.add(line_text)
+                        st.session_state.displayed_comment_ids.add(line_text)
                 if debug_mode:
                     st.write(f"Categorized comments for {category}:")
                     st.write(st.session_state.categorized_comments[category])
@@ -283,12 +284,14 @@ def display_categorized_comments():
                 st.write(f"Vote for the comments that are {current_category}.")
                 for idx, comment in enumerate(st.session_state.categorized_comments[current_category][:5]):
                     if comment['text'].strip():  # Ensure no blank comments are displayed
-                        st.write(comment['text'])
-                        votes = fetch_votes(video_id, comment['id'], current_category)  # Use current_category
-                        unique_vote_key = f"{current_category}_up_{comment['id']}_{idx}"  # Ensure unique key
-                        if st.button(f"👍 ({votes['up']})", key=unique_vote_key):  # Ensure unique key
-                            update_votes(video_id, comment['id'], current_category, "up")  # Use current_category
-                            st.experimental_rerun()  # Force a rerun to update vote count
+                        if comment['id'] not in st.session_state.displayed_comment_ids:
+                            st.session_state.displayed_comment_ids.add(comment['id'])
+                            st.write(comment['text'])
+                            votes = fetch_votes(video_id, comment['id'], current_category)  # Use current_category
+                            unique_vote_key = f"{current_category}_up_{comment['id']}_{idx}"  # Ensure unique key
+                            if st.button(f"👍 ({votes['up']})", key=unique_vote_key):  # Ensure unique key
+                                update_votes(video_id, comment['id'], current_category, "up")  # Use current_category
+                                st.experimental_rerun()  # Force a rerun to update vote count
             else:
                 st.write(f"No comments found for {current_category}.")
 
