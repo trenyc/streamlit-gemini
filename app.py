@@ -103,7 +103,7 @@ if video_url:
             video_id = video_url.split('v=')[-1]
         st.video(f"https://www.youtube.com/watch?v={video_id}", start_time=0)
     except Exception as e:
-        st.error(f"Failed to display video: {e}")
+        st.error(f"Failed to  video: {e}")
 
 # Function to fetch YouTube comments
 def fetch_youtube_comments(video_id, page_token=None):
@@ -125,7 +125,7 @@ def fetch_youtube_comments(video_id, page_token=None):
         if debug_mode:
             st.write("Processing response from YouTube API...")
         comments = [{"id": item['snippet']['topLevelComment']['id'],
-                     "text": item['snippet']['topLevelComment']['snippet']['textDisplay']} for item in response['items']]
+                     "text": item['snippet']['topLevelComment']['snippet']['text']} for item in response['items']]
         if debug_mode:
             st.write(f"Fetched {len(comments)} comments.")
         next_page_token = response.get('nextPageToken', None)
@@ -284,10 +284,10 @@ def display_categorized_comments():
                 st.write(f"### {current_category.capitalize()}")
                 st.write(f"Vote for the comments that are {current_category}.")
 
-                filtered_comments = [
-                    comment for comment in st.session_state.categorized_comments[current_category]
-                    if comment['id'] not in st.session_state.previously_rendered_comments[current_category]
-                ]
+                #filtered_comments = [
+                 #   comment for comment in st.session_state.categorized_comments[current_category]
+                  #  if comment['id'] not in st.session_state.previously_rendered_comments[current_category]
+                #]
 
                 for idx, comment in enumerate(filtered_comments[:5]):
                     if comment['text'].strip():  # Ensure no blank comments are displayed
@@ -296,8 +296,8 @@ def display_categorized_comments():
                         votes = fetch_votes(video_id, comment['id'], current_category)  # Use current_category
 
                         unique_vote_key = f"{current_category}_up_{comment['id']}_{uuid.uuid4()}"  # Ensure unique key
-
-                        if st.button(f"👍 ({votes['up']})", key=unique_vote_key):  # Ensure unique key
+                        vote_key = f"{current_category}_up_{comment['id']})}"  # Ensure unique key
+                        if st.button(f"👍 ({votes['up']})", key=vote_key):  # Ensure unique key
                             update_votes(video_id, comment['id'], current_category, "up")  # Use current_category
                             #st.experimental_rerun()  # Force a rerun to update vote count
 
