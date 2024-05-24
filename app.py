@@ -1,4 +1,4 @@
-# Streamlit App Code - Version 3.22
+# Streamlit App Code - Version 3.23
 
 import os
 import streamlit as st
@@ -258,6 +258,15 @@ def fetch_and_categorize_comments():
     else:
         st.warning("No comments found or failed to fetch comments.")
 
+# Function to create vote button
+def create_vote_button(video_id, comment_id, category, vote_type="up"):
+    button_text = f"👍 ({fetch_votes(video_id, comment_id, category)['up']})"
+    button_key = f"{category}_{vote_type}_{comment_id}"
+
+    if st.button(button_text, key=button_key):
+        update_votes(video_id, comment_id, category, vote_type)
+        st.experimental_rerun()  # Force rerun to update vote count
+
 # Function to display categorized comments
 def display_categorized_comments(prevent_votes=False):
     if isinstance(st.session_state.categorized_comments, dict):
@@ -271,11 +280,7 @@ def display_categorized_comments(prevent_votes=False):
                     if comment['text'].strip():  # Ensure no blank comments are displayed
                         st.write(comment['text'])
                         if not prevent_votes:
-                            votes = fetch_votes(video_id, comment['id'], current_category)  # Use current_category
-
-                            if st.button(f"👍 ({votes['up']})", key=f"{current_category}_up_{comment['id']}"):
-                                update_votes(video_id, comment['id'], current_category, "up")
-                                st.experimental_rerun()  # Force a rerun to update vote count
+                            create_vote_button(video_id, comment['id'], current_category)
 
             else:
                 st.write(f"No comments found for {current_category}.")
