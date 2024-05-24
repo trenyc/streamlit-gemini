@@ -1,4 +1,4 @@
-# Streamlit App Code - Version 3.19
+# Streamlit App Code - Version 3.20
 
 import os
 import streamlit as st
@@ -133,6 +133,8 @@ if 'previously_rendered_comments' not in st.session_state:
     st.session_state.previously_rendered_comments = {category: [] for category in ['funny', 'positive', 'negative']}
 if 'batch_number' not in st.session_state:
     st.session_state.batch_number = 1
+if 'load_more_clicked' not in st.session_state:
+    st.session_state.load_more_clicked = False
 
 # Initialize votes in session state
 if 'votes' not in st.session_state:
@@ -272,7 +274,7 @@ def display_categorized_comments():
 
                         if st.button(f"👍 ({votes['up']})", key=f"{current_category}_up_{comment['id']}"):
                             update_votes(video_id, comment['id'], current_category, "up")
-                            #st.experimental_rerun()  # Force a rerun to update vote count
+                            st.experimental_rerun()  # Force a rerun to update vote count
 
             else:
                 st.write(f"No comments found for {current_category}.")
@@ -328,10 +330,10 @@ if st.session_state.next_page_token:
     if st.button("Load More Comments"):
         st.session_state.load_more_clicked = True
 
-if st.session_state.get('load_more_clicked', False):
+if st.session_state.load_more_clicked:
+    st.write("Load More button clicked.")
     with st.spinner("Loading more comments..."):
         comments, next_page_token = fetch_youtube_comments(video_id, st.session_state.next_page_token)
-        st.write("Load More button clicked.")
         if comments:
             st.session_state.comments.extend(comments)
             st.session_state.next_page_token = next_page_token
