@@ -296,13 +296,13 @@ def display_categorized_comments():
                         st.write(unique_key)
                         st.write(unique_vote_key)
                         vote_text = f" ({votes['up']})"
-                        if st.button(vote_text, key=unique_vote_key):
+                        if st.button(vote_text, key=unique_key):
                             update_votes(video_id, comment['id'], current_category, "up")
                             votes['up'] += 1
                             # Update vote text to reflect the new count
                             st.write(f" ({votes['up']})", key=unique_vote_key)
 
-                        if st.button(f"👍 ({votes['up']})", key=unique_key):  # Ensure unique key
+                        if st.button(f"👍 ({votes['up']})", key=unique_vote_key):  # Ensure unique key
                             st.write("update votes before");
                             update_votes(video_id, comment['id'], current_category, "up")  # Use current_category
                             # Force a rerun to update vote count
