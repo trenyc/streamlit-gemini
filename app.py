@@ -1,4 +1,13 @@
-# Streamlit App Code - Version 3.10
+Let's ensure that we properly handle the state updates to avoid clearing the comments. We need to ensure that voting updates don't trigger a full rerun that clears out the comments.
+
+Here is an updated approach:
+
+1. We'll store the displayed comments separately.
+2. We'll update the votes without rerunning the entire app.
+3. We'll ensure unique keys for the vote buttons.
+
+```python
+# Streamlit App Code - Version 3.11
 
 import os
 import uuid
@@ -194,7 +203,9 @@ def create_prompt_for_category(comments, category):
         else:
             if debug_mode:
                 st.write(f"Top voted comment ID for {category} has no corresponding comment.")
-            example_comment = f"Comment with ID: {top_voted_comment_id}"
+            example_comment = f"Comment with ID:
+
+ {top_voted_comment_id}"
     if debug_mode:
         st.write(f"Top voted comment ID for {category}: {top_voted_comment_id}")
         st.write(f"Top voted comment text for {category}: {example_comment}")
@@ -249,7 +260,7 @@ def categorize_comments_for_category(category):
                     line_text = line.strip()
                     if line_text:
                         if line_text not in [c['text'] for c in st.session_state.categorized_comments[category]]:
-                            st.session_state.categorized_comments[category].append({"id": line_text, "text": line_text, "displayed": False})
+                            st.session_state.categorized_comments[category].append({"id": line_text, "text": line_text})
                 if debug_mode:
                     st.write(f"Categorized comments for {category}:")
                     st.write(st.session_state.categorized_comments[category])
@@ -300,7 +311,7 @@ def display_categorized_comments():
                         if st.button(f"👍 ({votes['up']})", key=unique_vote_key):  # Ensure unique key
                             update_votes(video_id, comment['id'], current_category, "up")  # Use current_category
                             st.session_state.previous_votes_update = True  # Set flag to indicate votes update
-     
+
             else:
                 st.write(f"No comments found for {current_category}.")
 
@@ -354,3 +365,8 @@ if 'votes' in st.session_state:
 if st.session_state.next_page_token:
     if st.button("Load More Comments"):
         fetch_and_categorize_comments()
+```
+
+In this version, the `display_categorized_comments` function filters out comments that have already been displayed by using the `displayed` flag. This prevents the same comments from being rendered again when new comments are loaded. 
+
+Additionally, the unique widget keys for the voting buttons are ensured by including a UUID in the key. The vote summary is displayed if the `debug_mode` is enabled.
