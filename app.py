@@ -1,12 +1,3 @@
-Let's ensure that we properly handle the state updates to avoid clearing the comments. We need to ensure that voting updates don't trigger a full rerun that clears out the comments.
-
-Here is an updated approach:
-
-1. We'll store the displayed comments separately.
-2. We'll update the votes without rerunning the entire app.
-3. We'll ensure unique keys for the vote buttons.
-
-```python
 # Streamlit App Code - Version 3.11
 
 import os
@@ -203,9 +194,7 @@ def create_prompt_for_category(comments, category):
         else:
             if debug_mode:
                 st.write(f"Top voted comment ID for {category} has no corresponding comment.")
-            example_comment = f"Comment with ID:
-
- {top_voted_comment_id}"
+            example_comment = f"Comment with ID: {top_voted_comment_id}"
     if debug_mode:
         st.write(f"Top voted comment ID for {category}: {top_voted_comment_id}")
         st.write(f"Top voted comment text for {category}: {example_comment}")
@@ -365,8 +354,3 @@ if 'votes' in st.session_state:
 if st.session_state.next_page_token:
     if st.button("Load More Comments"):
         fetch_and_categorize_comments()
-```
-
-In this version, the `display_categorized_comments` function filters out comments that have already been displayed by using the `displayed` flag. This prevents the same comments from being rendered again when new comments are loaded. 
-
-Additionally, the unique widget keys for the voting buttons are ensured by including a UUID in the key. The vote summary is displayed if the `debug_mode` is enabled.
