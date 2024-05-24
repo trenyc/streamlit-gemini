@@ -171,6 +171,7 @@ def update_votes(video_id, comment_id, category, vote):
 def fetch_votes(video_id, comment_id, category):
     st.write("fetchvotes");
     if video_id in st.session_state.votes and comment_id in st.session_state.votes[video_id]:
+        st.write("sessionvote")
         st.write(st.session_state.votes[video_id][comment_id][category])
         return st.session_state.votes[video_id][comment_id].get(category, {"up": 0})
     else:
