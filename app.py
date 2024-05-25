@@ -233,17 +233,20 @@ def categorize_comments_for_category(category, comments):
 
 # Function to load more comments
 def load_more_comments():
-    st.session_state.load_more_clicked = True
-    comments, next_page_token = fetch_youtube_comments(video_id, st.session_state.next_page_token)
-    if comments:
-        st.session_state.comments = comments + st.session_state.comments
-        st.session_state.next_page_token = next_page_token
-        for category in categories:
-            categorize_comments_for_category(category, comments)
-        st.session_state.load_more_clicked = False
-    else:
-        st.warning("No more comments available.")
-        st.session_state.load_more_clicked = False
+  st.session_state.load_more_clicked = True  # Set flag to True initially
+  comments, next_page_token = fetch_youtube_comments(video_id, st.session_state.next_page_token)
+  if comments:
+    st.session_state.comments = comments + st.session_state.comments
+    st.session_state.next_page_token = next_page_token
+    for category in categories:
+      categorize_comments_for_category(category, comments)
+    display_categorized_comments(prevent_votes=False)  # Call to display loaded comments
+  else:
+    st.warning("No more comments available.")
+
+  # Only set flag to False if no more comments to load
+  st.session_state.load_more_clicked = next_page_token is None
+
 
 # Fetch and categorize comments for each category
 def fetch_and_categorize_comments():
