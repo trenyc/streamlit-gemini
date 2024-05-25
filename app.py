@@ -289,6 +289,18 @@ def display_categorized_comments(prevent_votes=False):
             else:
                 st.write(f"No comments found for {current_category}.")
 
+# Function to display loaded comments categorized without voting buttons
+def display_loaded_comments():
+    st.write("Displaying loaded comments")
+    if isinstance(st.session_state.categorized_comments, dict):
+        for current_category in st.session_state.categorized_comments.keys():
+            if len(st.session_state.categorized_comments[current_category]) > 5:
+                st.write(f"### More {current_category.capitalize()} Comments")
+                additional_comments = st.session_state.categorized_comments[current_category][5:]
+                for idx, comment in enumerate(additional_comments):
+                    if comment['text'].strip():
+                        st.write(comment['text'])
+
 # Function to display vote summary for each category
 def display_vote_summary():
     if debug_mode:
@@ -340,18 +352,6 @@ if st.session_state.next_page_token:
     if st.button("Load More Comments"):
         with st.spinner("Loading more comments..."):
             load_more_comments()
-
-# Function to display loaded comments categorized without voting buttons
-def display_loaded_comments():
-    st.write("Displaying loaded comments")
-    if isinstance(st.session_state.categorized_comments, dict):
-        for current_category in st.session_state.categorized_comments.keys():
-            if len(st.session_state.categorized_comments[current_category]) > 5:
-                st.write(f"### More {current_category.capitalize()} Comments")
-                additional_comments = st.session_state.categorized_comments[current_category][5:]
-                for idx, comment in enumerate(additional_comments):
-                    if comment['text'].strip():
-                        st.write(comment['text'])
 
 if st.session_state.load_more_clicked:
     display_loaded_comments()
