@@ -92,7 +92,7 @@ if openai_api_key:
     client = OpenAI(api_key=openai_api_key)
 
 # Main app content
-st.title("Youtube Comments Categorizer")
+st.title("YouTube Comments Categorizer")
 st.caption("Unleash fun in YouTube comments with OpenAI")
 
 # Function to search YouTube videos
