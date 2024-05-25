@@ -195,7 +195,7 @@ def create_prompt_for_category(comments, category):
         if len(prompt) + len(comment_text) + 2 > token_limit:  # +2 for the ", " separator
             break
         prompt += comment_text + ", "
-    return prompt.rstrip(', '
+    return prompt.rstrip(', ')
 
 # Function to categorize comments for a specific category
 def categorize_comments_for_category(category, comments):
