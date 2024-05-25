@@ -357,7 +357,7 @@ if st.button("Categorize Comments"):
 # Display categorized comments and voting buttons only once
 if 'categorized_comments' in st.session_state and any(st.session_state.categorized_comments.values()) and not st.session_state.load_more_clicked:
     st.subheader("Vote on Comments")
-    display_categorized_comments(prevent_votes=False)
+    #display_categorized_comments(prevent_votes=False)
 
 # Display vote summary
 if 'votes' in st.session_state:
