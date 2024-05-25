@@ -1,3 +1,5 @@
+# Streamlit App Code - Version 3.29
+
 import os
 import uuid
 import streamlit as st
@@ -35,9 +37,6 @@ st.markdown("""
         border-radius: 10px;
         padding: 10px;
         margin-bottom: 10px;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
     }
     .batch-label {
         font-weight: bold;
@@ -67,13 +66,9 @@ with st.sidebar:
     if not openai_api_key:
         openai_api_key = st.text_input('Enter OpenAI API Key:', type='password', key="openai_key")
 
-    debug_mode = st.checkbox("Debug Mode", value=False)
-
 # Define OpenAI client (if API key available)
 if openai_api_key:
     client = OpenAI(api_key=openai_api_key)
-    if debug_mode:
-        st.write(f"Using OpenAI API Key: ...{openai_api_key[-4:]}")
 
 # Main app content
 st.title("Youtube Comments Categorizer")
@@ -243,7 +238,6 @@ def create_prompt_for_category(comments, category):
 # Function to categorize comments for a specific category
 def categorize_comments_for_category(category, comments, batch=1):
     prompt = create_prompt_for_category(comments, category)
-    st.write(f"Starting to categorize comments for category: {category}")
     try:
         with st.spinner(f"Categorizing comments into {category} using OpenAI..."):
             response = client.chat.completions.create(
@@ -346,38 +340,11 @@ def display_loaded_comments(batch_number, comments):
                 if comment['text'].strip():
                     st.markdown(f"<div class='comment-box'><span>{comment['text']}</span></div>", unsafe_allow_html=True)
 
-# Function to display vote summary for each category
-def display_vote_summary():
-    if debug_mode:
-        st.subheader("Vote Summary")
-        for category in st.session_state.categorized_comments.keys():
-            vote_summary = {}
-            for comment_id in st.session_state.votes.get(video_id, {}):
-                if category in st.session_state.votes[video_id][comment_id]:
-                    up_votes = st.session_state.votes[video_id][comment_id][category]["up"]
-                    if up_votes > 0:
-                        if comment_id not in vote_summary:
-                            vote_summary[comment_id] = 0
-                        vote_summary[comment_id] += up_votes
-
-            st.write(f"**{category.capitalize()}**: {sum(vote_summary.values())} votes")
-
 # Fetch and display YouTube comments
 if 'selected_video_id' in st.session_state and yt_api_key and openai_api_key:
     if 'auto_fetch' in st.session_state and st.session_state.auto_fetch:
         fetch_and_categorize_comments()
         st.session_state.auto_fetch = False
-
-# Show "Fetch Comments" and "Show/Hide Comments" in debug mode
-if debug_mode:
-    if st.button("Fetch Comments"):
-        fetch_youtube_comments(video_id)
-    show_comments = st.checkbox("Show/Hide Comments")
-    if show_comments and 'comments' in st.session_state:
-        st.write("Displaying fetched comments...")
-        st.write("💬 Fetched YouTube Comments")
-        for comment in st.session_state.comments:
-            st.write(comment['text'])
 
 # Always show the "Categorize Comments" button
 if st.button("Categorize Comments"):
@@ -386,10 +353,6 @@ if st.button("Categorize Comments"):
 # Display categorized comments and voting buttons only once
 if 'categorized_comments' in st.session_state and any(st.session_state.categorized_comments.values()) and not st.session_state.load_more_clicked:
     display_categorized_comments(prevent_votes=False)
-
-# Display vote summary
-if 'votes' in st.session_state:
-    display_vote_summary()
 
 # Load more comments button
 if st.session_state.next_page_token:
@@ -400,4 +363,3 @@ if st.session_state.next_page_token:
 if st.session_state.load_more_clicked:
     display_loaded_comments(st.session_state.batch_number, st.session_state.comments[-100:])  # Pass the last batch of comments
     st.session_state.load_more_clicked = False
-
