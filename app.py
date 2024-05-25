@@ -293,8 +293,9 @@ def display_categorized_comments(prevent_votes=False):
                 for idx, comment in enumerate(comments):
                     if comment['text'].strip():  # Ensure no blank comments are displayed
                         st.write(comment['text'])
-                        #if not st.session_state.load_more_clicked:
-                        create_vote_button(video_id, comment['id'], current_category)
+                        if not st.session_state.load_more_clicked:
+                            create_vote_button(video_id, comment['id'], current_category)
+
 
             else:
                 st.write(f"No comments found for {current_category}.")
@@ -310,6 +311,7 @@ def display_loaded_comments():
                 for idx, comment in enumerate(additional_comments):
                     if comment['text'].strip():
                         st.write(comment['text'])
+                        create_vote_button(video_id, comment['id'], current_category)
 
 # Function to display vote summary for each category
 def display_vote_summary():
