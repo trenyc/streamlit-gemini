@@ -290,21 +290,6 @@ def load_more_comments():
         st.warning("No more comments available.")
         st.session_state.load_more_clicked = False
 
-# Function to fetch and categorize comments
-def fetch_and_categorize_comments():
-    comments, next_page_token = fetch_youtube_comments(video_id)
-    if comments:
-        st.success("Comments fetched successfully!")
-        # Prepend new comments to existing comments
-        st.session_state.comments = comments + st.session_state.comments
-        st.session_state.next_page_token = next_page_token
-        st.session_state.batch_number += 1  # Increment batch number
-        for category in categories:
-            categorize_comments_for_category(category, comments)
-        display_categorized_comments(prevent_votes=False)  # Display categorized comments after fetching and categorizing
-    else:
-        st.warning("No comments found or failed to fetch comments.")
-
 # Function to create vote button
 def create_vote_button(video_id, comment_id, category, vote_type="up"):
     button_text = f"👍 ({fetch_votes(video_id, comment_id, category)['up']})"
@@ -326,7 +311,7 @@ def display_categorized_comments(prevent_votes=False):
                 comments = st.session_state.categorized_comments[current_category][:5]
                 for idx, comment in enumerate(comments):
                     if comment['text'].strip():  # Ensure no blank comments are displayed
-                        st.markdown(f"<div class='comment-box'><div class='vote-button'>", unsafe_allow_html=True)
+                        st.write(f"<div class='comment-box'><div class='vote-button'>", unsafe_allow_html=True)
                         create_vote_button(video_id, comment['id'], current_category)
                         st.write(f"</div>{comment['text']}</div>", unsafe_allow_html=True)
 
