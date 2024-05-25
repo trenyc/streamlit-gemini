@@ -298,6 +298,7 @@ def fetch_and_categorize_comments():
         st.session_state.batch_number = 1  # Initialize batch number
         for category in categories:
             categorize_comments_for_category(category, comments)
+        st.subheader("Vote on Comments")
         display_categorized_comments(prevent_votes=False)  # Display categorized comments after fetching and categorizing
     else:
         st.warning("No comments found or failed to fetch comments.")
@@ -378,11 +379,11 @@ if debug_mode:
 # Always show the "Categorize Comments" button
 if st.button("Categorize Comments"):
     fetch_and_categorize_comments()
-    # Display categorized comments and voting buttons only once
-    if 'categorized_comments' in st.session_state and any(st.session_state.categorized_comments.values()) and not st.session_state.load_more_clicked:
-        st.subheader("Vote on Comments")
-        fetch_and_categorize_comments()
+   
+# Display categorized comments and voting buttons only once
+if 'categorized_comments' in st.session_state and any(st.session_state.categorized_comments.values()) and not st.session_state.load_more_clicked:
         #display_categorized_comments(prevent_votes=False)
+        st.write("")
 
 
 
