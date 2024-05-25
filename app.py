@@ -35,6 +35,9 @@ st.markdown("""
         border-radius: 10px;
         padding: 10px;
         margin-bottom: 10px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
     }
     .batch-label {
         font-weight: bold;
@@ -324,7 +327,7 @@ def display_categorized_comments(prevent_votes=False):
                 comments = st.session_state.categorized_comments[current_category][:5]
                 for idx, comment in enumerate(comments):
                     if comment['text'].strip():  # Ensure no blank comments are displayed
-                        st.markdown(f"<div class='comment-box'>{comment['text']}</div>", unsafe_allow_html=True)
+                        st.markdown(f"<div class='comment-box'><span>{comment['text']}</span>", unsafe_allow_html=True)
                         if not st.session_state.load_more_clicked:
                             create_vote_button(video_id, comment['id'], current_category)
 
@@ -336,13 +339,12 @@ def display_loaded_comments(batch_number, comments):
     st.markdown(f"<div class='horizontal-bar'></div>", unsafe_allow_html=True)
     st.markdown(f"<div class='batch-label'>Batch {batch_number}</div>", unsafe_allow_html=True)
     st.write("Displaying loaded comments")
-    batchtrack = 1
     if isinstance(st.session_state.categorized_comments, dict):
         for current_category in st.session_state.categorized_comments.keys():
             st.write(f"### More {current_category.capitalize()} Comments")
             for comment in comments:
                 if comment['text'].strip():
-                    st.markdown(f"<div class='comment-box'>{comment['text']}</div>", unsafe_allow_html=True)
+                    st.markdown(f"<div class='comment-box'><span>{comment['text']}</span></div>", unsafe_allow_html=True)
 
 # Function to display vote summary for each category
 def display_vote_summary():
@@ -383,10 +385,7 @@ if st.button("Categorize Comments"):
    
 # Display categorized comments and voting buttons only once
 if 'categorized_comments' in st.session_state and any(st.session_state.categorized_comments.values()) and not st.session_state.load_more_clicked:
-        display_categorized_comments(prevent_votes=False)
-         
-
-
+    display_categorized_comments(prevent_votes=False)
 
 # Display vote summary
 if 'votes' in st.session_state:
@@ -401,3 +400,4 @@ if st.session_state.next_page_token:
 if st.session_state.load_more_clicked:
     display_loaded_comments(st.session_state.batch_number, st.session_state.comments[-100:])  # Pass the last batch of comments
     st.session_state.load_more_clicked = False
+
