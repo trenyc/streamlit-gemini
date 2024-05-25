@@ -115,7 +115,7 @@ if 'search_results' in st.session_state:
                 st.session_state.auto_fetch = True
                 st.session_state.batch_number = 1  # Initialize batch number
                 del st.session_state.search_results
-                #st.experimental_rerun()  # Force a rerun to update state
+                st.experimental_rerun()  # Force a rerun to update state
 
 # Set selected video ID from search results
 if 'selected_video_id' in st.session_state:
@@ -276,13 +276,13 @@ def load_more_comments():
     st.session_state.load_more_clicked = True
     comments, next_page_token = fetch_youtube_comments(video_id, st.session_state.next_page_token)
     if comments:
-        st.session_state.comments = comments + st.session_state.comments
-        st.session_state.next_page_token = next_page_token
         st.session_state.batch_number += 1  # Increment batch number here
+        st.session_state.comments.extend(comments)  # Append new comments to the existing list
+        st.session_state.next_page_token = next_page_token
         for category in categories:
             categorize_comments_for_category(category, comments)
         st.session_state.load_more_clicked = False
-        display_loaded_comments(st.session_state.batch_number)
+        display_loaded_comments(st.session_state.batch_number, comments)  # Pass comments to display_loaded_comments
     else:
         st.warning("No more comments available.")
         st.session_state.load_more_clicked = False
@@ -331,18 +331,16 @@ def display_categorized_comments(prevent_votes=False):
                 st.write(f"No comments found for {current_category}.")
 
 # Function to display loaded comments categorized without voting buttons
-def display_loaded_comments(batch_number):
+def display_loaded_comments(batch_number, comments):
     st.markdown(f"<div class='horizontal-bar'></div>", unsafe_allow_html=True)
     st.markdown(f"<div class='batch-label'>Batch {batch_number}</div>", unsafe_allow_html=True)
     st.write("Displaying loaded comments")
     if isinstance(st.session_state.categorized_comments, dict):
         for current_category in st.session_state.categorized_comments.keys():
-            if len(st.session_state.categorized_comments[current_category]) > 5:
-                st.write(f"### More {current_category.capitalize()} Comments")
-                additional_comments = st.session_state.categorized_comments[current_category][5:]
-                for idx, comment in enumerate(additional_comments):
-                    if comment['text'].strip():
-                        st.markdown(f"<div class='comment-box'>{comment['text']}</div>", unsafe_allow_html=True)
+            st.write(f"### More {current_category.capitalize()} Comments")
+            for comment in comments:
+                if comment['text'].strip():
+                    st.markdown(f"<div class='comment-box'>{comment['text']}</div>", unsafe_allow_html=True)
 
 # Function to display vote summary for each category
 def display_vote_summary():
@@ -384,7 +382,7 @@ if st.button("Categorize Comments"):
 # Display categorized comments and voting buttons only once
 if 'categorized_comments' in st.session_state and any(st.session_state.categorized_comments.values()) and not st.session_state.load_more_clicked:
     st.subheader("Vote on Comments")
-    #display_categorized_comments(prevent_votes=False)
+    display_categorized_comments(prevent_votes=False)
 
 # Display vote summary
 if 'votes' in st.session_state:
@@ -397,5 +395,5 @@ if st.session_state.next_page_token:
             load_more_comments()
 
 if st.session_state.load_more_clicked:
-    display_loaded_comments(st.session_state.batch_number)
+    display_loaded_comments(st.session_state.batch_number, st.session_state.comments[-100:])  # Pass the last batch of comments
     st.session_state.load_more_clicked = False
