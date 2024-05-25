@@ -282,7 +282,6 @@ def load_more_comments():
         for category in categories:
             categorize_comments_for_category(category, comments, st.session_state.batch_number)
         st.session_state.load_more_clicked = False
-        st.write("test")
         display_loaded_comments(st.session_state.batch_number, comments)  # Pass comments to display_loaded_comments
     else:
         st.warning("No more comments available.")
@@ -383,8 +382,8 @@ if st.button("Categorize Comments"):
    
 # Display categorized comments and voting buttons only once
 if 'categorized_comments' in st.session_state and any(st.session_state.categorized_comments.values()) and not st.session_state.load_more_clicked:
-        #display_categorized_comments(prevent_votes=False)
-        st.write("")
+        display_categorized_comments(prevent_votes=False)
+         
 
 
 
