@@ -273,6 +273,8 @@ def fetch_and_categorize_comments():
 
 
 
+import streamlit as st
+
 def create_vote_button(video_id, comment_id, category, vote_type="up"):
   button_text = f" ({fetch_votes(video_id, comment_id, category)['up']})"
   button_key = f"{category}_{vote_type}_{comment_id}{str(uuid.uuid4())}"
@@ -280,7 +282,7 @@ def create_vote_button(video_id, comment_id, category, vote_type="up"):
   if st.button(button_text, key=button_key):
     update_votes(video_id, comment_id, category, vote_type)
 
-    # Update vote count in the displayed comments (without rerunning)
+    # Update vote count in displayed comments (without rerunning)
     if 'categorized_comments' in st.session_state:
       for current_category in st.session_state.categorized_comments.keys():
         for comment in st.session_state.categorized_comments[current_category]:
@@ -297,8 +299,8 @@ def create_vote_button(video_id, comment_id, category, vote_type="up"):
             st.session_state.update_comment_section = True
             break  # Exit loop after finding the matching comment
 
-    # Optional: Trigger a partial rerun to update displayed vote count
-    # st.experimental_rerun()  # Use with caution if needed
+  # Optional: Trigger a partial rerun to update displayed vote count
+  # st.experimental_rerun()  # Use with caution if needed
 
   # Display a success message (optional)
   st.success(f"Vote updated for comment {comment_id}")
