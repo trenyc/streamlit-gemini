@@ -1,4 +1,4 @@
-# Streamlit App Code - Version 3.24
+# Streamlit App Code - Version 3.25
 
 import os
 import streamlit as st
@@ -241,6 +241,7 @@ def load_more_comments():
         for category in categories:
             categorize_comments_for_category(category, comments)
         st.session_state.load_more_clicked = False
+        display_loaded_comments()  # Display loaded comments after fetching and categorizing
     else:
         st.warning("No more comments available.")
         st.session_state.load_more_clicked = False
@@ -256,9 +257,9 @@ def fetch_and_categorize_comments():
         st.session_state.batch_number += 1  # Increment batch number
         for category in categories:
             categorize_comments_for_category(category, comments)
-        display_categorized_comments(prevent_votes=False)  # Display categorized comments after fetching and categorizing
     else:
         st.warning("No comments found or failed to fetch comments.")
+    display_categorized_comments(prevent_votes=False)  # Display categorized comments after fetching and categorizing
 
 # Function to create vote button
 def create_vote_button(video_id, comment_id, category, vote_type="up"):
@@ -307,7 +308,7 @@ def display_vote_summary():
 # Fetch and display YouTube comments
 if 'selected_video_id' in st.session_state and yt_api_key and openai_api_key:
     if 'auto_fetch' in st.session_state and st.session_state.auto_fetch:
-        #fetch_and_categorize_comments()
+        fetch_and_categorize_comments()
         st.session_state.auto_fetch = False
 
 # Show "Fetch Comments" and "Show/Hide Comments" in debug mode
@@ -324,11 +325,6 @@ if debug_mode:
 # Always show the "Categorize Comments" button
 if st.button("Categorize Comments"):
     fetch_and_categorize_comments()
-
-# Display categorized comments and voting buttons only once
-if 'categorized_comments' in st.session_state and any(st.session_state.categorized_comments.values()) and not st.session_state.load_more_clicked:
-    st.subheader("Vote on Comments")
-    display_categorized_comments(prevent_votes=False)
 
 # Display vote summary
 if 'votes' in st.session_state:
