@@ -12,11 +12,7 @@ YOUTUBE_API_KEY = st.secrets["YOUTUBE_API_KEY_ENV"]
 OPENAI_API_KEY = st.secrets["OPENAI_API_KEY_ENV"]
 
 # Set the page configuration for the Streamlit app
-st.set_page_config(
-  page_title="Comments Categorized",
-  page_icon="",
-  layout="wide"
-)
+st.set_page_config( page_title="Comments Categorized", page_icon="", layout="wide")
 
 # Sidebar for API key inputs
 with st.sidebar:
