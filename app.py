@@ -336,6 +336,7 @@ def display_loaded_comments(batch_number, comments):
     st.markdown(f"<div class='horizontal-bar'></div>", unsafe_allow_html=True)
     st.markdown(f"<div class='batch-label'>Batch {batch_number}</div>", unsafe_allow_html=True)
     st.write("Displaying loaded comments")
+    batchtrack = 1
     if isinstance(st.session_state.categorized_comments, dict):
         for current_category in st.session_state.categorized_comments.keys():
             st.write(f"### More {current_category.capitalize()} Comments")
