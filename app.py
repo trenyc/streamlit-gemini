@@ -322,12 +322,12 @@ def fetch_and_categorize_comments():
         st.warning("No comments found or failed to fetch comments.")
 
 # Function to create vote button
+buttoncount = 1
 def create_vote_button(video_id, comment_id, category, vote_type="up"):
     button_text = f"👍 ({fetch_votes(video_id, comment_id, category)['up']})"
-    uuidtext = str(uuid.uuid1())
-    uuidtxtresult = uuidtext[:4]
-    button_key = f"{category}_{vote_type}_{comment_id}_{uuidtxtresult}"
-    st.write(uuidtxtresult)
+    
+    button_key = f"{category}_{vote_type}_{comment_id}{buttoncount}"
+     
     if st.button(button_text, key=button_key):
         st.write("test")
         update_votes(video_id, comment_id, category, vote_type)
