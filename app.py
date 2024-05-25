@@ -1,4 +1,4 @@
-# Streamlit App Code - Version 3.29
+# Streamlit App Code - Version 3.30
 
 import os
 import uuid
@@ -113,9 +113,17 @@ def fetch_youtube_comments(video_id, page_token=None):
             pageToken=page_token
         )
         response = request.execute()
-        comments = [{"id": item['snippet']['topLevelComment']['id'],
-                     "text": item['snippet']['topLevelComment']['snippet']['textDisplay'],
-                     "uuid": str(uuid.uuid4())} for item in response['items']]
+        comments = []
+        for item in response['items']:
+            try:
+                comment = {
+                    "id": item['snippet']['topLevelComment']['id'],
+                    "text": item['snippet']['topLevelComment']['snippet']['textDisplay'],
+                    "uuid": str(uuid.uuid4())
+                }
+                comments.append(comment)
+            except KeyError as e:
+                st.error(f"Error processing comment: {e}")
         next_page_token = response.get('nextPageToken', None)
         return comments, next_page_token
     except HttpError as e:
@@ -191,7 +199,7 @@ def create_prompt_for_category(comments, category):
     if top_voted_comment_id:
         top_voted_comment = next((comment for comment in st.session_state.comments if comment['id'] == top_voted_comment_id), None)
         if top_voted_comment:
-            example_comment = top_voted_comment['text']  # Use example comment as is
+            example_comment = top_voted_comment['text']
         else:
             example_comment = f"Comment with ID: {top_voted_comment_id}"
     if not example_comment:
