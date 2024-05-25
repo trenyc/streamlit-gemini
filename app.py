@@ -1,4 +1,4 @@
-# Streamlit App Code - Version 3.25
+# Streamlit App Code - Version 3.26
 
 import os
 import streamlit as st
@@ -7,8 +7,8 @@ from googleapiclient.errors import HttpError
 from openai import OpenAI, APIError
 import streamlit_tags as st_tags
 
-# DefineAPI key environment variable names
-YOFUTUBE_API_KEY = st.secrets["YOUTUBE_API_KEY_ENV"]
+# Define API key environment variable names
+YOUTUBE_API_KEY = st.secrets["YOUTUBE_API_KEY_ENV"]
 OPENAI_API_KEY = st.secrets["OPENAI_API_KEY_ENV"]
 
 # Set the page configuration for the Streamlit app
@@ -211,149 +211,4 @@ def categorize_comments_for_category(category, comments):
                 ]
             )
             if response.choices:
-                response_text = response.choices[0].message.content.strip()
-                # Strip introductory line and ignore example comment
-                response_lines = response_text.split('\n')
-                if response_lines and response_lines[0].count(':') > 0:
-                    response_lines = response_lines[1:]
-                response_lines = [line for line in response_lines if line.strip() and all(st.session_state.top_voted_comments[cat] is None or st.session_state.top_voted_comments[cat] not in line for cat in categories)]
-                for line in response_lines:
-                    line_text = line.strip()
-                    if line_text:
-                        if line_text not in [c['text'] for c in st.session_state.categorized_comments[category]]:
-                            st.session_state.categorized_comments[category].append({"id": line_text, "text": line_text})
-            else:
-                st.error(f"No response from the model for category: {category}")
-    except APIError as e:
-        st.error(f"An API error occurred: {e}")
-        st.error(f"Error code: {e.status_code} - {e.message}")
-        st.error(f"Full response: {e.response}")
-    except Exception as e:
-        st.error(f"An unexpected error occurred: {e}")
-
-# Function to load more comments
-def load_more_comments():
-    st.session_state.load_more_clicked = True
-    comments, next_page_token = fetch_youtube_comments(video_id, st.session_state.next_page_token)
-    if comments:
-        st.session_state.comments = comments + st.session_state.comments
-        st.session_state.next_page_token = next_page_token
-        for category in categories:
-            categorize_comments_for_category(category, comments)
-        display_categorized_comments(prevent_votes=True) 
-        st.session_state.load_more_clicked = False
-    else:
-        st.warning("No more comments available.")
-        st.session_state.load_more_clicked = False
-
-# Fetch and categorize comments for each category
-def fetch_and_categorize_comments():
-    comments, next_page_token = fetch_youtube_comments(video_id)
-    if comments:
-        st.success("Comments fetched successfully!")
-        # Prepend new comments to existing comments
-        st.session_state.comments = comments + st.session_state.comments
-        st.session_state.next_page_token = next_page_token
-        st.session_state.batch_number += 1  # Increment batch number
-        for category in categories:
-            categorize_comments_for_category(category, comments)
-        display_categorized_comments(prevent_votes=False)  # Display categorized comments after fetching and categorizing
-    else:
-        st.warning("No comments found or failed to fetch comments.")
-
-# Function to create vote button
-def create_vote_button(video_id, comment_id, category, vote_type="up"):
-    button_text = f"👍 ({fetch_votes(video_id, comment_id, category)['up']})"
-    button_key = f"{category}_{vote_type}_{comment_id}"
-
-    if st.button(button_text, key=button_key):
-        update_votes(video_id, comment_id, category, vote_type)
-        st.experimental_rerun()  # Force rerun to update vote count
-
-# Function to display categorized comments
-def display_categorized_comments(prevent_votes=False):
-    st.write("Displaying categorized comments")
-    if isinstance(st.session_state.categorized_comments, dict):
-        for current_category in st.session_state.categorized_comments.keys():  # Use current_category
-            if len(st.session_state.categorized_comments[current_category]) > 0:  # Check if the list is not empty
-                st.write(f"### {current_category.capitalize()}")
-                st.write(f"Comments that are {current_category}:")
-
-                comments = st.session_state.categorized_comments[current_category][:5]
-                for idx, comment in enumerate(comments):
-                    if comment['text'].strip():  # Ensure no blank comments are displayed
-                        st.write(comment['text'])
-                        if not st.session_state.load_more_clicked:
-                        #if not prevent_votes:
-                            create_vote_button(video_id, comment['id'], current_category)
-
-            else:
-                st.write(f"No comments found for {current_category}.")
-
-# Function to display vote summary for each category
-def display_vote_summary():
-    if debug_mode:
-        st.subheader("Vote Summary")
-        for category in st.session_state.categorized_comments.keys():
-            vote_summary = {}
-            for comment_id in st.session_state.votes.get(video_id, {}):
-                if category in st.session_state.votes[video_id][comment_id]:
-                    up_votes = st.session_state.votes[video_id][comment_id][category]["up"]
-                    if up_votes > 0:
-                        if comment_id not in vote_summary:
-                            vote_summary[comment_id] = 0
-                        vote_summary[comment_id] += up_votes
-
-            st.write(f"**{category.capitalize()}**: {sum(vote_summary.values())} votes")
-
-# Fetch and display YouTube comments
-if 'selected_video_id' in st.session_state and yt_api_key and openai_api_key:
-    if 'auto_fetch' in st.session_state and st.session_state.auto_fetch:
-        fetch_and_categorize_comments()
-        st.session_state.auto_fetch = False
-
-# Show "Fetch Comments" and "Show/Hide Comments" in debug mode
-if debug_mode:
-    if st.button("Fetch Comments"):
-        fetch_youtube_comments(video_id)
-    show_comments = st.checkbox("Show/Hide Comments")
-    if show_comments and 'comments' in st.session_state:
-        st.write("Displaying fetched comments...")
-        st.write("💬 Fetched YouTube Comments")
-        for comment in st.session_state.comments:
-            st.write(comment['text'])
-
-# Always show the "Categorize Comments" button
-if st.button("Categorize Comments"):
-    fetch_and_categorize_comments()
-
-# Display categorized comments and voting buttons only once
-if 'categorized_comments' in st.session_state and any(st.session_state.categorized_comments.values()) and not st.session_state.load_more_clicked:
-    st.subheader("Vote on Comments")
-    display_categorized_comments(prevent_votes=False)
-
-# Display vote summary
-if 'votes' in st.session_state:
-    display_vote_summary()
-
-# Load more comments button
-if st.session_state.next_page_token:
-    if st.button("Load More Comments"):
-        with st.spinner("Loading more comments..."):
-            load_more_comments()
-
-# Function to display loaded comments categorized without voting buttons
-def display_loaded_comments():
-    st.write("Displaying loaded comments")
-    if isinstance(st.session_state.categorized_comments, dict):
-        for current_category in st.session_state.categorized_comments.keys():
-            if len(st.session_state.categorized_comments[current_category]) > 5:
-                st.write(f"### More {current_category.capitalize()} Comments")
-                additional_comments = st.session_state.categorized_comments[current_category][5:]
-                for idx, comment in enumerate(additional_comments):
-                    if comment['text'].strip():
-                        st.write(comment['text'])
-
-if st.session_state.load_more_clicked:
-    display_loaded_comments()
-    st.session_state.load_more_clicked = False
+                response_text = response.choices[0].message.content
