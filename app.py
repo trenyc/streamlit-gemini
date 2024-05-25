@@ -282,7 +282,7 @@ def display_categorized_comments(prevent_votes=False):
                 for idx, comment in enumerate(comments):
                     if comment['text'].strip():  # Ensure no blank comments are displayed
                         st.write(comment['text'])
-                        if not prevent_votes:
+                        #if not prevent_votes:
                             #create_vote_button(video_id, comment['id'], current_category)
 
             else:
