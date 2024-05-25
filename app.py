@@ -328,7 +328,7 @@ def create_vote_button(video_id, comment_id, category, vote_type="up"):
 
     if st.button(button_text, key=button_key):
         update_votes(video_id, comment_id, category, vote_type)
-        st.experimental_rerun()  # Force rerun to update vote count
+        st.rerun()  # Force rerun to update vote count
 
 # Function to display categorized comments
 def display_categorized_comments(prevent_votes=False):
@@ -374,8 +374,8 @@ if st.button("Categorize Comments"):
    
 # Display categorized comments and voting buttons only once
 if 'categorized_comments' in st.session_state and any(st.session_state.categorized_comments.values()) and not st.session_state.load_more_clicked:
-    #display_categorized_comments(prevent_votes=False)
-    st.rerun()
+    display_categorized_comments(prevent_votes=True)
+   
     st.write();
 
 # Load more comments button
