@@ -1,4 +1,4 @@
-# Streamlit App Code - Version 3.28
+# Streamlit App Code - Version 3.29
 
 import os
 import uuid
@@ -275,7 +275,7 @@ def fetch_and_categorize_comments():
 # Function to create vote button
 def create_vote_button(video_id, comment_id, comment_uuid, category, vote_type="up"):
     button_text = f"👍 ({fetch_votes(video_id, comment_id, category)['up']})"
-    button_key = f"{category}_{vote_type}_{comment_uuid}"
+    button_key = f"{category}_{vote_type}_{comment_id}_{uuid.uuid4()}"
 
     if st.button(button_text, key=button_key):
         update_votes(video_id, comment_id, category, vote_type)
