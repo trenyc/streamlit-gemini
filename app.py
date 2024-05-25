@@ -1,9 +1,6 @@
-
-
-# Streamlit App Code - Version 3.27
+# Streamlit App Code - Version 3.26
 
 import os
-import uuid
 import streamlit as st
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
@@ -20,21 +17,6 @@ st.set_page_config(
     page_icon="",
     layout="wide"
 )
-# Custom CSS for wider scroll bar
-st.markdown("""
-    <style>
-    ::-webkit-scrollbar {
-        width: 20px;  /* Adjust the width as needed */
-    }
-    ::-webkit-scrollbar-thumb {
-        background-color: darkgrey;
-        border-radius: 10px;
-    }
-    ::-webkit-scrollbar-track {
-        background: white;
-    }
-    </style>
-    """, unsafe_allow_html=True)
 
 # Sidebar for API key inputs
 with st.sidebar:
@@ -144,11 +126,11 @@ if 'comments' not in st.session_state:
 if 'next_page_token' not in st.session_state:
     st.session_state.next_page_token = None
 if 'categorized_comments' not in st.session_state:
-    st.session_state.categorized_comments = {}
+    st.session_state.categorized_comments = {category: [] for category in ['funny']}
 if 'top_voted_comments' not in st.session_state:
-    st.session_state.top_voted_comments = {}
+    st.session_state.top_voted_comments = {category: None for category in ['funny']}
 if 'previously_rendered_comments' not in st.session_state:
-    st.session_state.previously_rendered_comments = {}
+    st.session_state.previously_rendered_comments = {category: [] for category in ['funny']}
 if 'batch_number' not in st.session_state:
     st.session_state.batch_number = 1
 if 'load_more_clicked' not in st.session_state:
@@ -170,7 +152,7 @@ def update_votes(video_id, comment_id, category, vote):
 
     # Update top voted comments
     if vote == "up":
-        current_top_comment = st.session_state.top_voted_comments.get(category)
+        current_top_comment = st.session_state.top_voted_comments[category]
         if current_top_comment is None or st.session_state.votes[video_id][comment_id][category]["up"] > st.session_state.votes[video_id][current_top_comment][category]["up"]:
             st.session_state.top_voted_comments[category] = comment_id
 
@@ -190,15 +172,6 @@ categories = st_tags.st_tags(
     suggestions=['funny'],
     maxtags=10,
 )
-
-# Update session state for categories
-for category in categories:
-    if category not in st.session_state.categorized_comments:
-        st.session_state.categorized_comments[category] = []
-    if category not in st.session_state.top_voted_comments:
-        st.session_state.top_voted_comments[category] = None
-    if category not in st.session_state.previously_rendered_comments:
-        st.session_state.previously_rendered_comments[category] = []
 
 # Function to create a prompt for categorization with token limits
 def create_prompt_for_category(comments, category):
@@ -291,11 +264,11 @@ def fetch_and_categorize_comments():
 # Function to create vote button
 def create_vote_button(video_id, comment_id, category, vote_type="up"):
     button_text = f"👍 ({fetch_votes(video_id, comment_id, category)['up']})"
-    button_key = f"{category}_{vote_type}_{comment_id}_{uuid.uuid4()}"
+    button_key = f"{category}_{vote_type}_{comment_id}"
 
     if st.button(button_text, key=button_key):
         update_votes(video_id, comment_id, category, vote_type)
-        # st.experimental_rerun()  # Removed to prevent rerun issues
+        st.experimental_rerun()  # Force rerun to update vote count
 
 # Function to display categorized comments
 def display_categorized_comments(prevent_votes=False):
@@ -310,8 +283,9 @@ def display_categorized_comments(prevent_votes=False):
                 for idx, comment in enumerate(comments):
                     if comment['text'].strip():  # Ensure no blank comments are displayed
                         st.write(comment['text'])
-                        if not prevent_votes:
+                        if not st.session_state.load_more_clicked:
                             create_vote_button(video_id, comment['id'], current_category)
+
             else:
                 st.write(f"No comments found for {current_category}.")
 
@@ -326,7 +300,6 @@ def display_loaded_comments():
                 for idx, comment in enumerate(additional_comments):
                     if comment['text'].strip():
                         st.write(comment['text'])
-                        create_vote_button(video_id, comment['id'], current_category)
 
 # Function to display vote summary for each category
 def display_vote_summary():
