@@ -1,7 +1,6 @@
-# Streamlit App Code - Version 3.31
+# Streamlit App Code - Version 3.27
 
 import os
-import uuid
 import streamlit as st
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
@@ -114,8 +113,7 @@ def fetch_youtube_comments(video_id, page_token=None):
         )
         response = request.execute()
         comments = [{"id": item['snippet']['topLevelComment']['id'],
-                     "text": item['snippet']['topLevelComment']['snippet']['textDisplay'],
-                     "uuid": str(uuid.uuid4())} for item in response['items']]
+                     "text": item['snippet']['topLevelComment']['snippet']['textDisplay']} for item in response['items']]
         next_page_token = response.get('nextPageToken', None)
         return comments, next_page_token
     except HttpError as e:
@@ -128,11 +126,11 @@ if 'comments' not in st.session_state:
 if 'next_page_token' not in st.session_state:
     st.session_state.next_page_token = None
 if 'categorized_comments' not in st.session_state:
-    st.session_state.categorized_comments = {category: [] for category in ['funny']}
+    st.session_state.categorized_comments = {}
 if 'top_voted_comments' not in st.session_state:
-    st.session_state.top_voted_comments = {category: None for category in ['funny']}
+    st.session_state.top_voted_comments = {}
 if 'previously_rendered_comments' not in st.session_state:
-    st.session_state.previously_rendered_comments = {category: [] for category in ['funny']}
+    st.session_state.previously_rendered_comments = {}
 if 'batch_number' not in st.session_state:
     st.session_state.batch_number = 1
 if 'load_more_clicked' not in st.session_state:
@@ -154,7 +152,7 @@ def update_votes(video_id, comment_id, category, vote):
 
     # Update top voted comments
     if vote == "up":
-        current_top_comment = st.session_state.top_voted_comments[category]
+        current_top_comment = st.session_state.top_voted_comments.get(category)
         if current_top_comment is None or st.session_state.votes[video_id][comment_id][category]["up"] > st.session_state.votes[video_id][current_top_comment][category]["up"]:
             st.session_state.top_voted_comments[category] = comment_id
 
@@ -174,6 +172,15 @@ categories = st_tags.st_tags(
     suggestions=['funny'],
     maxtags=10,
 )
+
+# Update session state for categories
+for category in categories:
+    if category not in st.session_state.categorized_comments:
+        st.session_state.categorized_comments[category] = []
+    if category not in st.session_state.top_voted_comments:
+        st.session_state.top_voted_comments[category] = None
+    if category not in st.session_state.previously_rendered_comments:
+        st.session_state.previously_rendered_comments[category] = []
 
 # Function to create a prompt for categorization with token limits
 def create_prompt_for_category(comments, category):
@@ -223,7 +230,7 @@ def categorize_comments_for_category(category, comments):
                     line_text = line.strip()
                     if line_text:
                         if line_text not in [c['text'] for c in st.session_state.categorized_comments[category]]:
-                            st.session_state.categorized_comments[category].append({"id": line_text.split(" [UUID:")[0], "text": line_text})
+                            st.session_state.categorized_comments[category].append({"id": line_text, "text": line_text})
             else:
                 st.error(f"No response from the model for category: {category}")
     except APIError as e:
@@ -264,9 +271,9 @@ def fetch_and_categorize_comments():
         st.warning("No comments found or failed to fetch comments.")
 
 # Function to create vote button
-def create_vote_button(video_id, comment_id, comment_uuid, category, vote_type="up"):
+def create_vote_button(video_id, comment_id, category, vote_type="up"):
     button_text = f"👍 ({fetch_votes(video_id, comment_id, category)['up']})"
-    button_key = f"{category}_{vote_type}_{comment_id}{uuid.uuid4()}"
+    button_key = f"{category}_{vote_type}_{comment_id}"
 
     if st.button(button_text, key=button_key):
         update_votes(video_id, comment_id, category, vote_type)
@@ -285,8 +292,9 @@ def display_categorized_comments(prevent_votes=False):
                 for idx, comment in enumerate(comments):
                     if comment['text'].strip():  # Ensure no blank comments are displayed
                         st.write(comment['text'])
-                        if not prevent_votes:
-                            create_vote_button(video_id, comment['id'], comment['uuid'], current_category)
+                        if not st.session_state.load_more_clicked:
+                            create_vote_button(video_id, comment['id'], current_category)
+
             else:
                 st.write(f"No comments found for {current_category}.")
 
@@ -301,7 +309,6 @@ def display_loaded_comments():
                 for idx, comment in enumerate(additional_comments):
                     if comment['text'].strip():
                         st.write(comment['text'])
-                        create_vote_button(video_id, comment['id'], comment['uuid'], current_category)
 
 # Function to display vote summary for each category
 def display_vote_summary():
