@@ -20,6 +20,7 @@ st.set_page_config(
 )
 
 # Custom CSS for wider scroll bar and comment box styling
+# Custom CSS for wider scroll bar and comment box styling
 st.markdown("""
     <style>
     ::-webkit-scrollbar {
@@ -33,10 +34,29 @@ st.markdown("""
         background: white;
     }
     .comment-box {
-        background-color: #f0f0f0;
-        border-radius: 10px;
-        padding: 10px;
-        margin-bottom: 10px;
+        background-color: #f9f9f9;
+        border-radius: 12px;
+        padding: 15px;
+        margin-bottom: 15px;
+        display: flex;
+        align-items: center;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+    .comment-text {
+        flex-grow: 1;
+        margin-right: 10px;
+    }
+    .vote-button {
+        background-color: #4CAF50;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        padding: 5px 10px;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+    }
+    .vote-button:hover {
+        background-color: #45a049;
     }
     .batch-label {
         font-weight: bold;
@@ -50,6 +70,7 @@ st.markdown("""
     }
     </style>
     """, unsafe_allow_html=True)
+
 
 # Sidebar for API key inputs
 with st.sidebar:
