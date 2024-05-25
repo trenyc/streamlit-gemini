@@ -326,8 +326,8 @@ def create_vote_button(video_id, comment_id, category, vote_type="up"):
     button_text = f"👍 ({fetch_votes(video_id, comment_id, category)['up']})"
     uuidtext = str(uuid.uuid1())
     uuidtxtresult = uuidtext[4:]
-    button_key = f"{category}_{vote_type}_{comment_id}a1gf"
-    st.write(str(uuid.uuid4()))
+    button_key = f"{category}_{vote_type}_{comment_id}_{uuidtxtresult}"
+    st.write(uuidtxtresult)
     if st.button(button_text, key=button_key):
         st.write("test")
         update_votes(video_id, comment_id, category, vote_type)
