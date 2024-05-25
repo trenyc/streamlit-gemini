@@ -126,11 +126,11 @@ if 'comments' not in st.session_state:
 if 'next_page_token' not in st.session_state:
     st.session_state.next_page_token = None
 if 'categorized_comments' not in st.session_state:
-    st.session_state.categorized_comments = {category: [] for category in ['funny', 'positive', 'negative']}
+    st.session_state.categorized_comments = {category: [] for category in ['funny']}
 if 'top_voted_comments' not in st.session_state:
-    st.session_state.top_voted_comments = {category: None for category in ['funny', 'positive', 'negative']}
+    st.session_state.top_voted_comments = {category: None for category in ['funny']}
 if 'previously_rendered_comments' not in st.session_state:
-    st.session_state.previously_rendered_comments = {category: [] for category in ['funny', 'positive', 'negative']}
+    st.session_state.previously_rendered_comments = {category: [] for category in ['funny']}
 if 'batch_number' not in st.session_state:
     st.session_state.batch_number = 1
 if 'load_more_clicked' not in st.session_state:
@@ -168,8 +168,8 @@ def fetch_votes(video_id, comment_id, category):
 categories = st_tags.st_tags(
     label='Add custom categories:',
     text='Press enter to add more',
-    value=['funny', 'positive', 'negative'],
-    suggestions=['funny', 'positive', 'negative'],
+    value=['funny'],
+    suggestions=['funny'],
     maxtags=10,
 )
 
@@ -282,8 +282,8 @@ def display_categorized_comments(prevent_votes=False):
                 for idx, comment in enumerate(comments):
                     if comment['text'].strip():  # Ensure no blank comments are displayed
                         st.write(comment['text'])
-                        if not prevent_votes:
-                            create_vote_button(video_id, comment['id'], current_category)
+                        #if not prevent_votes:
+                            #create_vote_button(video_id, comment['id'], current_category)
 
             else:
                 st.write(f"No comments found for {current_category}.")
