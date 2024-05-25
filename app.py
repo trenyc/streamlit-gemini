@@ -326,15 +326,6 @@ if debug_mode:
 if st.button("Categorize Comments"):
     fetch_and_categorize_comments()
 
-comments_displayed = False  # Initialize a flag
-
-
-
-if 'categorized_comments' in st.session_state and any(st.session_state.categorized_comments.values()) and not st.session_state.load_more_clicked:
-  if not comments_displayed:  # Check if comments haven't been displayed yet
-    st.subheader("Vote on Comments")
-    display_categorized_comments(prevent_votes=False)
-    comments_displayed = True  # Set flag to true after display
 
 # Display vote summary
 if 'votes' in st.session_state:
