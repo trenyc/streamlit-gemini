@@ -373,10 +373,12 @@ if st.button("Categorize Comments"):
     
    
 # Display categorized comments and voting buttons only once
-if 'categorized_comments' in st.session_state and any(st.session_state.categorized_comments.values()) and not st.session_state.load_more_clicked:
-    display_categorized_comments(prevent_votes=True)
-   
-    st.write();
+try:
+    if 'categorized_comments' in st.session_state and any(st.session_state.categorized_comments.values()) and not st.session_state.load_more_clicked:
+        display_categorized_comments(prevent_votes=True)
+except Exception as e:
+    st.error(f"An unexpected error occurred: {e}")
+
 
 # Load more comments button
 if st.session_state.next_page_token:
