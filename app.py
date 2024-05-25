@@ -259,13 +259,7 @@ def fetch_and_categorize_comments():
        
     else:
         st.warning("No comments found or failed to fetch comments.")
-    # Display categorized comments and voting buttons only once
-    if 'categorized_comments' in st.session_state and any(st.session_state.categorized_comments.values()) and not st.session_state.load_more_clicked:
-        st.subheader("Vote on Comments")
-        display_categorized_comments(prevent_votes=False)
-
-        
-    #display_categorized_comments(prevent_votes=False)  # Display categorized comments after fetching and categorizing
+    display_categorized_comments(prevent_votes=False)  # Display categorized comments after fetching and categorizing
 
 # Function to create vote button
 def create_vote_button(video_id, comment_id, category, vote_type="up"):
@@ -332,7 +326,10 @@ if debug_mode:
 if st.button("Categorize Comments"):
     fetch_and_categorize_comments()
 
-
+# Display categorized comments and voting buttons only once
+if 'categorized_comments' in st.session_state and any(st.session_state.categorized_comments.values()) and not st.session_state.load_more_clicked:
+    st.subheader("Vote on Comments")
+    display_categorized_comments(prevent_votes=False)
 
 # Display vote summary
 if 'votes' in st.session_state:
