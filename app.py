@@ -322,7 +322,7 @@ def display_vote_summary():
 # Fetch and display YouTube comments
 if 'selected_video_id' in st.session_state and yt_api_key and openai_api_key:
     if 'auto_fetch' in st.session_state and st.session_state.auto_fetch:
-        #fetch_and_categorize_comments()
+        fetch_and_categorize_comments()
         st.session_state.auto_fetch = False
 
 # Show "Fetch Comments" and "Show/Hide Comments" in debug mode
