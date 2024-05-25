@@ -17,6 +17,21 @@ st.set_page_config(
     page_icon="",
     layout="wide"
 )
+# Custom CSS for wider scroll bar
+st.markdown("""
+    <style>
+    ::-webkit-scrollbar {
+        width: 20px;  /* Adjust the width as needed */
+    }
+    ::-webkit-scrollbar-thumb {
+        background-color: darkgrey;
+        border-radius: 10px;
+    }
+    ::-webkit-scrollbar-track {
+        background: white;
+    }
+    </style>
+    """, unsafe_allow_html=True)
 
 # Sidebar for API key inputs
 with st.sidebar:
