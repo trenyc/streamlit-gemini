@@ -273,11 +273,11 @@ def fetch_and_categorize_comments():
 
 
 
-
+ 
 
 def create_vote_button(video_id, comment_id, category, vote_type="up"):
-  button_text = f" ({fetch_votes(video_id, comment_id, category)['up']})"
-  button_key = f"{category}_{vote_type}_{comment_id}_{str(uuid.uuid4())}"
+  button_text = f" ({fetch_votes(video_id, comment_id, category)['up']})"  # Include emoji directly
+  button_key = f"{category}_{vote_type}_{comment_id}{str(uuid.uuid4())}"
 
   if st.button(button_text, key=button_key):
     update_votes(video_id, comment_id, category, vote_type)
@@ -285,25 +285,21 @@ def create_vote_button(video_id, comment_id, category, vote_type="up"):
     # Update vote count in displayed comments (without rerunning)
     if 'categorized_comments' in st.session_state:
       for current_category in st.session_state.categorized_comments.keys():
-        for comment in st.session_state.categorized_comments[current_category]:
+        for i, comment in enumerate(st.session_state.categorized_comments[current_category]):
           if comment['id'] == comment_id:
             if 'uuid' in comment:  # Check for key before using it
               comment_uuid = comment['uuid']
-            # Update the vote count within the comment dictionary
+            # Update vote count within the comment dictionary
             comment_votes = fetch_votes(video_id, comment_id, category)
-            st.session_state.categorized_comments[current_category] = [
-                c for c in st.session_state.categorized_comments[current_category]
-                if c['uuid'] != comment_uuid or c['id'] != comment_id
-            ] + [{'id': comment_id, 'text': comment['text'], 'uuid': comment_uuid} | comment_votes]
-            # Mark the comment section for update (optional for better UX)
-            st.session_state.update_comment_section = True
+            comment['votes'] = comment_votes  # Update 'votes' key directly (assuming it exists)
+            st.session_state.categorized_comments[current_category][i] = comment  # Update comment in place
+
+            # Optional: Trigger a partial rerun to update displayed vote count visually
+            # st.experimental_rerun()  # Use with caution if needed (may be unnecessary with in-place update)
+
+            # Display a success message (optional)
+            st.success(f"Vote updated for comment {comment_id}")
             break  # Exit loop after finding the matching comment
-
-  # Optional: Trigger a partial rerun to update displayed vote count
-  # st.experimental_rerun()  # Use with caution if needed
-
-  # Display a success message (optional)
-  st.success(f"Vote updated for comment {comment_id}")
 
 # Function to display categorized comments
 def display_categorized_comments(prevent_votes=False):
