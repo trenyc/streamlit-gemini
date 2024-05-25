@@ -240,6 +240,7 @@ def load_more_comments():
         st.session_state.next_page_token = next_page_token
         for category in categories:
             categorize_comments_for_category(category, comments)
+        display_categorized_comments(prevent_votes=True) 
         st.session_state.load_more_clicked = False
     else:
         st.warning("No more comments available.")
