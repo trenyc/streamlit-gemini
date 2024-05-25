@@ -324,7 +324,7 @@ def fetch_and_categorize_comments():
 # Function to create vote button
 def create_vote_button(video_id, comment_id, category, vote_type="up"):
     button_text = f"👍 ({fetch_votes(video_id, comment_id, category)['up']})"
-    uuidtext = uuid.uuid1()
+    uuidtext = str(uuid.uuid1())
     uuidtxtresult = uuidtext[4:]
     button_key = f"{category}_{vote_type}_{comment_id}{uuidtxtresult}"
     st.write(str(uuid.uuid4()))
