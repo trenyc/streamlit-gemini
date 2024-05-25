@@ -263,9 +263,7 @@ def fetch_and_categorize_comments():
     if 'categorized_comments' in st.session_state and any(st.session_state.categorized_comments.values()) and not st.session_state.load_more_clicked:
         st.subheader("Vote on Comments")
         display_categorized_comments(prevent_votes=False)
-    else:
-        display_categorized_comments(prevent_votes=False)
-        st.write("logictest")
+
         
     #display_categorized_comments(prevent_votes=False)  # Display categorized comments after fetching and categorizing
 
