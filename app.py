@@ -17,6 +17,22 @@ st.set_page_config(
     layout="wide"
 )
 
+# Custom CSS for wider scroll bar
+st.markdown("""
+    <style>
+    ::-webkit-scrollbar {
+        width: 15px;
+    }
+    ::-webkit-scrollbar-thumb {
+        background-color: darkgrey;
+        border-radius: 10px;
+    }
+    ::-webkit-scrollbar-track {
+        background: white;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+
 # Sidebar for API key inputs
 with st.sidebar:
     st.image("https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/1f916.png", width=64)
@@ -210,7 +226,7 @@ def categorize_comments_for_category(category, comments):
                     line_text = line.strip()
                     if line_text:
                         if line_text not in [c['text'] for c in st.session_state.categorized_comments[category]]:
-                            st.session_state.categorized_comments[category].append({"id": line_text, "text": line_text})
+                            st.session_state.categorized_comments[category].append({"id": line_text, "text": line_text, "uuid": str(uuid.uuid4())})
             else:
                 st.error(f"No response from the model for category: {category}")
     except APIError as e:
