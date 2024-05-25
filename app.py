@@ -1,4 +1,4 @@
-# Streamlit App Code - Version 3.25
+# Streamlit App Code - Version 3.24
 
 import os
 import streamlit as st
@@ -241,7 +241,6 @@ def load_more_comments():
         for category in categories:
             categorize_comments_for_category(category, comments)
         st.session_state.load_more_clicked = False
-        display_loaded_comments()  # Display loaded comments after fetching and categorizing
     else:
         st.warning("No more comments available.")
         st.session_state.load_more_clicked = False
@@ -257,6 +256,7 @@ def fetch_and_categorize_comments():
         st.session_state.batch_number += 1  # Increment batch number
         for category in categories:
             categorize_comments_for_category(category, comments)
+       
     else:
         st.warning("No comments found or failed to fetch comments.")
     display_categorized_comments(prevent_votes=False)  # Display categorized comments after fetching and categorizing
@@ -325,6 +325,7 @@ if debug_mode:
 # Always show the "Categorize Comments" button
 if st.button("Categorize Comments"):
     fetch_and_categorize_comments()
+
 
 # Display vote summary
 if 'votes' in st.session_state:
