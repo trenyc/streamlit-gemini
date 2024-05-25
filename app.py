@@ -1,4 +1,5 @@
 import os
+import uuid
 import streamlit as st
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
@@ -33,6 +34,16 @@ st.markdown("""
         background-color: #f0f0f0;
         border-radius: 10px;
         padding: 10px;
+        margin-bottom: 10px;
+    }
+    .batch-label {
+        font-weight: bold;
+        margin-top: 20px;
+        margin-bottom: 10px;
+    }
+    .horizontal-bar {
+        border-top: 2px solid darkgrey;
+        margin-top: 10px;
         margin-bottom: 10px;
     }
     </style>
@@ -270,7 +281,7 @@ def load_more_comments():
         for category in categories:
             categorize_comments_for_category(category, comments)
         st.session_state.load_more_clicked = False
-        display_loaded_comments()
+        display_loaded_comments(st.session_state.batch_number)
     else:
         st.warning("No more comments available.")
         st.session_state.load_more_clicked = False
@@ -319,8 +330,10 @@ def display_categorized_comments(prevent_votes=False):
                 st.write(f"No comments found for {current_category}.")
 
 # Function to display loaded comments categorized without voting buttons
-def display_loaded_comments():
+def display_loaded_comments(batch_number):
     st.write("Displaying loaded comments")
+    st.markdown(f"<div class='horizontal-bar'></div>", unsafe_allow_html=True)
+    st.markdown(f"<div class='batch-label'>Batch {batch_number}</div>", unsafe_allow_html=True)
     if isinstance(st.session_state.categorized_comments, dict):
         for current_category in st.session_state.categorized_comments.keys():
             if len(st.session_state.categorized_comments[current_category]) > 5:
@@ -383,5 +396,5 @@ if st.session_state.next_page_token:
             load_more_comments()
 
 if st.session_state.load_more_clicked:
-    display_loaded_comments()
+    display_loaded_comments(st.session_state.batch_number)
     st.session_state.load_more_clicked = False
