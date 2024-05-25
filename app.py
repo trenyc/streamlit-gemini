@@ -256,9 +256,10 @@ def fetch_and_categorize_comments():
         st.session_state.batch_number += 1  # Increment batch number
         for category in categories:
             categorize_comments_for_category(category, comments)
-    display_categorized_comments(prevent_votes=False)  # Display categorized comments after fetching and categorizing
+       
     else:
         st.warning("No comments found or failed to fetch comments.")
+    display_categorized_comments(prevent_votes=False)  # Display categorized comments after fetching and categorizing
 
 # Function to create vote button
 def create_vote_button(video_id, comment_id, category, vote_type="up"):
