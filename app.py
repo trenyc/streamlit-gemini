@@ -1,5 +1,3 @@
-# Streamlit App Code - Version 3.28
-
 import os
 import uuid
 import streamlit as st
@@ -142,6 +140,8 @@ if 'batch_number' not in st.session_state:
     st.session_state.batch_number = 1
 if 'load_more_clicked' not in st.session_state:
     st.session_state.load_more_clicked = False
+if 'vote_updated' not in st.session_state:
+    st.session_state.vote_updated = False
 
 # Initialize votes in session state
 if 'votes' not in st.session_state:
@@ -256,24 +256,23 @@ def load_more_comments():
         st.session_state.next_page_token = next_page_token
         for category in categories:
             categorize_comments_for_category(category, comments)
-        display_loaded_comments()
-    else:
-        st.warning("No more comments available.")
-    st.session_state.load_more_clicked = False
+        st.session_state.load_more_clicked = False  # Ensure this is set to False after loading comments
 
-# Fetch and categorize comments for each category
-def fetch_and_categorize_comments():
-    comments, next_page_token = fetch_youtube_comments(video_id)
-    if comments:
-        st.success("Comments fetched successfully!")
-        st.session_state.comments.extend(comments)
-        st.session_state.next_page_token = next_page_token
-        st.session_state.batch_number += 1  # Increment batch number
-        for category in categories:
-            categorize_comments_for_category(category, comments)
-        display_categorized_comments(prevent_votes=False)  # Display categorized comments after fetching and categorizing
-    else:
-        st.warning("No comments found or failed to fetch comments.")
+def display_categorized_comments(prevent_votes=False):
+    st.write("Displaying categorized comments")
+    if isinstance(st.session_state.categorized_comments, dict):
+        for current_category in st.session_state.categorized_comments.keys():  # Use current_category
+            if len(st.session_state.categorized_comments[current_category]) > 0:  # Check if the list is not empty
+                st.write(f"### {current_category.capitalize()}")
+                st.write(f"Comments that are {current_category}:")
+                comments = st.session_state.categorized_comments[current_category][:5]
+                for idx, comment in enumerate(comments):
+                    if comment['text'].strip():  # Ensure no blank comments are displayed
+                        st.write(comment['text'])
+                        if not prevent_votes:
+                            create_vote_button(video_id, comment['id'], current_category)
+            else:
+                st.write(f"No comments found for {current_category}.")
 
 # Function to create vote button
 def create_vote_button(video_id, comment_id, category, vote_type="up"):
@@ -282,26 +281,15 @@ def create_vote_button(video_id, comment_id, category, vote_type="up"):
 
     if st.button(button_text, key=button_key):
         update_votes(video_id, comment_id, category, vote_type)
-        st.experimental_rerun()  # Force rerun to update vote count
+        # Update votes in the session state without forcing a rerun
+        st.session_state.vote_updated = True
 
-# Function to display categorized comments
-def display_categorized_comments(prevent_votes=False):
-    st.write("Displaying categorized comments")
-    if isinstance(st.session_state.categorized_comments, dict):
-        for current_category in st.session_state.categorized_comments.keys():  # Use current_category
-            if len(st.session_state.categorized_comments[current_category]) > 0:  # Check if the list is not empty
-                st.write(f"### {current_category.capitalize()}")
-                st.write(f"Comments that are {current_category}:")
-
-                comments = st.session_state.categorized_comments[current_category][:5]
-                for idx, comment in enumerate(comments):
-                    if comment['text'].strip():  # Ensure no blank comments are displayed
-                        st.write(comment['text'])
-                        if not st.session_state.load_more_clicked:
-                            create_vote_button(video_id, comment['id'], current_category)
-
-            else:
-                st.write(f"No comments found for {current_category}.")
+# Check if votes have been updated
+if st.session_state.vote_updated:
+    st.session_state.vote_updated = False
+    display_categorized_comments(prevent_votes=False)
+    if st.session_state.load_more_clicked:
+        display_loaded_comments()
 
 # Function to display loaded comments categorized without voting buttons
 def display_loaded_comments():
@@ -368,6 +356,7 @@ if st.session_state.next_page_token:
         with st.spinner("Loading more comments..."):
             load_more_comments()
 
+# If load more button was clicked, ensure additional comments are displayed
 if st.session_state.load_more_clicked:
     display_loaded_comments()
     st.session_state.load_more_clicked = False
