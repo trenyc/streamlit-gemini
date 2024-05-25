@@ -115,7 +115,7 @@ if 'search_results' in st.session_state:
                 st.session_state.auto_fetch = True
                 st.session_state.batch_number = 1  # Initialize batch number
                 del st.session_state.search_results
-                st.experimental_rerun()  # Force a rerun to update state
+                #st.experimental_rerun()  # Force a rerun to update state
 
 # Set selected video ID from search results
 if 'selected_video_id' in st.session_state:
