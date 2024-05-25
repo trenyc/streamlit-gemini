@@ -1,5 +1,3 @@
-# Streamlit App Code - Version 3.27
-
 import os
 import uuid
 import streamlit as st
@@ -114,7 +112,8 @@ def fetch_youtube_comments(video_id, page_token=None):
         )
         response = request.execute()
         comments = [{"id": item['snippet']['topLevelComment']['id'],
-                     "text": item['snippet']['topLevelComment']['snippet']['textDisplay']} for item in response['items']]
+                     "text": item['snippet']['topLevelComment']['snippet']['textDisplay'],
+                     "uuid": str(uuid.uuid4())} for item in response['items']]
         next_page_token = response.get('nextPageToken', None)
         return comments, next_page_token
     except HttpError as e:
@@ -271,19 +270,13 @@ def fetch_and_categorize_comments():
     else:
         st.warning("No comments found or failed to fetch comments.")
 
-
-
- 
-
 # Function to create vote button
 def create_vote_button(video_id, comment_id, category, vote_type="up"):
     button_text = f"👍 ({fetch_votes(video_id, comment_id, category)['up']})"
-    button_key = f"{category}_{vote_type}_{comment_id}_{str(uuid.uuid4())}"
+    button_key = f"{category}_{vote_type}_{comment_id}_{uuid.uuid4()}"
 
     if st.button(button_text, key=button_key):
-        st.write("test")
-        #update_votes(video_id, comment_id, category, vote_type)
-        #st.experimental_rerun()  # Force rerun to update vote count
+        update_votes(video_id, comment_id, category, vote_type)
 
 # Function to display categorized comments
 def display_categorized_comments(prevent_votes=False):
@@ -298,10 +291,8 @@ def display_categorized_comments(prevent_votes=False):
                 for idx, comment in enumerate(comments):
                     if comment['text'].strip():  # Ensure no blank comments are displayed
                         st.write(comment['text'])
-                        if not st.session_state.load_more_clicked:
+                        if not prevent_votes:
                             create_vote_button(video_id, comment['id'], current_category)
-
-
             else:
                 st.write(f"No comments found for {current_category}.")
 
@@ -316,7 +307,6 @@ def display_loaded_comments():
                 for idx, comment in enumerate(additional_comments):
                     if comment['text'].strip():
                         st.write(comment['text'])
-                        
                         create_vote_button(video_id, comment['id'], current_category)
 
 # Function to display vote summary for each category
