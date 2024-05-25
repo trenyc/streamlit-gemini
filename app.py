@@ -241,7 +241,7 @@ def load_more_comments():
         for category in categories:
             categorize_comments_for_category(category, comments)
         st.session_state.load_more_clicked = False
-    display_categorized_comments(prevent_votes=True)  # Display categorized comments after fetching and categorizing
+        display_categorized_comments(prevent_votes=True)  # Display categorized comments after fetching and categorizing
     else:
         st.warning("No more comments available.")
         st.session_state.load_more_clicked = False
