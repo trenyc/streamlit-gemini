@@ -1,5 +1,3 @@
-# Streamlit App Code - Version 3.26
-
 import os
 import streamlit as st
 from googleapiclient.discovery import build
@@ -18,7 +16,7 @@ st.set_page_config(
     layout="wide"
 )
 
-# Custom CSS for wider scroll bar
+# Custom CSS for wider scroll bar and comment box styling
 st.markdown("""
     <style>
     ::-webkit-scrollbar {
@@ -30,6 +28,12 @@ st.markdown("""
     }
     ::-webkit-scrollbar-track {
         background: white;
+    }
+    .comment-box {
+        background-color: #f0f0f0;
+        border-radius: 10px;
+        padding: 10px;
+        margin-bottom: 10px;
     }
     </style>
     """, unsafe_allow_html=True)
@@ -189,6 +193,15 @@ categories = st_tags.st_tags(
     maxtags=10,
 )
 
+# Update session state for categories
+for category in categories:
+    if category not in st.session_state.categorized_comments:
+        st.session_state.categorized_comments[category] = []
+    if category not in st.session_state.top_voted_comments:
+        st.session_state.top_voted_comments[category] = None
+    if category not in st.session_state.previously_rendered_comments:
+        st.session_state.previously_rendered_comments[category] = []
+
 # Function to create a prompt for categorization with token limits
 def create_prompt_for_category(comments, category):
     top_voted_comment_id = st.session_state.top_voted_comments[category]
@@ -298,7 +311,7 @@ def display_categorized_comments(prevent_votes=False):
                 comments = st.session_state.categorized_comments[current_category][:5]
                 for idx, comment in enumerate(comments):
                     if comment['text'].strip():  # Ensure no blank comments are displayed
-                        st.write(comment['text'])
+                        st.markdown(f"<div class='comment-box'>{comment['text']}</div>", unsafe_allow_html=True)
                         if not st.session_state.load_more_clicked:
                             create_vote_button(video_id, comment['id'], current_category)
 
@@ -315,7 +328,7 @@ def display_loaded_comments():
                 additional_comments = st.session_state.categorized_comments[current_category][5:]
                 for idx, comment in enumerate(additional_comments):
                     if comment['text'].strip():
-                        st.write(comment['text'])
+                        st.markdown(f"<div class='comment-box'>{comment['text']}</div>", unsafe_allow_html=True)
 
 # Function to display vote summary for each category
 def display_vote_summary():
@@ -357,7 +370,7 @@ if st.button("Categorize Comments"):
 # Display categorized comments and voting buttons only once
 if 'categorized_comments' in st.session_state and any(st.session_state.categorized_comments.values()) and not st.session_state.load_more_clicked:
     st.subheader("Vote on Comments")
-    #display_categorized_comments(prevent_votes=False)
+    display_categorized_comments(prevent_votes=False)
 
 # Display vote summary
 if 'votes' in st.session_state:
