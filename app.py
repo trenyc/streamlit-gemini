@@ -7,8 +7,8 @@ from googleapiclient.errors import HttpError
 from openai import OpenAI, APIError
 import streamlit_tags as st_tags
 
-# Define API key environment variable names
-YOUTUBE_API_KEY = st.secrets["YOUTUBE_API_KEY_ENV"]
+# DefineAPI key environment variable names
+YOFUTUBE_API_KEY = st.secrets["YOUTUBE_API_KEY_ENV"]
 OPENAI_API_KEY = st.secrets["OPENAI_API_KEY_ENV"]
 
 # Set the page configuration for the Streamlit app
@@ -328,9 +328,9 @@ if st.button("Categorize Comments"):
     fetch_and_categorize_comments()
 
 # Display categorized comments and voting buttons only once
-if 'categorized_comments' in st.session_state and any(st.session_state.categorized_comments.values()) and not st.session_state.load_more_clicked:
-    st.subheader("Vote on Comments")
-    display_categorized_comments(prevent_votes=False)
+#if 'categorized_comments' in st.session_state and any(st.session_state.categorized_comments.values()) and not st.session_state.load_more_clicked:
+#    st.subheader("Vote on Comments")
+#    display_categorized_comments(prevent_votes=False)
 
 # Display vote summary
 if 'votes' in st.session_state:
