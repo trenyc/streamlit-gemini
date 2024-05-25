@@ -275,31 +275,14 @@ def fetch_and_categorize_comments():
 
  
 
+# Function to create vote button
 def create_vote_button(video_id, comment_id, category, vote_type="up"):
-  button_text = f" ({fetch_votes(video_id, comment_id, category)['up']})"  # Include emoji directly
-  button_key = f"{category}_{vote_type}_{comment_id}{str(uuid.uuid4())}"
+    button_text = f"👍 ({fetch_votes(video_id, comment_id, category)['up']})"
+    button_key = f"{category}_{vote_type}_{comment_id}str(uuid.uuid4())"
 
-  if st.button(button_text, key=button_key):
-    update_votes(video_id, comment_id, category, vote_type)
-
-    # Update vote count in displayed comments (without rerunning)
-    if 'categorized_comments' in st.session_state:
-      for current_category in st.session_state.categorized_comments.keys():
-        for i, comment in enumerate(st.session_state.categorized_comments[current_category]):
-          if comment['id'] == comment_id:
-            if 'uuid' in comment:  # Check for key before using it
-              comment_uuid = comment['uuid']
-            # Update vote count within the comment dictionary
-            comment_votes = fetch_votes(video_id, comment_id, category)
-            comment['votes'] = comment_votes  # Update 'votes' key directly (assuming it exists)
-            st.session_state.categorized_comments[current_category][i] = comment  # Update comment in place
-
-            # Optional: Trigger a partial rerun to update displayed vote count visually
-            # st.experimental_rerun()  # Use with caution if needed (may be unnecessary with in-place update)
-
-            # Display a success message (optional)
-            st.success(f"Vote updated for comment {comment_id}")
-            break  # Exit loop after finding the matching comment
+    if st.button(button_text, key=button_key):
+        update_votes(video_id, comment_id, category, vote_type)
+        st.experimental_rerun()  # Force rerun to update vote count
 
 # Function to display categorized comments
 def display_categorized_comments(prevent_votes=False):
