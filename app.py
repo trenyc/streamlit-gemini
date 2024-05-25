@@ -292,7 +292,7 @@ def display_categorized_comments(prevent_votes=False):
                 comments = st.session_state.categorized_comments[current_category][:5]
                 for idx, comment in enumerate(comments):
                     if comment['text'].strip():  # Ensure no blank comments are displayed
-                        comment_text, comment_uuid = comment['text'].split(" [UUID:")
+                        comment_text, _, comment_uuid = comment['text'].partition(" [UUID:")
                         st.write(comment_text)
                         if not st.session_state.load_more_clicked:
                             create_vote_button(video_id, comment_uuid, current_category)
