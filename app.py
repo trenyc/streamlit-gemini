@@ -274,22 +274,22 @@ def create_vote_button(video_id, comment_id, category, vote_type="up"):
 
 # Function to display categorized comments
 def display_categorized_comments(prevent_votes=False):
-    st.write("Displaying categorized comments")
-    if isinstance(st.session_state.categorized_comments, dict):
-        for current_category in st.session_state.categorized_comments.keys():  # Use current_category
-            if len(st.session_state.categorized_comments[current_category]) > 0:  # Check if the list is not empty
-                st.write(f"### {current_category.capitalize()}")
-                st.write(f"Comments that are {current_category}:")
+  st.write("Displaying categorized comments")
+  if isinstance(st.session_state.categorized_comments, dict):
+    for current_category in st.session_state.categorized_comments.keys():
+      if len(st.session_state.categorized_comments[current_category]) > 0:
+        st.write(f"### {current_category.capitalize()}")
+        st.write(f"Comments that are {current_category}:")
 
-                comments = st.session_state.categorized_comments[current_category][:5]
-                for idx, comment in enumerate(comments):
-                    if comment['text'].strip():  # Ensure no blank comments are displayed
-                        st.write(comment['text'])
-                        if not prevent_votes:
-                            create_vote_button(video_id, comment['id'], current_category)
+        comments = st.session_state.categorized_comments[current_category][:5]
+        for idx, comment in enumerate(comments):
+          if comment['text'].strip():
+            st.write(comment['text'])
+            if not prevent_votes:  # Only show buttons if not preventing votes
+              create_vote_button(video_id, comment['id'], current_category)
 
-            else:
-                st.write(f"No comments found for {current_category}.")
+  else:
+    st.write(f"No comments found for any category.")
 
 # Function to display vote summary for each category
 def display_vote_summary():
@@ -339,22 +339,24 @@ if 'votes' in st.session_state:
 
 # Load more comments button
 if st.session_state.next_page_token:
-    if st.button("Load More Comments"):
-        with st.spinner("Loading more comments..."):
-            load_more_comments()
+  if st.button("Load More Comments"):
+    with st.spinner("Loading more comments..."):
+      load_more_comments()
 
 # Function to display loaded comments categorized without voting buttons
 def display_loaded_comments():
-    st.write("Displaying loaded comments")
-    if isinstance(st.session_state.categorized_comments, dict):
-        for current_category in st.session_state.categorized_comments.keys():
-            if len(st.session_state.categorized_comments[current_category]) > 5:
-                st.write(f"### More {current_category.capitalize()} Comments")
-                additional_comments = st.session_state.categorized_comments[current_category][5:]
-                for idx, comment in enumerate(additional_comments):
-                    if comment['text'].strip():
-                        st.write(comment['text'])
+  st.write("Displaying loaded comments")
+  if isinstance(st.session_state.categorized_comments, dict):
+    for current_category in st.session_state.categorized_comments.keys():
+      if len(st.session_state.categorized_comments[current_category]) > 5:
+        st.write(f"### More {current_category.capitalize()} Comments")
+        additional_comments = st.session_state.categorized_comments[current_category][5:]
+        for idx, comment in enumerate(additional_comments):
+          if comment['text'].strip():
+            st.write(comment['text'])
+
+# ... (rest of your code)
 
 if st.session_state.load_more_clicked:
-    display_loaded_comments()
-    st.session_state.load_more_clicked = False
+  display_loaded_comments()
+  st.session_state.load_more_clicked = False
