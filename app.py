@@ -339,6 +339,7 @@ if 'votes' in st.session_state:
 if st.session_state.next_page_token:
     if st.button("Load More Comments"):
         with st.spinner("Loading more comments..."):
+            display_categorized_comments(prevent_votes=True)
             load_more_comments()
 
 # Function to display loaded comments categorized without voting buttons
