@@ -256,7 +256,7 @@ def fetch_and_categorize_comments():
         st.session_state.batch_number += 1  # Increment batch number
         for category in categories:
             categorize_comments_for_category(category, comments)
-        display_categorized_comments(prevent_votes=False)  # Display categorized comments after fetching and categorizing
+    display_categorized_comments(prevent_votes=False)  # Display categorized comments after fetching and categorizing
     else:
         st.warning("No comments found or failed to fetch comments.")
 
@@ -307,7 +307,7 @@ def display_vote_summary():
 # Fetch and display YouTube comments
 if 'selected_video_id' in st.session_state and yt_api_key and openai_api_key:
     if 'auto_fetch' in st.session_state and st.session_state.auto_fetch:
-        #fetch_and_categorize_comments()
+        fetch_and_categorize_comments()
         st.session_state.auto_fetch = False
 
 # Show "Fetch Comments" and "Show/Hide Comments" in debug mode
