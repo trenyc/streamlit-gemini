@@ -1,4 +1,5 @@
 import os
+import uuid
 import streamlit as st
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
@@ -16,7 +17,7 @@ st.set_page_config(
     layout="wide"
 )
 
-# Custom CSS for wider scroll bar and comment styling
+# Custom CSS for wider scroll bar and comment box styling
 st.markdown("""
     <style>
     ::-webkit-scrollbar {
@@ -31,21 +32,18 @@ st.markdown("""
     }
     .comment-box {
         background-color: #f0f0f0;
-        padding: 10px;
         border-radius: 10px;
+        padding: 10px;
         margin-bottom: 10px;
-        display: flex;
-        align-items: center;
-    }
-    .vote-button {
-        margin-right: 10px;
-    }
-    .horizontal-bar {
-        border-top: 2px solid #bbb;
-        margin: 20px 0;
     }
     .batch-label {
         font-weight: bold;
+        margin-top: 20px;
+        margin-bottom: 10px;
+    }
+    .horizontal-bar {
+        border-top: 2px solid darkgrey;
+        margin-top: 10px;
         margin-bottom: 10px;
     }
     </style>
@@ -146,8 +144,7 @@ def fetch_youtube_comments(video_id, page_token=None):
         )
         response = request.execute()
         comments = [{"id": item['snippet']['topLevelComment']['id'],
-                     "text": item['snippet']['topLevelComment']['snippet']['textDisplay'],
-                     "batch": st.session_state.batch_number} for item in response['items']]
+                     "text": item['snippet']['topLevelComment']['snippet']['textDisplay']} for item in response['items']]
         next_page_token = response.get('nextPageToken', None)
         return comments, next_page_token
     except HttpError as e:
@@ -290,6 +287,21 @@ def load_more_comments():
         st.warning("No more comments available.")
         st.session_state.load_more_clicked = False
 
+# Fetch and categorize comments for each category
+def fetch_and_categorize_comments():
+    comments, next_page_token = fetch_youtube_comments(video_id)
+    if comments:
+        st.success("Comments fetched successfully!")
+        # Prepend new comments to existing comments
+        st.session_state.comments = comments + st.session_state.comments
+        st.session_state.next_page_token = next_page_token
+        st.session_state.batch_number = 1  # Initialize batch number
+        for category in categories:
+            categorize_comments_for_category(category, comments)
+        display_categorized_comments(prevent_votes=False)  # Display categorized comments after fetching and categorizing
+    else:
+        st.warning("No comments found or failed to fetch comments.")
+
 # Function to create vote button
 def create_vote_button(video_id, comment_id, category, vote_type="up"):
     button_text = f"👍 ({fetch_votes(video_id, comment_id, category)['up']})"
@@ -311,9 +323,9 @@ def display_categorized_comments(prevent_votes=False):
                 comments = st.session_state.categorized_comments[current_category][:5]
                 for idx, comment in enumerate(comments):
                     if comment['text'].strip():  # Ensure no blank comments are displayed
-                        st.write(f"<div class='comment-box'><div class='vote-button'>", unsafe_allow_html=True)
-                        create_vote_button(video_id, comment['id'], current_category)
-                        st.write(f"</div>{comment['text']}</div>", unsafe_allow_html=True)
+                        st.markdown(f"<div class='comment-box'>{comment['text']}</div>", unsafe_allow_html=True)
+                        if not st.session_state.load_more_clicked:
+                            create_vote_button(video_id, comment['id'], current_category)
 
             else:
                 st.write(f"No comments found for {current_category}.")
@@ -328,9 +340,7 @@ def display_loaded_comments(batch_number, comments):
             st.write(f"### More {current_category.capitalize()} Comments")
             for comment in comments:
                 if comment['text'].strip():
-                    st.markdown(f"<div class='comment-box'><div class='vote-button'>", unsafe_allow_html=True)
-                    create_vote_button(video_id, comment['id'], current_category)
-                    st.write(f"</div>{comment['text']}</div>", unsafe_allow_html=True)
+                    st.markdown(f"<div class='comment-box'>{comment['text']}</div>", unsafe_allow_html=True)
 
 # Function to display vote summary for each category
 def display_vote_summary():
@@ -385,5 +395,5 @@ if st.session_state.next_page_token:
             load_more_comments()
 
 if st.session_state.load_more_clicked:
-    display_loaded_comments(st.session_state.batch_number, st.session_state.comments)
+    display_loaded_comments(st.session_state.batch_number, st.session_state.comments[-100:])  # Pass the last batch of comments
     st.session_state.load_more_clicked = False
