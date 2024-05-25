@@ -238,7 +238,7 @@ def create_prompt_for_category(comments, category):
     return prompt.rstrip(', ')
 
 # Function to categorize comments for a specific category
-def categorize_comments_for_category(category, comments):
+def categorize_comments_for_category(category, comments, batch=1):
     prompt = create_prompt_for_category(comments, category)
     st.write(f"Starting to categorize comments for category: {category}")
     try:
@@ -261,7 +261,7 @@ def categorize_comments_for_category(category, comments):
                     line_text = line.strip()
                     if line_text:
                         if line_text not in [c['text'] for c in st.session_state.categorized_comments[category]]:
-                            st.session_state.categorized_comments[category].append({"id": line_text, "text": line_text})
+                            st.session_state.categorized_comments[category].append({"id": line_text, "text": line_text, "batch": batch})
             else:
                 st.error(f"No response from the model for category: {category}")
     except APIError as e:
@@ -280,8 +280,9 @@ def load_more_comments():
         st.session_state.comments.extend(comments)  # Append new comments to the existing list
         st.session_state.next_page_token = next_page_token
         for category in categories:
-            categorize_comments_for_category(category, comments)
+            categorize_comments_for_category(category, comments, st.session_state.batch_number)
         st.session_state.load_more_clicked = False
+        st.write("test")
         display_loaded_comments(st.session_state.batch_number, comments)  # Pass comments to display_loaded_comments
     else:
         st.warning("No more comments available.")
