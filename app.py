@@ -1,6 +1,7 @@
-# Streamlit App Code - Version 3.27
+# Streamlit App Code - Version 3.28
 
 import os
+import uuid
 import streamlit as st
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
@@ -113,7 +114,7 @@ def fetch_youtube_comments(video_id, page_token=None):
         )
         response = request.execute()
         comments = [{"id": item['snippet']['topLevelComment']['id'],
-                     "text": item['snippet']['topLevelComment']['snippet']['textDisplay']} for item in response['items']]
+                     "text": item['snippet']['topLevelComment']['snippet']['textDisplay'] + f" [UUID:{uuid.uuid4()}]"} for item in response['items']]
         next_page_token = response.get('nextPageToken', None)
         return comments, next_page_token
     except HttpError as e:
@@ -189,7 +190,7 @@ def create_prompt_for_category(comments, category):
     if top_voted_comment_id:
         top_voted_comment = next((comment for comment in st.session_state.comments if comment['id'] == top_voted_comment_id), None)
         if top_voted_comment:
-            example_comment = top_voted_comment['text']
+            example_comment = top_voted_comment['text'].split(" [UUID:")[0]  # Strip UUID before using as example
         else:
             example_comment = f"Comment with ID: {top_voted_comment_id}"
     if not example_comment:
@@ -230,7 +231,7 @@ def categorize_comments_for_category(category, comments):
                     line_text = line.strip()
                     if line_text:
                         if line_text not in [c['text'] for c in st.session_state.categorized_comments[category]]:
-                            st.session_state.categorized_comments[category].append({"id": line_text, "text": line_text})
+                            st.session_state.categorized_comments[category].append({"id": line_text.split(" [UUID:")[0], "text": line_text})
             else:
                 st.error(f"No response from the model for category: {category}")
     except APIError as e:
@@ -291,9 +292,10 @@ def display_categorized_comments(prevent_votes=False):
                 comments = st.session_state.categorized_comments[current_category][:5]
                 for idx, comment in enumerate(comments):
                     if comment['text'].strip():  # Ensure no blank comments are displayed
-                        st.write(comment['text'])
+                        comment_text, comment_uuid = comment['text'].split(" [UUID:")
+                        st.write(comment_text)
                         if not st.session_state.load_more_clicked:
-                            create_vote_button(video_id, comment['id'], current_category)
+                            create_vote_button(video_id, comment_uuid, current_category)
 
             else:
                 st.write(f"No comments found for {current_category}.")
@@ -308,7 +310,8 @@ def display_loaded_comments():
                 additional_comments = st.session_state.categorized_comments[current_category][5:]
                 for idx, comment in enumerate(additional_comments):
                     if comment['text'].strip():
-                        st.write(comment['text'])
+                        comment_text = comment['text'].split(" [UUID:")[0]
+                        st.write(comment_text)
 
 # Function to display vote summary for each category
 def display_vote_summary():
