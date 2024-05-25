@@ -1,6 +1,9 @@
-# Streamlit App Code - Version 3.22
+
+
+# Streamlit App Code - Version 3.27
 
 import os
+import uuid
 import streamlit as st
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
@@ -141,11 +144,11 @@ if 'comments' not in st.session_state:
 if 'next_page_token' not in st.session_state:
     st.session_state.next_page_token = None
 if 'categorized_comments' not in st.session_state:
-    st.session_state.categorized_comments = {category: [] for category in ['funny', 'positive', 'negative']}
+    st.session_state.categorized_comments = {}
 if 'top_voted_comments' not in st.session_state:
-    st.session_state.top_voted_comments = {category: None for category in ['funny', 'positive', 'negative']}
+    st.session_state.top_voted_comments = {}
 if 'previously_rendered_comments' not in st.session_state:
-    st.session_state.previously_rendered_comments = {category: [] for category in ['funny', 'positive', 'negative']}
+    st.session_state.previously_rendered_comments = {}
 if 'batch_number' not in st.session_state:
     st.session_state.batch_number = 1
 if 'load_more_clicked' not in st.session_state:
@@ -167,7 +170,7 @@ def update_votes(video_id, comment_id, category, vote):
 
     # Update top voted comments
     if vote == "up":
-        current_top_comment = st.session_state.top_voted_comments[category]
+        current_top_comment = st.session_state.top_voted_comments.get(category)
         if current_top_comment is None or st.session_state.votes[video_id][comment_id][category]["up"] > st.session_state.votes[video_id][current_top_comment][category]["up"]:
             st.session_state.top_voted_comments[category] = comment_id
 
@@ -183,10 +186,19 @@ def fetch_votes(video_id, comment_id, category):
 categories = st_tags.st_tags(
     label='Add custom categories:',
     text='Press enter to add more',
-    value=['funny', 'positive', 'negative'],
-    suggestions=['funny', 'positive', 'negative'],
+    value=['funny'],
+    suggestions=['funny'],
     maxtags=10,
 )
+
+# Update session state for categories
+for category in categories:
+    if category not in st.session_state.categorized_comments:
+        st.session_state.categorized_comments[category] = []
+    if category not in st.session_state.top_voted_comments:
+        st.session_state.top_voted_comments[category] = None
+    if category not in st.session_state.previously_rendered_comments:
+        st.session_state.previously_rendered_comments[category] = []
 
 # Function to create a prompt for categorization with token limits
 def create_prompt_for_category(comments, category):
@@ -248,19 +260,22 @@ def categorize_comments_for_category(category, comments):
 
 # Function to load more comments
 def load_more_comments():
+    st.session_state.load_more_clicked = True
     comments, next_page_token = fetch_youtube_comments(video_id, st.session_state.next_page_token)
     if comments:
         st.session_state.comments = comments + st.session_state.comments
         st.session_state.next_page_token = next_page_token
         for category in categories:
             categorize_comments_for_category(category, comments)
+        st.session_state.load_more_clicked = False
+        display_loaded_comments()
     else:
         st.warning("No more comments available.")
         st.session_state.load_more_clicked = False
 
 # Fetch and categorize comments for each category
 def fetch_and_categorize_comments():
-    comments, next_page_token = fetch_youtube_comments(video_id, st.session_state.next_page_token)
+    comments, next_page_token = fetch_youtube_comments(video_id)
     if comments:
         st.success("Comments fetched successfully!")
         # Prepend new comments to existing comments
@@ -273,8 +288,18 @@ def fetch_and_categorize_comments():
     else:
         st.warning("No comments found or failed to fetch comments.")
 
+# Function to create vote button
+def create_vote_button(video_id, comment_id, category, vote_type="up"):
+    button_text = f"👍 ({fetch_votes(video_id, comment_id, category)['up']})"
+    button_key = f"{category}_{vote_type}_{comment_id}_{uuid.uuid4()}"
+
+    if st.button(button_text, key=button_key):
+        update_votes(video_id, comment_id, category, vote_type)
+        # st.experimental_rerun()  # Removed to prevent rerun issues
+
 # Function to display categorized comments
 def display_categorized_comments(prevent_votes=False):
+    st.write("Displaying categorized comments")
     if isinstance(st.session_state.categorized_comments, dict):
         for current_category in st.session_state.categorized_comments.keys():  # Use current_category
             if len(st.session_state.categorized_comments[current_category]) > 0:  # Check if the list is not empty
@@ -286,14 +311,22 @@ def display_categorized_comments(prevent_votes=False):
                     if comment['text'].strip():  # Ensure no blank comments are displayed
                         st.write(comment['text'])
                         if not prevent_votes:
-                            votes = fetch_votes(video_id, comment['id'], current_category)  # Use current_category
-
-                            if st.button(f"👍 ({votes['up']})", key=f"{current_category}_up_{comment['id']}"):
-                                update_votes(video_id, comment['id'], current_category, "up")
-                                st.experimental_rerun()  # Force a rerun to update vote count
-
+                            create_vote_button(video_id, comment['id'], current_category)
             else:
                 st.write(f"No comments found for {current_category}.")
+
+# Function to display loaded comments categorized without voting buttons
+def display_loaded_comments():
+    st.write("Displaying loaded comments")
+    if isinstance(st.session_state.categorized_comments, dict):
+        for current_category in st.session_state.categorized_comments.keys():
+            if len(st.session_state.categorized_comments[current_category]) > 5:
+                st.write(f"### More {current_category.capitalize()} Comments")
+                additional_comments = st.session_state.categorized_comments[current_category][5:]
+                for idx, comment in enumerate(additional_comments):
+                    if comment['text'].strip():
+                        st.write(comment['text'])
+                        create_vote_button(video_id, comment['id'], current_category)
 
 # Function to display vote summary for each category
 def display_vote_summary():
@@ -332,8 +365,8 @@ if debug_mode:
 if st.button("Categorize Comments"):
     fetch_and_categorize_comments()
 
-# Display categorized comments and voting buttons
-if 'categorized_comments' in st.session_state and any(st.session_state.categorized_comments.values()):
+# Display categorized comments and voting buttons only once
+if 'categorized_comments' in st.session_state and any(st.session_state.categorized_comments.values()) and not st.session_state.load_more_clicked:
     st.subheader("Vote on Comments")
     display_categorized_comments(prevent_votes=False)
 
@@ -344,17 +377,9 @@ if 'votes' in st.session_state:
 # Load more comments button
 if st.session_state.next_page_token:
     if st.button("Load More Comments"):
-        load_more_comments()
+        with st.spinner("Loading more comments..."):
+            load_more_comments()
 
-# Function to display loaded comments categorized without voting buttons
-def display_loaded_comments():
-    if isinstance(st.session_state.categorized_comments, dict):
-        for current_category in st.session_state.categorized_comments.keys():
-            if len(st.session_state.categorized_comments[current_category]) > 5:
-                st.write(f"### More {current_category.capitalize()} Comments")
-                additional_comments = st.session_state.categorized_comments[current_category][5:]
-                for idx, comment in enumerate(additional_comments):
-                    if comment['text'].strip():
-                        st.write(comment['text'])
-
-display_loaded_comments()
+if st.session_state.load_more_clicked:
+    display_loaded_comments()
+    st.session_state.load_more_clicked = False
