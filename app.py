@@ -278,7 +278,8 @@ def create_vote_button(video_id, comment_id, category, vote_type="up"):
 
     if st.button(button_text, key=button_key):
         update_votes(video_id, comment_id, category, vote_type)
-        st.experimental_rerun()  # Force rerun to update vote count
+        if not st.session_state.load_more_clicked:
+            st.experimental_rerun()  # Force rerun to update vote count
 
 # Function to display categorized comments
 def display_categorized_comments(prevent_votes=False):
@@ -311,6 +312,7 @@ def display_loaded_comments():
                 for idx, comment in enumerate(additional_comments):
                     if comment['text'].strip():
                         st.write(comment['text'])
+                        
                         create_vote_button(video_id, comment['id'], current_category)
 
 # Function to display vote summary for each category
