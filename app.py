@@ -296,7 +296,6 @@ def load_more_comments():
             categorize_comments_for_category(category, comments, st.session_state.batch_number)
         st.session_state.load_more_clicked = False
         display_loaded_comments(st.session_state.batch_number, comments)  # Pass comments to display_loaded_comments
-        st.rerun()
     else:
         st.warning("No more comments available.")
         st.session_state.load_more_clicked = False
