@@ -93,8 +93,8 @@ if openai_api_key:
     client = OpenAI(api_key=openai_api_key)
 
 # Main app content
-st.title("YouTube Comments Categorizer")
-st.caption("Unleash fun in YouTube comments with OpenAI")
+st.title("Comments Caddy")
+st.caption("Categorize YouTube Comments To Cut Through The Noise")
 
 # Function to search YouTube videos
 def search_youtube_videos(query):
