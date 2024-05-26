@@ -3,7 +3,7 @@ import streamlit as st
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 from openai import OpenAI, APIError
-import streamlit_tags as st_tag
+import streamlit_tags as st_tags
 import uuid
 
 # Define API key environment variable names
