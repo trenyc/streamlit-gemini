@@ -338,7 +338,7 @@ def display_categorized_comments(prevent_votes=False):
         for current_category in st.session_state.categorized_comments.keys():  # Use current_category
             if len(st.session_state.categorized_comments[current_category]) > 0:  # Check if the list is not empty
                 st.write(f"### {current_category.capitalize()}")
-                st.write(f"Here arec omments that are {current_category}. Help AI know your categories, vote for comments the best match category.")
+                st.write(f"Here are comments that are {current_category}. Help AI know your categories, vote for comments the best match category.")
 
                 for batch in range(1, st.session_state.batch_number + 1):
                     #st.write(f"#### Batch {batch}")
