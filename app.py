@@ -74,7 +74,7 @@ st.markdown("""
 
 # Sidebar for API key inputs
 with st.sidebar:
-    st.image("https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/1f916.png", width=64)
+    st.image("https://cdn.discordapp.com/attachments/997271639525961748/1244099030389227611/blueberry_2024_flat_line_art_minimalist_focused_on_categorizing_d2cf7d87-b54b-4159-a0f2-a75f698f593c.png")
     st.title("API Keys")
 
     # Try to retrieve API keys from environment variables (if available)
