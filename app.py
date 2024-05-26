@@ -381,7 +381,7 @@ if st.button("Load Categorize Comments"):
 try:
     if 'categorized_comments' in st.session_state and any(st.session_state.categorized_comments.values()) and not st.session_state.load_more_clicked:
         st.write("")
-        #display_categorized_comments(prevent_votes=True)
+        display_categorized_comments(prevent_votes=True)
 except Exception as e:
     st.error(f"An unexpected error occurred: {e}")
 
