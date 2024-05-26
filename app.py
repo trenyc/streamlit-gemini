@@ -336,7 +336,6 @@ def create_vote_button(video_id, comment_id, category, vote_type="up"):
 
 # Function to display categorized comments
 def display_categorized_comments(prevent_votes=False):
-    st.write("Displaying categorized comments")
     if isinstance(st.session_state.categorized_comments, dict):
         for current_category in st.session_state.categorized_comments.keys():  # Use current_category
             if len(st.session_state.categorized_comments[current_category]) > 0:  # Check if the list is not empty
