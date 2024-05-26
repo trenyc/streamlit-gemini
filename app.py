@@ -1,4 +1,4 @@
-# Streamlit App Code - Version 3.29
+# Streamlit App Code - Version 3.41
 
 import os
 import uuid
@@ -357,11 +357,12 @@ def display_loaded_comments(batch_number, comments):
     st.markdown(f"<div class='batch-label'>Batch {batch_number}</div>", unsafe_allow_html=True)
     st.write("Displaying loaded comments")
     if isinstance(st.session_state.categorized_comments, dict):
-        for current_category in st.session_state.categorized_comments.keys():
+        for current_category, categorized_comments in st.session_state.categorized_comments.items():
             st.write(f"### More {current_category.capitalize()} Comments")
-            for comment in comments:
+            for comment in categorized_comments:
                 if comment['text'].strip():
                     st.markdown(f"<div class='comment-box'><span>{comment['text']}</span></div>", unsafe_allow_html=True)
+
 
 # Fetch and display YouTube comments
 if 'selected_video_id' in st.session_state and yt_api_key and openai_api_key:
