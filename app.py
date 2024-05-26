@@ -329,8 +329,8 @@ def create_vote_button(video_id, comment_id, category, vote_type="up"):
     button_key = f"{category}_{vote_type}_{comment_id}_{buttoncount}"
      
     if st.button(button_text, key=button_key):
-        st.write("test")
         update_votes(video_id, comment_id, category, vote_type)
+        st.session_state.load_more_clicked = True
         st.rerun()  # Force rerun to update vote count
 
 # Function to display categorized comments
@@ -379,7 +379,6 @@ if st.button("Categorize Comments"):
 try:
     if 'categorized_comments' in st.session_state and any(st.session_state.categorized_comments.values()) and not st.session_state.load_more_clicked:
         display_categorized_comments(prevent_votes=True)
-        display_loaded_comments(1)
 except Exception as e:
     st.error(f"An unexpected error occurred: {e}")
 
