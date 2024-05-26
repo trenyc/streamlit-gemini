@@ -338,7 +338,12 @@ def display_categorized_comments(prevent_votes=False):
                 st.write(f"Here arec omments that are {current_category}. Help AI know your categories, vote for comments the best match category.")
 
                 for batch in range(1, st.session_state.batch_number + 1):
-                    st.write(f"#### Batch {batch}")
+                    #st.write(f"#### Batch {batch}")
+                    st.markdown(f"<div class='horizontal-bar'></div>", unsafe_allow_html=True)
+                    st.markdown(f"<div class='batch-label'>Batch {batch}</div>", unsafe_allow_html=True)
+
+
+
                     comments = [c for c in st.session_state.categorized_comments[current_category] if c['batch'] == batch]
                     for comment in comments:
                         if comment['text'].strip():  # Ensure no blank comments are displayed
