@@ -353,8 +353,8 @@ def display_loaded_comments(batch_number, comments):
     
     if isinstance(st.session_state.categorized_comments, dict):
         for current_category, categorized_comments in st.session_state.categorized_comments.items():
-            st.markdown(f"<div class='horizontal-bar'></div>", unsafe_allow_html=True)
-            st.markdown(f"<div class='batch-label'>Batch {batch_number} comments </div>", unsafe_allow_html=True)
+            #st.markdown(f"<div class='horizontal-bar'></div>", unsafe_allow_html=True)
+            #st.markdown(f"<div class='batch-label'>Batch {batch_number} comments </div>", unsafe_allow_html=True)
             st.write(f"### More {current_category.capitalize()} Comments")
             for comment in categorized_comments:
                 if comment['batch'] == batch_number and comment['text'].strip():
@@ -396,5 +396,6 @@ if st.session_state.next_page_token:
     if st.button("Load More Comments"):
         with st.spinner("Loading more comments..."):
             load_more_comments()
+            st.rerun()
 
 
