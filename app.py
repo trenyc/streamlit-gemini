@@ -74,8 +74,8 @@ st.markdown("""
 
 # Sidebar for API key inputs
 with st.sidebar:
-    st.image("https://mtest45.s3.us-east-2.amazonaws.com/sidebarytimage.png")
-    
+    st.image("https://mtest45.s3.us-east-2.amazonaws.com/sidebarytimage.png”)
+   
 
     # Try to retrieve API keys from environment variables (if available)
     yt_api_key = os.environ.get("YOUTUBE_API_KEY_ENV")
@@ -93,8 +93,8 @@ if openai_api_key:
     client = OpenAI(api_key=openai_api_key)
 
 # Main app content
-st.title("Comments Caddy")
-st.caption("Categorize YouTube Comments To Cut Through The Noise")
+st.title("YouTube Comments Categorizer")
+st.caption("Unleash fun in YouTube comments with OpenAI")
 
 # Function to search YouTube videos
 def search_youtube_videos(query):
@@ -325,15 +325,14 @@ def fetch_and_categorize_comments():
 # Function to create vote button
 buttoncount = 1
 def create_vote_button(video_id, comment_id, category, vote_type="up"):
-    button_text = f"👍"
+    button_text = f"👍 ({fetch_votes(video_id, comment_id, category)['up']})"
     
     button_key = f"{category}_{vote_type}_{comment_id}_{buttoncount}"
      
     if st.button(button_text, key=button_key):
+        st.write("test")
         update_votes(video_id, comment_id, category, vote_type)
-        st.write("Vote cast successfully!")  
         st.rerun()  # Force rerun to update vote count
-       
 
 # Function to display categorized comments
 def display_categorized_comments(prevent_votes=False):
@@ -373,14 +372,13 @@ if 'selected_video_id' in st.session_state and yt_api_key and openai_api_key:
         st.session_state.auto_fetch = False
 
 # Always show the "Categorize Comments" button
-if st.button("Load Categorize Comments"):
+if st.button("Categorize Comments"):
     fetch_and_categorize_comments()
     
    
 # Display categorized comments and voting buttons only once
 try:
     if 'categorized_comments' in st.session_state and any(st.session_state.categorized_comments.values()) and not st.session_state.load_more_clicked:
-        st.write("")
         display_categorized_comments(prevent_votes=True)
 except Exception as e:
     st.error(f"An unexpected error occurred: {e}")
