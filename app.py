@@ -313,9 +313,10 @@ def fetch_and_categorize_comments():
             categorize_comments_for_category(category, comments)
         st.subheader("Vote on Comments")
         display_categorized_comments(prevent_votes=False)  # Display categorized comments after fetching and categorizing
+        st.rerun()
     else:
         st.warning("No comments found or failed to fetch comments.")
-
+display_categorized_comments(prevent_votes=True)
 # Function to create vote button
 buttoncount = 1
 def create_vote_button(video_id, comment_id, category, vote_type="up"):
