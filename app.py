@@ -31,6 +31,9 @@ st.markdown("""
     ::-webkit-scrollbar-track {
         background: white;
     }
+    [data-testid="stSidebar"] img {
+        border-radius: 12px;  
+    }
     .comment-box {
         background-color: #f9f9f9;
         border-radius: 12px;
