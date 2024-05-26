@@ -211,7 +211,7 @@ def fetch_votes(video_id, comment_id, category):
 
 # Input for additional categories
 categories = st_tags.st_tags(
-    label='Add custom categories:',
+    label='Add how you want to categorize comments:',
     text='Press enter to add more',
     value=['funny'],
     suggestions=['funny'],
