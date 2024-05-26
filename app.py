@@ -1,12 +1,10 @@
-# Streamlit App Code - Version 3.41
-
 import os
-import uuid
 import streamlit as st
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 from openai import OpenAI, APIError
 import streamlit_tags as st_tags
+import uuid
 
 # Define API key environment variable names
 YOUTUBE_API_KEY = st.secrets["YOUTUBE_API_KEY_ENV"]
@@ -19,7 +17,6 @@ st.set_page_config(
     layout="wide"
 )
 
-# Custom CSS for wider scroll bar and comment box styling
 # Custom CSS for wider scroll bar and comment box styling
 st.markdown("""
     <style>
@@ -71,12 +68,9 @@ st.markdown("""
     </style>
     """, unsafe_allow_html=True)
 
-
 # Sidebar for API key inputs
 with st.sidebar:
     st.image("https://mtest45.s3.us-east-2.amazonaws.com/sidebarytimage.png")
-   
-
     # Try to retrieve API keys from environment variables (if available)
     yt_api_key = os.environ.get("YOUTUBE_API_KEY_ENV")
     openai_api_key = os.environ.get("OPENAI_API_KEY_ENV")
@@ -360,7 +354,7 @@ def display_loaded_comments(batch_number, comments):
         for current_category, categorized_comments in st.session_state.categorized_comments.items():
             st.write(f"### More {current_category.capitalize()} Comments")
             for comment in categorized_comments:
-                if comment['text'].strip():
+                if comment['batch'] == batch_number and comment['text'].strip():
                     st.markdown(f"<div class='comment-box'><span>{comment['text']}</span></div>", unsafe_allow_html=True)
 
 
@@ -373,8 +367,7 @@ if 'selected_video_id' in st.session_state and yt_api_key and openai_api_key:
 # Always show the "Categorize Comments" button
 if st.button("Categorize Comments"):
     fetch_and_categorize_comments()
-    
-   
+
 # Display categorized comments and voting buttons only once
 try:
     if 'categorized_comments' in st.session_state and any(st.session_state.categorized_comments.values()) and not st.session_state.load_more_clicked:
