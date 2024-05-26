@@ -310,7 +310,7 @@ def fetch_and_categorize_comments():
         st.session_state.batch_number = 1  # Initialize batch number
         for category in categories:
             categorize_comments_for_category(category, comments)
-        st.subheader("Vote on Comments")
+       
         display_categorized_comments(prevent_votes=False)  # Display categorized comments after fetching and categorizing
     else:
         st.warning("No comments found or failed to fetch comments.")
@@ -329,9 +329,12 @@ def create_vote_button(video_id, comment_id, category, vote_type="up"):
 
 # Function to display categorized comments
 def display_categorized_comments(prevent_votes=False):
+    if not st.session_state.load_more_clicked:
+        st.subheader("Train AI, Vote on Comments  ")
     if isinstance(st.session_state.categorized_comments, dict):
         for current_category in st.session_state.categorized_comments.keys():  # Use current_category
             if len(st.session_state.categorized_comments[current_category]) > 0:  # Check if the list is not empty
+                 
                 st.write(f"### {current_category.capitalize()}")
                 st.write(f"Comments that are {current_category}:")
 
