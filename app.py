@@ -1,10 +1,11 @@
+#version 3.43
+
 import os
 import streamlit as st
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 from openai import OpenAI, APIError
 import streamlit_tags as st_tags
-import uuid
 
 # Define API key environment variable names
 YOUTUBE_API_KEY = st.secrets["YOUTUBE_API_KEY_ENV"]
@@ -211,7 +212,7 @@ def fetch_votes(video_id, comment_id, category):
 
 # Input for additional categories
 categories = st_tags.st_tags(
-    label='Add how you want to categorize comments:',
+    label='Add custom categories:',
     text='Press enter to add more',
     value=['funny'],
     suggestions=['funny'],
@@ -295,7 +296,7 @@ def load_more_comments():
         for category in categories:
             categorize_comments_for_category(category, comments, st.session_state.batch_number)
         st.session_state.load_more_clicked = False
-        display_loaded_comments(st.session_state.batch_number, comments)  # Pass comments to display_loaded_comments
+        st.experimental_rerun()  # Force a rerun to update state
     else:
         st.warning("No more comments available.")
         st.session_state.load_more_clicked = False
@@ -310,7 +311,7 @@ def fetch_and_categorize_comments():
         st.session_state.batch_number = 1  # Initialize batch number
         for category in categories:
             categorize_comments_for_category(category, comments)
-       
+        st.subheader("Vote on Comments")
         display_categorized_comments(prevent_votes=False)  # Display categorized comments after fetching and categorizing
     else:
         st.warning("No comments found or failed to fetch comments.")
@@ -329,37 +330,23 @@ def create_vote_button(video_id, comment_id, category, vote_type="up"):
 
 # Function to display categorized comments
 def display_categorized_comments(prevent_votes=False):
-    if not st.session_state.load_more_clicked:
-        st.subheader("Help the AI. Vote on Best Comments for Category")
     if isinstance(st.session_state.categorized_comments, dict):
         for current_category in st.session_state.categorized_comments.keys():  # Use current_category
             if len(st.session_state.categorized_comments[current_category]) > 0:  # Check if the list is not empty
-                 
                 st.write(f"### {current_category.capitalize()}")
-                #st.write(f"Comments that are {current_category}:")
+                st.write(f"Comments that are {current_category}:")
 
-                comments = st.session_state.categorized_comments[current_category][:5]
-                for idx, comment in enumerate(comments):
-                    if comment['text'].strip():  # Ensure no blank comments are displayed
-                        st.markdown(f"<div class='comment-box'><span>{comment['text']}</span>", unsafe_allow_html=True)
-                        if not st.session_state.load_more_clicked:
-                            create_vote_button(video_id, comment['id'], current_category)
+                for batch in range(1, st.session_state.batch_number + 1):
+                    st.write(f"#### Batch {batch}")
+                    comments = [c for c in st.session_state.categorized_comments[current_category] if c['batch'] == batch]
+                    for comment in comments:
+                        if comment['text'].strip():  # Ensure no blank comments are displayed
+                            st.markdown(f"<div class='comment-box'><span>{comment['text']}</span>", unsafe_allow_html=True)
+                            if not prevent_votes:
+                                create_vote_button(video_id, comment['id'], current_category)
 
             else:
                 st.write(f"No comments found for {current_category}.")
-
-# Function to display loaded comments categorized without voting buttons
-def display_loaded_comments(batch_number, comments):
-    
-    if isinstance(st.session_state.categorized_comments, dict):
-        for current_category, categorized_comments in st.session_state.categorized_comments.items():
-            #st.markdown(f"<div class='horizontal-bar'></div>", unsafe_allow_html=True)
-            #st.markdown(f"<div class='batch-label'>Batch {batch_number} comments </div>", unsafe_allow_html=True)
-            st.write(f"### More {current_category.capitalize()} Comments")
-            for comment in categorized_comments:
-                if comment['batch'] == batch_number and comment['text'].strip():
-                    st.markdown(f"<div class='comment-box'><span>{comment['text']}</span></div>", unsafe_allow_html=True)
-
 
 # Fetch and display YouTube comments
 if 'selected_video_id' in st.session_state and yt_api_key and openai_api_key:
@@ -369,33 +356,21 @@ if 'selected_video_id' in st.session_state and yt_api_key and openai_api_key:
 
 # Always show the "Categorize Comments" button
 if st.button("Categorize Comments"):
-    st.session_state.cat_clicked = True
     fetch_and_categorize_comments()
 
 # Display categorized comments and voting buttons only once
 try:
-    if 'categorized_comments' in st.session_state and any(st.session_state.categorized_comments.values()) and not st.session_state.load_more_clicked and not st.session_state.cat_clicked:
-        st.write("")
-        display_categorized_comments(prevent_votes=False)
-        
-except Exception as e:
-    st.error(f"An unexpected error occurred: {e}")
-st.session_state.cat_clicked = False
-try:
     if 'categorized_comments' in st.session_state and any(st.session_state.categorized_comments.values()):
-        display_loaded_comments(st.session_state.batch_number, st.session_state.comments[-100:])
+        display_categorized_comments(prevent_votes=True)
 except Exception as e:
     st.error(f"An unexpected error occurred: {e}")
-    
-if st.session_state.load_more_clicked:
-    display_loaded_comments(st.session_state.batch_number, st.session_state.comments[-100:])  # Pass the last batch of comments
-    st.session_state.load_more_clicked = False
-    
+
 # Load more comments button
 if st.session_state.next_page_token:
     if st.button("Load More Comments"):
         with st.spinner("Loading more comments..."):
             load_more_comments()
-            st.rerun()
 
-
+if st.session_state.load_more_clicked:
+    display_categorized_comments(prevent_votes=True)  # Ensure display of all comments including the newly loaded ones
+    st.session_state.load_more_clicked = False
