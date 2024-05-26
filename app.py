@@ -310,7 +310,6 @@ def load_more_comments():
 def fetch_and_categorize_comments():
     comments, next_page_token = fetch_youtube_comments(video_id)
     if comments:
-        st.success("Comments fetched successfully!")
         # Prepend new comments to existing comments
         st.session_state.comments = comments + st.session_state.comments
         st.session_state.next_page_token = next_page_token
