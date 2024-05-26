@@ -74,7 +74,7 @@ st.markdown("""
 
 # Sidebar for API key inputs
 with st.sidebar:
-    st.image("https://mtest45.s3.us-east-2.amazonaws.com/sidebarytimage.png”)
+    st.image("https://mtest45.s3.us-east-2.amazonaws.com/sidebarytimage.png")
    
 
     # Try to retrieve API keys from environment variables (if available)
