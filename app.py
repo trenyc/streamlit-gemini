@@ -212,7 +212,7 @@ def fetch_votes(video_id, comment_id, category):
 
 # Input for additional categories
 categories = st_tags.st_tags(
-    label='Add custom categories:',
+    label='Add categories to filter the comments:',
     text='Press enter to add more',
     value=['funny'],
     suggestions=['funny'],
@@ -335,7 +335,7 @@ def display_categorized_comments(prevent_votes=False):
         for current_category in st.session_state.categorized_comments.keys():  # Use current_category
             if len(st.session_state.categorized_comments[current_category]) > 0:  # Check if the list is not empty
                 st.write(f"### {current_category.capitalize()}")
-                st.write(f"Comments that are {current_category}:")
+                st.write(f"Here arec omments that are {current_category}. Help AI know your categories, vote for comments the best match category.")
 
                 for batch in range(1, st.session_state.batch_number + 1):
                     st.write(f"#### Batch {batch}")
