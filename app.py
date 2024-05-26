@@ -331,10 +331,9 @@ def create_vote_button(video_id, comment_id, category, vote_type="up"):
      
     if st.button(button_text, key=button_key):
         update_votes(video_id, comment_id, category, vote_type)
-        st.write("Vote cast successfully!")
-        #st.experimental_set_value(button_text, f" ("1")    
-        #st.rerun()  # Force rerun to update vote count
-        #st.button(f"👍(1)", key=f"{{button_key}{uuid.uuid1()}")
+        st.write("Vote cast successfully!")  
+        st.rerun()  # Force rerun to update vote count
+       
 
 # Function to display categorized comments
 def display_categorized_comments(prevent_votes=False):
@@ -374,7 +373,7 @@ if 'selected_video_id' in st.session_state and yt_api_key and openai_api_key:
         st.session_state.auto_fetch = False
 
 # Always show the "Categorize Comments" button
-if st.button("Categorize Comments"):
+if st.button("Load Categorize Comments"):
     fetch_and_categorize_comments()
     
    
