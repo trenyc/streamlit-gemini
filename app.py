@@ -3,8 +3,8 @@ import streamlit as st
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 from openai import OpenAI, APIError
-import streamlit_tags as st_tags
-import uuid
+import streamlit_tags as st_tag
+import uuidf
 
 # Define API key environment variable names
 YOUTUBE_API_KEY = st.secrets["YOUTUBE_API_KEY_ENV"]
@@ -330,13 +330,13 @@ def create_vote_button(video_id, comment_id, category, vote_type="up"):
 # Function to display categorized comments
 def display_categorized_comments(prevent_votes=False):
     if not st.session_state.load_more_clicked:
-        st.subheader("Train AI, Vote on Comments  ")
+        st.subheader("Help the AI. Vote on Best Comments for Category")
     if isinstance(st.session_state.categorized_comments, dict):
         for current_category in st.session_state.categorized_comments.keys():  # Use current_category
             if len(st.session_state.categorized_comments[current_category]) > 0:  # Check if the list is not empty
                  
                 st.write(f"### {current_category.capitalize()}")
-                st.write(f"Comments that are {current_category}:")
+                #st.write(f"Comments that are {current_category}:")
 
                 comments = st.session_state.categorized_comments[current_category][:5]
                 for idx, comment in enumerate(comments):
