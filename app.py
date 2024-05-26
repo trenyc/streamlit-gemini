@@ -382,6 +382,11 @@ try:
 except Exception as e:
     st.error(f"An unexpected error occurred: {e}")
 
+try:
+    if 'categorized_comments' in st.session_state and any(st.session_state.categorized_comments.values()):
+        display_loaded_comments(st.session_state.batch_number, st.session_state.comments[-100:])
+except Exception as e:
+    st.error(f"An unexpected error occurred: {e}")
 
 # Load more comments button
 if st.session_state.next_page_token:
