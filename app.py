@@ -366,16 +366,18 @@ if 'selected_video_id' in st.session_state and yt_api_key and openai_api_key:
 
 # Always show the "Categorize Comments" button
 if st.button("Categorize Comments"):
+    st.session_state.cat_clicked = True
     fetch_and_categorize_comments()
 
 # Display categorized comments and voting buttons only once
 try:
-    if 'categorized_comments' in st.session_state and any(st.session_state.categorized_comments.values()) and not st.session_state.load_more_clicked:
+    if 'categorized_comments' in st.session_state and any(st.session_state.categorized_comments.values()) and not st.session_state.load_more_clicked and not st.session_state.cat_clicked:
         st.write("")
-        #display_categorized_comments(prevent_votes=True)
+        display_categorized_comments(prevent_votes=False)
+        
 except Exception as e:
     st.error(f"An unexpected error occurred: {e}")
-
+st.session_state.cat_clicked = False
 try:
     if 'categorized_comments' in st.session_state and any(st.session_state.categorized_comments.values()):
         display_loaded_comments(st.session_state.batch_number, st.session_state.comments[-100:])
