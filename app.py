@@ -316,7 +316,7 @@ def fetch_and_categorize_comments():
         st.rerun()
     else:
         st.warning("No comments found or failed to fetch comments.")
-display_categorized_comments(prevent_votes=True)
+
 # Function to create vote button
 buttoncount = 1
 def create_vote_button(video_id, comment_id, category, vote_type="up"):
@@ -361,8 +361,8 @@ if st.button("Categorize Comments"):
 
 # Display categorized comments and voting buttons only once
 try:
-    if 'categorized_comments' in st.session_state and any(st.session_state.categorized_comments.values()):
-        display_categorized_comments(prevent_votes=True)
+    if 'categorized_comments' in st.session_state or any(st.session_state.categorized_comments.values()):
+        display_categorized_comments(prevent_votes=False)
 except Exception as e:
     st.error(f"An unexpected error occurred: {e}")
 
