@@ -330,7 +330,7 @@ def create_vote_button(video_id, comment_id, category, vote_type="up"):
      
     if st.button(button_text, key=button_key):
         update_votes(video_id, comment_id, category, vote_type)
-        st.session_state.load_more_clicked = True
+        st.session_state.load_more_clicked = False
         st.rerun()  # Force rerun to update vote count
 
 # Function to display categorized comments
