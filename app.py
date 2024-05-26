@@ -356,6 +356,7 @@ def display_categorized_comments(prevent_votes=False):
 
             else:
                 st.write(f"No comments found for {current_category}.")
+                st.write(f"#")
 
 # Fetch and display YouTube comments
 if 'selected_video_id' in st.session_state and yt_api_key and openai_api_key:
