@@ -74,8 +74,8 @@ st.markdown("""
 
 # Sidebar for API key inputs
 with st.sidebar:
-    st.image("https://github.com/trenyc/streamlit-gemini/blob/main/sidebarytimage.png")
-    st.title("API Keys")
+    st.image("https://mtest45.s3.us-east-2.amazonaws.com/sidebarytimage.png")
+    
 
     # Try to retrieve API keys from environment variables (if available)
     yt_api_key = os.environ.get("YOUTUBE_API_KEY_ENV")
@@ -83,6 +83,7 @@ with st.sidebar:
 
     # Optional input fields if environment variables are not set
     if not yt_api_key:
+        st.title("API Keys")
         yt_api_key = st.text_input('Enter YouTube API Key:', type='password', key="yt_key")
     if not openai_api_key:
         openai_api_key = st.text_input('Enter OpenAI API Key:', type='password', key="openai_key")
