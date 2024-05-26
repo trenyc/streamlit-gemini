@@ -380,13 +380,15 @@ try:
         display_loaded_comments(st.session_state.batch_number, st.session_state.comments[-100:])
 except Exception as e:
     st.error(f"An unexpected error occurred: {e}")
-
+    
+if st.session_state.load_more_clicked:
+    display_loaded_comments(st.session_state.batch_number, st.session_state.comments[-100:])  # Pass the last batch of comments
+    st.session_state.load_more_clicked = False
+    
 # Load more comments button
 if st.session_state.next_page_token:
     if st.button("Load More Comments"):
         with st.spinner("Loading more comments..."):
             load_more_comments()
 
-if st.session_state.load_more_clicked:
-    display_loaded_comments(st.session_state.batch_number, st.session_state.comments[-100:])  # Pass the last batch of comments
-    st.session_state.load_more_clicked = False
+
