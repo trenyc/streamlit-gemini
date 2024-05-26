@@ -350,11 +350,11 @@ def display_categorized_comments(prevent_votes=False):
 
 # Function to display loaded comments categorized without voting buttons
 def display_loaded_comments(batch_number, comments):
-    st.markdown(f"<div class='horizontal-bar'></div>", unsafe_allow_html=True)
-    st.markdown(f"<div class='batch-label'>Batch {batch_number}</div>", unsafe_allow_html=True)
-    st.write("Displaying loaded comments")
+    
     if isinstance(st.session_state.categorized_comments, dict):
         for current_category, categorized_comments in st.session_state.categorized_comments.items():
+            st.markdown(f"<div class='horizontal-bar'></div>", unsafe_allow_html=True)
+            st.markdown(f"<div class='batch-label'>Batch {batch_number} comments </div>", unsafe_allow_html=True)
             st.write(f"### More {current_category.capitalize()} Comments")
             for comment in categorized_comments:
                 if comment['batch'] == batch_number and comment['text'].strip():
