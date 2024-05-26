@@ -4,7 +4,7 @@ from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 from openai import OpenAI, APIError
 import streamlit_tags as st_tag
-import uuidf
+import uuid
 
 # Define API key environment variable names
 YOUTUBE_API_KEY = st.secrets["YOUTUBE_API_KEY_ENV"]
